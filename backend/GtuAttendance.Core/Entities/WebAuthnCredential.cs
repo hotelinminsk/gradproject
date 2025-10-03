@@ -2,20 +2,31 @@
 
 public class WebAuthnCredential
 {
-    public string CredentialId { get; set; } = string.Empty;
-    public Guid UserId { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-    public byte[] CredentialIdBytes { get; set; } = Array.Empty<byte>();
+    public Guid UserId { get; set; }
+    public User User { get; set; } = null!;
+
+    // Fido2'den gelen CredentialId
+    public byte[] CredentialId { get; set; } = Array.Empty<byte>();
+
+    // Public Key
     public byte[] PublicKey { get; set; } = Array.Empty<byte>();
 
+    // Counter (replay attack önleme)
     public long SignatureCounter { get; set; }
-    public string? DeviceName { get; set; }
 
+    // Kullanıcı kimliği (UserHandle) – byte[]
+    public byte[] UserHandle { get; set; } = Array.Empty<byte>();
+
+    // Opsiyonel metadata
+    public string? DeviceName { get; set; }
+    public string CredentialType { get; set; } = "public-key";
+    public string? Transports { get; set; }
+
+    // Tarihler
     public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
     public DateTime LastUsedAt { get; set; } = DateTime.UtcNow;
-    
+
     public bool IsActive { get; set; } = true;
-
-
-    public User User { get; set; } = null;
 }

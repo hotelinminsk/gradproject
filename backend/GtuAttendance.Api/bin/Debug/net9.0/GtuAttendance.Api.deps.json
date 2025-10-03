@@ -9,6 +9,7 @@
       "GtuAttendance.Api/1.0.0": {
         "dependencies": {
           "EPPlus": "8.2.0",
+          "Fido2.NetFramework": "0.5.0",
           "GtuAttendance.Core": "1.0.0",
           "GtuAttendance.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.9",
@@ -54,6 +55,14 @@
           }
         }
       },
+      "BouncyCastle.Cryptography/2.2.1": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.2.1.47552"
+          }
+        }
+      },
       "EPPlus/8.2.0": {
         "dependencies": {
           "EPPlus.Interfaces": "8.1.0",
@@ -76,6 +85,21 @@
           "lib/net9.0/EPPlus.Interfaces.dll": {
             "assemblyVersion": "8.1.0.0",
             "fileVersion": "8.1.0.0"
+          }
+        }
+      },
+      "Fido2.NetFramework/0.5.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.2.1",
+          "Newtonsoft.Json": "13.0.3",
+          "System.Formats.Asn1": "9.0.9",
+          "System.Formats.Cbor": "7.0.0",
+          "System.IdentityModel.Tokens.Jwt": "8.0.1"
+        },
+        "runtime": {
+          "lib/net472/Fido2.NetFramework.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.5.0.0"
           }
         }
       },
@@ -863,6 +887,14 @@
           }
         }
       },
+      "Newtonsoft.Json/13.0.3": {
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.3.27908"
+          }
+        }
+      },
       "System.ClientModel/1.0.0": {
         "dependencies": {
           "System.Memory.Data": "1.0.2",
@@ -992,6 +1024,14 @@
           "lib/net9.0/System.Formats.Asn1.dll": {
             "assemblyVersion": "9.0.0.0",
             "fileVersion": "9.0.925.41916"
+          }
+        }
+      },
+      "System.Formats.Cbor/7.0.0": {
+        "runtime": {
+          "lib/net7.0/System.Formats.Cbor.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.22.51805"
           }
         }
       },
@@ -1186,6 +1226,13 @@
       "path": "azure.identity/1.11.4",
       "hashPath": "azure.identity.1.11.4.nupkg.sha512"
     },
+    "BouncyCastle.Cryptography/2.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-A6Zr52zVqJKt18ZBsTnX0qhG0kwIQftVAjLmszmkiR/trSp8H+xj1gUOzk7XHwaKgyREMSV1v9XaKrBUeIOdvQ==",
+      "path": "bouncycastle.cryptography/2.2.1",
+      "hashPath": "bouncycastle.cryptography.2.2.1.nupkg.sha512"
+    },
     "EPPlus/8.2.0": {
       "type": "package",
       "serviceable": true,
@@ -1199,6 +1246,13 @@
       "sha512": "sha512-Nfc7ehsn8Sb8Ed8KYYuOxqt8gWqmy2Vhts5nfLMw3zISi+aZFwyW+k9s3FOpVuW91VDSrhVAId9brYtz9NnmKA==",
       "path": "epplus.interfaces/8.1.0",
       "hashPath": "epplus.interfaces.8.1.0.nupkg.sha512"
+    },
+    "Fido2.NetFramework/0.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5GiZdyRJq+m3JBgu0EyuDHuIJ7Huo+FAgnoJ53W46B1pGt0wXl05ZquB2apm5rjUa/clwXnQ0BxgFSjJUIdpLQ==",
+      "path": "fido2.netframework/0.5.0",
+      "hashPath": "fido2.netframework.0.5.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",
@@ -1543,6 +1597,13 @@
       "path": "mono.texttemplating/3.0.0",
       "hashPath": "mono.texttemplating.3.0.0.nupkg.sha512"
     },
+    "Newtonsoft.Json/13.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "path": "newtonsoft.json/13.0.3",
+      "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
+    },
     "System.ClientModel/1.0.0": {
       "type": "package",
       "serviceable": true,
@@ -1640,6 +1701,13 @@
       "sha512": "sha512-hnQCFWPAvZM45fFEExgbHTgq6GyfyQdHxyI+PvuzqI1G7KvBYcnNEPHbLJ+1jP+Ip69yBvvUOxaibmDInmOw2Q==",
       "path": "system.formats.asn1/9.0.9",
       "hashPath": "system.formats.asn1.9.0.9.nupkg.sha512"
+    },
+    "System.Formats.Cbor/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2DvlHGwr0hEXXRv/8j9x4fw9yqJ7638qusWsf3iruVUmRb+mWl5ODSZRtXe5ZH62/0R6qf/QxA8JTrhIRvWlXw==",
+      "path": "system.formats.cbor/7.0.0",
+      "hashPath": "system.formats.cbor.7.0.0.nupkg.sha512"
     },
     "System.IdentityModel.Tokens.Jwt/8.0.1": {
       "type": "package",

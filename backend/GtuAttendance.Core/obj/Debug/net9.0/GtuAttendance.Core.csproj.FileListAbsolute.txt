@@ -1,11 +1,11 @@
+C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.deps.json
+C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.dll
+C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.pdb
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.AssemblyInfoInputs.cache
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.AssemblyInfo.cs
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.csproj.CoreCompileInputs.cache
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.sourcelink.json
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.deps.json
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.dll
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\bin\Debug\net9.0\GtuAttendance.Core.pdb
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\refint\GtuAttendance.Core.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Core\obj\Debug\net9.0\GtuAttendance.Core.pdb

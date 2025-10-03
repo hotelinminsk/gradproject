@@ -3,20 +3,72 @@
   "WorkspaceRootPath": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\webauthncredential.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\webauthncredential.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\teacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\teacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\attendancesession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\attendancesession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\errors\\common\\invalidcredentialserror.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\errors\\common\\invalidcredentialserror.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\errors\\students\\gtuidexistsexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\errors\\students\\gtuidexistsexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\gtuattendance.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\gtuattendance.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\gtuattendance.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\gtuattendance.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\utilities\\geohelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\utilities\\geohelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\teacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\teacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\services\\passwordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\services\\passwordservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\utilities\\geohelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\utilities\\geohelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,40 +79,12 @@
       "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\attendancerecord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\attendancesession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\attendancesession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\courseenrollment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\courseenrollment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\webauthncredential.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\webauthncredential.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|solutionrelative:gtuattendance.core\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A62D48C0-FC8C-43B6-BAF5-4A972F23B3FF}|GtuAttendance.Api\\GtuAttendance.Api.csproj|solutionrelative:gtuattendance.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.infrastructure\\gtuattendance.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{15D9B219-F5EE-42F6-B122-5F18B0BF7106}|GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj|solutionrelative:gtuattendance.infrastructure\\gtuattendance.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{53C467D2-2076-4F21-86D5-3B6CF6D2B2A0}|GtuAttendance.Core\\GtuAttendance.Core.csproj|c:\\users\\root\\documents\\projectgrad\\backend\\gtuattendance.core\\entities\\courseroster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -79,20 +103,163 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AuthDtos.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\DTOs\\AuthDtos.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Api\\DTOs\\AuthDtos.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\DTOs\\AuthDtos.cs",
-              "RelativeToolTip": "GtuAttendance.Api\\DTOs\\AuthDtos.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAkwCgAAAARAAAAAAAAAA==",
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Api\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "GtuAttendance.Api\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAJ4AAAAAAAAAAAAAALwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T22:05:01.121Z",
+              "WhenOpened": "2025-10-03T13:37:54.784Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Student.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Student.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\Student.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Student.cs",
+              "RelativeToolTip": "GtuAttendance.Core\\Entities\\Student.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T21:40:02.285Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\User.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\User.cs",
+              "RelativeToolTip": "GtuAttendance.Core\\Entities\\User.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAUwB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T19:33:27.144Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Teacher.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Teacher.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\Teacher.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Teacher.cs",
+              "RelativeToolTip": "GtuAttendance.Core\\Entities\\Teacher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T21:41:57.316Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "InvalidCredentialsError.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Errors\\Common\\InvalidCredentialsError.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\Errors\\Common\\InvalidCredentialsError.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Errors\\Common\\InvalidCredentialsError.cs",
+              "RelativeToolTip": "GtuAttendance.Infrastructure\\Errors\\Common\\InvalidCredentialsError.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-03T15:53:16.017Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "GTUIDExistsException.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Errors\\Students\\GTUIDExistsException.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\Errors\\Students\\GTUIDExistsException.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Errors\\Students\\GTUIDExistsException.cs",
+              "RelativeToolTip": "GtuAttendance.Infrastructure\\Errors\\Students\\GTUIDExistsException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-03T15:57:27.971Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GtuAttendance.Infrastructure.csproj",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
+              "RelativeToolTip": "GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-02T19:58:45.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AttendanceSession.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\AttendanceSession.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\AttendanceSession.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\AttendanceSession.cs",
+              "RelativeToolTip": "GtuAttendance.Core\\Entities\\AttendanceSession.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAgwBIAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T19:50:02.953Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "GtuAttendance.Api",
+              "Title": "WebAuthnCredential.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
+              "RelativeToolTip": "GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAwwBYAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T19:36:11.813Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "JwtService.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Services\\JwtService.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\Services\\JwtService.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Services\\JwtService.cs",
+              "RelativeToolTip": "GtuAttendance.Infrastructure\\Services\\JwtService.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAswEAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-03T13:06:09.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Program.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Program.cs",
+              "RelativeToolTip": "GtuAttendance.Api\\Program.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAwwE0AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T20:56:34.425Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.json",
+              "RelativeDocumentMoniker": "GtuAttendance.Api\\appsettings.json",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.json",
+              "RelativeToolTip": "GtuAttendance.Api\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-03T13:20:52.91Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "GtuAttendance.Api.csproj",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj",
               "RelativeDocumentMoniker": "GtuAttendance.Api\\GtuAttendance.Api.csproj",
               "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj",
@@ -104,20 +271,46 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Teacher.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Teacher.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\Teacher.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Teacher.cs",
-              "RelativeToolTip": "GtuAttendance.Core\\Entities\\Teacher.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T21:41:57.316Z",
+              "DocumentIndex": 13,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "GtuAttendance.Api\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.Development.json",
+              "RelativeToolTip": "GtuAttendance.Api\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-02T20:47:49.436Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 14,
+              "Title": "PasswordService.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Services\\PasswordService.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\Services\\PasswordService.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Services\\PasswordService.cs",
+              "RelativeToolTip": "GtuAttendance.Infrastructure\\Services\\PasswordService.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAswCkAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-03T12:57:12.418Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "AuthDtos.cs",
+              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\DTOs\\AuthDtos.cs",
+              "RelativeDocumentMoniker": "GtuAttendance.Api\\DTOs\\AuthDtos.cs",
+              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\DTOs\\AuthDtos.cs",
+              "RelativeToolTip": "GtuAttendance.Api\\DTOs\\AuthDtos.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAwwCgAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T22:05:01.121Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
               "Title": "GeoHelper.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Utilities\\GeoHelper.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Core\\Utilities\\GeoHelper.cs",
@@ -125,12 +318,11 @@
               "RelativeToolTip": "GtuAttendance.Core\\Utilities\\GeoHelper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T21:18:45.341Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T21:18:45.341Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 18,
               "Title": "AttendanceRecord.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\AttendanceRecord.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\AttendanceRecord.cs",
@@ -138,25 +330,11 @@
               "RelativeToolTip": "GtuAttendance.Core\\Entities\\AttendanceRecord.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAmwAwAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:54:09.699Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T19:54:09.699Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "AttendanceSession.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\AttendanceSession.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\AttendanceSession.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\AttendanceSession.cs",
-              "RelativeToolTip": "GtuAttendance.Core\\Entities\\AttendanceSession.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAA5wBIAAAASAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:50:02.953Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 17,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\Data\\AppDbContext.cs",
@@ -164,12 +342,11 @@
               "RelativeToolTip": "GtuAttendance.Infrastructure\\Data\\AppDbContext.cs",
               "ViewState": "AgIAAIUAAAAAAAAAAAAwwJkAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:59:24.185Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T19:59:24.185Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 19,
               "Title": "CourseEnrollment.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\CourseEnrollment.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\CourseEnrollment.cs",
@@ -177,12 +354,11 @@
               "RelativeToolTip": "GtuAttendance.Core\\Entities\\CourseEnrollment.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:46:59.106Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T19:46:59.106Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 20,
               "Title": "Course.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Course.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\Course.cs",
@@ -190,90 +366,11 @@
               "RelativeToolTip": "GtuAttendance.Core\\Entities\\Course.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAYwBEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:40:24.974Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T19:40:24.974Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "WebAuthnCredential.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
-              "RelativeToolTip": "GtuAttendance.Core\\Entities\\WebAuthnCredential.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAxwBIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:36:11.813Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Student.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Student.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\Student.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\Student.cs",
-              "RelativeToolTip": "GtuAttendance.Core\\Entities\\Student.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T21:40:02.285Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "User.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\User.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\User.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\User.cs",
-              "RelativeToolTip": "GtuAttendance.Core\\Entities\\User.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAA9wBcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:33:27.144Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "GtuAttendance.Api\\appsettings.Development.json",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\appsettings.Development.json",
-              "RelativeToolTip": "GtuAttendance.Api\\appsettings.Development.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-10-02T20:47:49.436Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Program.cs",
-              "RelativeDocumentMoniker": "GtuAttendance.Api\\Program.cs",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\Program.cs",
-              "RelativeToolTip": "GtuAttendance.Api\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T20:56:34.425Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "GtuAttendance.Infrastructure",
-              "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
-              "RelativeDocumentMoniker": "GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
-              "ToolTip": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
-              "RelativeToolTip": "GtuAttendance.Infrastructure\\GtuAttendance.Infrastructure.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-10-02T19:58:45.517Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 21,
               "Title": "CourseRoster.cs",
               "DocumentMoniker": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Core\\Entities\\CourseRoster.cs",
               "RelativeDocumentMoniker": "GtuAttendance.Core\\Entities\\CourseRoster.cs",
@@ -281,8 +378,7 @@
               "RelativeToolTip": "GtuAttendance.Core\\Entities\\CourseRoster.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-02T19:44:40.215Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T19:44:40.215Z"
             }
           ]
         }

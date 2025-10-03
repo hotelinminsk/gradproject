@@ -71,74 +71,6 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.ToTable("AttendanceSessions");
                 });
 
-            modelBuilder.Entity("Course", b =>
-                {
-                    b.Property<Guid>("CourseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CourseCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("CourseName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("InvitationToken")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CourseId");
-
-                    b.HasIndex("InvitationToken")
-                        .IsUnique();
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("Courses");
-                });
-
-            modelBuilder.Entity("CourseEnrollment", b =>
-                {
-                    b.Property<Guid>("EnrollmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EnrolledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsValidated")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("EnrollmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("CourseId", "StudentId")
-                        .IsUnique();
-
-                    b.ToTable("CourseEnrollment");
-                });
-
             modelBuilder.Entity("CourseRoster", b =>
                 {
                     b.Property<Guid>("RosterId")
@@ -183,8 +115,7 @@ namespace GtuAttendance.Infrastructure.Migrations
 
                     b.Property<string>("DeviceCredentialId")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("DistanceFromTeacherMeters")
                         .HasPrecision(10, 2)
@@ -224,6 +155,74 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.ToTable("AttendanceRecords");
                 });
 
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Course", b =>
+                {
+                    b.Property<Guid>("CourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CourseCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CourseName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvitationToken")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CourseId");
+
+                    b.HasIndex("InvitationToken")
+                        .IsUnique();
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.CourseEnrollment", b =>
+                {
+                    b.Property<Guid>("EnrollmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EnrolledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsValidated")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("EnrollmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("CourseId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("CourseEnrollments");
+                });
+
             modelBuilder.Entity("GtuAttendance.Core.Entities.User", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -244,51 +243,67 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("GtuStudentId")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("GtuStudentId")
-                        .IsUnique()
-                        .HasFilter("[GtuStudentId] IS NOT NULL");
-
                     b.ToTable("Users");
+
+                    b.HasDiscriminator<string>("UserType").HasValue("User");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("WebAuthnCredential", b =>
                 {
                     b.Property<string>("CredentialId")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Counter")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<byte[]>("CredentialIdBytes")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("DeviceName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime?>("LastUsedAt")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUsedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PublicKey")
+                    b.Property<byte[]>("PublicKey")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("SignatureCounter")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -300,16 +315,33 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.ToTable("WebAuthnCredentials");
                 });
 
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Student", b =>
+                {
+                    b.HasBaseType("GtuAttendance.Core.Entities.User");
+
+                    b.HasIndex("GtuStudentId")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("Student");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Teacher", b =>
+                {
+                    b.HasBaseType("GtuAttendance.Core.Entities.User");
+
+                    b.HasDiscriminator().HasValue("Teacher");
+                });
+
             modelBuilder.Entity("AttendanceSession", b =>
                 {
-                    b.HasOne("Course", "Course")
+                    b.HasOne("GtuAttendance.Core.Entities.Course", "Course")
                         .WithMany("Sessions")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GtuAttendance.Core.Entities.User", "Teacher")
-                        .WithMany()
+                    b.HasOne("GtuAttendance.Core.Entities.Teacher", "Teacher")
+                        .WithMany("AttendanceSessions")
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -317,41 +349,11 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Course", b =>
-                {
-                    b.HasOne("GtuAttendance.Core.Entities.User", "Teacher")
-                        .WithMany("CreatedCourses")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("CourseEnrollment", b =>
-                {
-                    b.HasOne("Course", "Course")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GtuAttendance.Core.Entities.User", "User")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CourseRoster", b =>
                 {
-                    b.HasOne("Course", "Course")
+                    b.HasOne("GtuAttendance.Core.Entities.Course", "Course")
                         .WithMany("Roster")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -362,7 +364,7 @@ namespace GtuAttendance.Infrastructure.Migrations
 
             modelBuilder.Entity("GtuAttendance.Core.Entities.AttendanceRecord", b =>
                 {
-                    b.HasOne("Course", "Course")
+                    b.HasOne("GtuAttendance.Core.Entities.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -380,7 +382,7 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GtuAttendance.Core.Entities.User", "Student")
+                    b.HasOne("GtuAttendance.Core.Entities.Student", "Student")
                         .WithMany("AttendanceRecords")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -391,6 +393,36 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Navigation("DeviceCredential");
 
                     b.Navigation("Session");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Course", b =>
+                {
+                    b.HasOne("GtuAttendance.Core.Entities.Teacher", "Teacher")
+                        .WithMany("CreatedCourses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.CourseEnrollment", b =>
+                {
+                    b.HasOne("GtuAttendance.Core.Entities.Course", "Course")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GtuAttendance.Core.Entities.Student", "Student")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Student");
                 });
@@ -411,7 +443,7 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Navigation("AttendanceRecords");
                 });
 
-            modelBuilder.Entity("Course", b =>
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Course", b =>
                 {
                     b.Navigation("Enrollments");
 
@@ -422,13 +454,21 @@ namespace GtuAttendance.Infrastructure.Migrations
 
             modelBuilder.Entity("GtuAttendance.Core.Entities.User", b =>
                 {
+                    b.Navigation("Credentials");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Student", b =>
+                {
                     b.Navigation("AttendanceRecords");
 
-                    b.Navigation("CreatedCourses");
-
-                    b.Navigation("Credentials");
-
                     b.Navigation("Enrollments");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.Teacher", b =>
+                {
+                    b.Navigation("AttendanceSessions");
+
+                    b.Navigation("CreatedCourses");
                 });
 #pragma warning restore 612, 618
         }

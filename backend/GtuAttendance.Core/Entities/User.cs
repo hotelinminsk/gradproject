@@ -10,7 +10,15 @@ public class User {
 	public DateTime CreatedAt {get;set;} = DateTime.UtcNow;
 	public bool IsActive {get;set;} = true;
 
+	public User(string email, string passwordhash, string fullname, string? gtuid,string role)
+	{
+		Email = email;
+		PasswordHash = passwordhash;
+		FullName = fullname;
+		GtuStudentId = gtuid;
+		Role = role;
 
+	}
 
 	public ICollection<WebAuthnCredential> Credentials { get; set; } = new List<WebAuthnCredential>();
 

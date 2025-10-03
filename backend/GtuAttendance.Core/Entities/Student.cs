@@ -4,6 +4,8 @@
 public class Student : User
 {
 
+    public Student(string email, string passhash, string fullname, string gtuid) : base (email, passhash, fullname,gtuid,"Student") { }
+
     public string GtuStudentId { get; set; } = string.Empty;
 
     public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
