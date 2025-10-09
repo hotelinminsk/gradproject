@@ -12,9 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "GTÜ Attendance API", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "GTï¿½ Attendance API", Version = "v1" });
 
-    // JWT Authentication için Swagger ayarlarý
+    // JWT Authentication iï¿½in Swagger ayarlarï¿½
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
@@ -45,8 +45,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Services
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<JWTService>();
 builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<Fido2Service>();
+builder.Services.AddMemoryCache();
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

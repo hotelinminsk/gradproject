@@ -11,7 +11,7 @@ public class AttendanceRecord
     public decimal StudentLongitude { get; set; }
     public decimal DistanceFromTeacherMeters { get; set; }
     public bool IsWithinRange { get; set; }
-    public string DeviceCredentialId { get; set; } = string.Empty;
+    public Guid DeviceCredentialId { get; set; }
     public DateTime? SyncedAt { get; set; }
 
     // Navigation

@@ -2,6 +2,10 @@
 
 namespace GtuAttendance.Api.DTOs;
 
+
+
+
+
 public record RegisterTeacherRequest(
     string Email,
     string Password,
@@ -15,27 +19,40 @@ public record RegisterStudentRequest(
     string FullName,
     string GtuStudentId
     );
-
-public record RegisterWebAuthnRequest(
-    Guid UserId,
-    byte[] CredentialId,
-    byte[] PublicKey,
-    long Counter,
-    string? DeviceName
-    );
-
 public record TeacherLoginRequest(
     string Email,
     string Password
     );
 
-public record WebAuthnLoginRequest(
+
+public record BeginWebAuthnRegisterRequest(Guid UserId, string? DeviceName, string? EnrollToken);
+
+public record CompleteWebAuthnRegisterRequest(
     Guid UserId,
-    byte[] CredentilaId,
+    string Id,
+    string Type,    
+    byte[] RawId,
+    byte[] AttestationObject,
+    byte[] ClientDataJSON,
+    string? DeviceName,
+    string[]? Transports,
+    string? EnrollToken
+);
+
+public record BeginWebAuthnLoginRequest(Guid UserId, string? DeviceName);
+
+public record CompleteWebAuthnLoginRequest(
+    Guid UserId,
+    string Id,
+    byte[] RawId,
     byte[] AuthenticatorData,
     byte[] ClientDataJSON,
-    byte[] Signature
-    );
+    byte[] Signature,
+    byte[]? UserHandle,
+    string? DeviceName
+);
+
+
 
 public record AuthResponse(
     string Token,

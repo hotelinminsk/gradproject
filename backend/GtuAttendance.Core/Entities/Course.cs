@@ -12,6 +12,7 @@ public class Course
 
     // Navigation
     public Teacher Teacher { get; set; } = null!;
+
     public ICollection<CourseRoster> Roster { get; set; } = new List<CourseRoster>();
     public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
     public ICollection<AttendanceSession> Sessions { get; set; } = new List<AttendanceSession>();

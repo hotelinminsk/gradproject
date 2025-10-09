@@ -113,9 +113,8 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DeviceCredentialId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("DeviceCredentialId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("DistanceFromTeacherMeters")
                         .HasPrecision(10, 2)
@@ -278,12 +277,18 @@ namespace GtuAttendance.Infrastructure.Migrations
 
             modelBuilder.Entity("WebAuthnCredential", b =>
                 {
-                    b.Property<string>("CredentialId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte[]>("CredentialIdBytes")
+                    b.Property<byte[]>("CredentialId")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("varbinary(900)");
+
+                    b.Property<string>("CredentialType")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("DeviceName")
                         .HasMaxLength(255)
@@ -305,10 +310,21 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Property<long>("SignatureCounter")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Transports")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<byte[]>("UserHandle")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("CredentialId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("CredentialId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

@@ -61,10 +61,6 @@
               "target": "Package",
               "version": "[8.2.0, )"
             },
-            "Fido2.NetFramework": {
-              "target": "Package",
-              "version": "[0.5.0, )"
-            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[9.0.9, )"

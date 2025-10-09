@@ -45,20 +45,28 @@ public class AppDbContext : DbContext
             entity.Property(e => e.GtuStudentId).HasMaxLength(50).IsRequired();
         });
 
-        // WebAuthnCredential
+
         modelBuilder.Entity<WebAuthnCredential>(entity =>
         {
-            entity.HasKey(e => e.CredentialId);
-            entity.Property(e => e.CredentialIdBytes).IsRequired();
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CredentialId).IsRequired();
             entity.Property(e => e.PublicKey).IsRequired();
+            entity.Property(e => e.UserHandle).IsRequired();
             entity.Property(e => e.DeviceName).HasMaxLength(255);
+            entity.Property(e => e.Transports).HasMaxLength(255);
+            entity.Property(e => e.CredentialType).HasMaxLength(255).IsRequired();
 
-            entity.HasOne(e => e.User)
-                .WithMany(u => u.Credentials)
-                .HasForeignKey(e => e.UserId)
+            entity.HasOne(e => e.User).
+                WithMany(u => u.Credentials).
+                HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
 
+            entity.HasIndex(e => e.CredentialId).IsUnique();
+
+
+        });
+        
         // Course
         modelBuilder.Entity<Course>(entity =>
         {
@@ -72,6 +80,7 @@ public class AppDbContext : DbContext
                 .WithMany(t => t.CreatedCourses)
                 .HasForeignKey(e => e.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
+
         });
 
         // CourseRoster
