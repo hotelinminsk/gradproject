@@ -1,3 +1,15 @@
+:root {
+  /* ColorHunt Palette */
+  --brand-bg: #F7FBFC;     /* Background (dominant) */
+  --brand-primary: #769FCD; /* Primary elements */
+  --brand-text: #1F2D3D;    /* Foreground text */
+  --brand-accent: #B9D7EA;  /* Accent */
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,6 +17,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(1200px 600px at 0% 0%, rgba(118,159,205,0.12), transparent),
+    radial-gradient(1200px 600px at 100% 100%, rgba(185,215,234,0.15), transparent),
+    var(--brand-bg);
+  color: var(--brand-text);
 }
 
 code {

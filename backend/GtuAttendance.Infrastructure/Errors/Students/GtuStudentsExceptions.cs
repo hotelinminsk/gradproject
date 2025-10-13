@@ -135,3 +135,22 @@ public class RemoveDeviceAttemptsExceededException : Exception
 
 
 }
+
+public class EnrollRequestNullException : Exception
+{
+    public EnrollRequestNullException() : base("Enroll request cannot be null.") { }
+
+    public EnrollRequestNullException(string message) : base(message) { }
+
+    public EnrollRequestNullException(Exception ex) : base("Enroll request is null in enroll by invite.", ex) { }
+}
+
+public class StudentNotInRosterException : Exception
+{
+    public StudentNotInRosterException(string name, string gtuid) : base($"Student: {name} with GTU id: {gtuid} is not in roster.") { }
+
+    public StudentNotInRosterException() : base("Student is not in roster.") { }
+
+    public StudentNotInRosterException(string message) : base(message) { }
+
+}

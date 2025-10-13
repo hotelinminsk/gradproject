@@ -1,5 +1,6 @@
 using GtuAttendance.Api.DTOs;
-using GtuAttendance.Infrastructure.Errors; 
+using GtuAttendance.Infrastructure.Errors;
+using GtuAttendance.Infrastructure.Errors.Students;
 
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -12,6 +13,8 @@ using GtuAttendance.Infrastructure.Data;
 using GtuAttendance.Core.Entities;
 using GtuAttendance.Infrastructure.Services;
 using System.IO.Compression;
+using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 
 
 namespace GtuAttendance.Api.Controllers;
@@ -130,11 +133,13 @@ public class CourseController : ControllerBase
 
             try
             {
-                if (rosterfile.ContentType.Contains('excel', StringComparison.OrdinalIgnoreCase)
-                || Path.GetExtension(rosterfile.FileName).Equals('.xlsx', StringComparison.OrdinalIgnoreCase))
+                if (rosterfile.ContentType.Contains("excel", StringComparison.OrdinalIgnoreCase)
+                || Path.GetExtension(rosterfile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
                 {
                     using var stream = rosterfile.OpenReadStream();
+                    ExcelPackage.License.SetNonCommercialOrganization("GtuAttendance");
                     using var package = new ExcelPackage(stream);
+
                     var ws = package.Workbook.Worksheets[0];
 
                     var row = 2;  // assume headers on row 1
@@ -198,8 +203,105 @@ public class CourseController : ControllerBase
             return BadRequest(new { error = EX.Message });
         }
 
-        
+
 
     }
-        
+
+    [Authorize(Roles = "Student")]
+    [HttpPost("enroll-by-invite")]
+    public async Task<IActionResult> EnrollByInvite([FromBody] EnrollByInviteRequest request)
+    {
+        try
+        {
+            if (request is null || string.IsNullOrWhiteSpace(request.invitationToken)) throw new EnrollRequestNullException();
+            var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
+            if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("enroll-by-invite");
+
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == studentId);
+            if (student is null) throw new Unauthorized("Student is null in enroll by invite");
+
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.InvitationToken == request.invitationToken);
+            if (course is null) throw new CourseNotFoundException($"Course not found in enroll by invite by givin token: {request.invitationToken}");
+
+            var inRoster = await _context.CourseRosters
+            .AnyAsync(r => r.CourseId == course.CourseId && r.GtuStudentId == student.GtuStudentId);
+
+            if (!inRoster) throw new StudentNotInRosterException(student.FullName, student.GtuStudentId);
+
+            var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId);
+
+            if (!exists)
+            {
+                _context.CourseEnrollments.Add(new CourseEnrollment
+                {
+                    CourseId = course.CourseId,
+                    StudentId = studentId,
+                });
+
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { succes = true, course.CourseId, course.CourseName, course.CourseCode });
+            }
+            else
+            {
+                return BadRequest(new { message = "Student:" + student.FullName + "already enrolled to this class " });
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("mine/courses/teacher")]
+    public async Task<IActionResult> GetMyCoursesTeacher()
+    {
+        try
+        {
+            var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
+            if (!Guid.TryParse(sub, out var teacherGuid)) throw new Unauthorized("mine/courses/teacher");
+
+            var list = _context.Courses.Where(c => c.TeacherId == teacherGuid).OrderByDescending(c => c.CreatedAt)
+            .Select(c => new { c.CourseId, c.CourseName, c.CourseCode, c.CreatedAt, c.IsActive })
+            .AsNoTracking()
+            .ToListAsync();
+
+            return Ok(list);
+
+        }
+        catch (System.Exception EX)
+        {
+            _logger.LogError(EX, EX.StackTrace);
+            return BadRequest(new { error = EX.Message });
+        }
+
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet("mine/courses/student")]
+    public async Task<IActionResult> GetMyCoursesStudent()
+    {
+        try
+        {
+            var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub").Value;
+            if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("mine/courses/student");
+
+            var list = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId)
+            .Select(e => new { e.Course.CourseId, e.Course.CourseName, e.Course.CourseCode })
+            .ToListAsync();
+
+            return Ok(list);
+        }
+        catch (System.Exception EX)
+        {
+            _logger.LogError(EX, EX.StackTrace);
+            return BadRequest(new { error = EX.Message });
+            throw;
+        }
+    }
 }

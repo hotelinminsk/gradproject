@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GtuAttendance.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7c0af2602b087778d9bda65d6027f96d4ad823de")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bdf589b67ba2357c85a4231987e4dc174ce22533")]
 [assembly: System.Reflection.AssemblyProductAttribute("GtuAttendance.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GtuAttendance.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

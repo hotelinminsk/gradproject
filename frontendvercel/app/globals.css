@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ColorHunt palette order (dominance):
+     1) #F7FBFC  2) #D6E6F2  3) #B9D7EA  4) #769FCD */
+
+  /* Light/base theme (teacher desktop + student mobile) */
+  --background: #F7FBFC;              /* dominant background */
+  --foreground: #1F2D3D;              /* primary text */
+
+  --card: #D6E6F2;                    /* surface cards */
+  --card-foreground: #1F2D3D;
+
+  --popover: #D6E6F2;
+  --popover-foreground: #1F2D3D;
+
+  --primary: #769FCD;                 /* interactive primary */
+  --primary-foreground: #0E1726;
+
+  --secondary: #B9D7EA;
+  --secondary-foreground: #1F2D3D;
+
+  --muted: #EAF2F7;
+  --muted-foreground: #4B627A;
+
+  --accent: #B9D7EA;                  /* subtle accent */
+  --accent-foreground: #1F2D3D;
+
+  --destructive: #DA3E52;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #E3EFF7;
+  --input: #E3EFF7;
+  --ring: #769FCD;
+
+  --chart-1: #769FCD;
+  --chart-2: #B9D7EA;
+  --chart-3: #D6E6F2;
+  --chart-4: #4B86C6;
+  --chart-5: #1F2D3D;
+
+  --radius: 0.75rem;
+
+  --sidebar: #D6E6F2;
+  --sidebar-foreground: #1F2D3D;
+  --sidebar-primary: #769FCD;
+  --sidebar-primary-foreground: #0E1726;
+  --sidebar-accent: #B9D7EA;
+  --sidebar-accent-foreground: #1F2D3D;
+  --sidebar-border: #E3EFF7;
+  --sidebar-ring: #769FCD;
+
+  --font-sans: "Roboto", "Roboto Fallback";
+  --font-serif: "Roboto Slab", "Roboto Slab Fallback";
+  --font-mono: "Roboto Mono", "Roboto Mono Fallback";
+}
+
+.dark {
+  /* Deeper tones of the same family */
+  --background: #0F2235;
+  --foreground: #EAF2F7;
+
+  --card: #1A324D;
+  --card-foreground: #EAF2F7;
+
+  --popover: #1A324D;
+  --popover-foreground: #EAF2F7;
+
+  --primary: #5C8EBF;
+  --primary-foreground: #0B1522;
+
+  --secondary: #274864;
+  --secondary-foreground: #EAF2F7;
+
+  --muted: #13283F;
+  --muted-foreground: #C9D7E4;
+
+  --accent: #5C8EBF;
+  --accent-foreground: #0B1522;
+
+  --destructive: #C43548;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #264766;
+  --input: #264766;
+  --ring: #5C8EBF;
+
+  --sidebar: #13283F;
+  --sidebar-foreground: #EAF2F7;
+  --sidebar-primary: #5C8EBF;
+  --sidebar-primary-foreground: #0B1522;
+  --sidebar-accent: #274864;
+  --sidebar-accent-foreground: #EAF2F7;
+  --sidebar-border: #264766;
+  --sidebar-ring: #5C8EBF;
+}
+
+@theme inline {
+  --font-sans: "Roboto", "Roboto Fallback";
+  --font-mono: "Roboto Mono", "Roboto Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-serif: "Roboto Slab", "Roboto Slab Fallback";
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(1200px 600px at 0% 0%, rgba(118,159,205,0.12), transparent),
+      radial-gradient(1200px 600px at 100% 100%, rgba(185,215,234,0.15), transparent);
+  }
+}
+
