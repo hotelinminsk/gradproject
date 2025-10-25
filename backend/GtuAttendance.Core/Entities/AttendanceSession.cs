@@ -19,4 +19,9 @@ public class AttendanceSession
     public Teacher Teacher { get; set; } = null!;
     public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
 
+    // New addition for extra validaiton of qr token
+
+    public byte[] Secret { get; set; } = Array.Empty<byte>();
+
+    public int CodeStepSeconds { get; set; } = 30;
 }

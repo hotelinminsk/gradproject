@@ -9,7 +9,8 @@ namespace GtuAttendance.Api.DTOs;
 public record RegisterTeacherRequest(
     string Email,
     string Password,
-    string FullName
+    string FullName,
+    string InviteToken
     );
 
 

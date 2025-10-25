@@ -9,7 +9,7 @@ public enum AttendanceDenominator
 };
 
 public record CourseReportOverviewResponse(
-    Guid CourseID,
+    Guid CourseId,
     DateTime FromUtc,
     DateTime ToUtc,
     int TotalSessions,
@@ -44,6 +44,33 @@ public record CourseReportMonthlyResponse(
 
 public record MonthBucket(int Year, int MonthIndex, int Count, int AttendancePct);
 
+
+
+public record SessionAttendanceResponse(
+    Guid CourseId,
+    Guid SessionId,
+    DateTime CreatedAtUtc,
+    string Denominator,
+    int PresentCount,
+    int AbsentCount,
+    IList<StudentPresentRow> Present,
+    IList<StudentAbsentRow> Absent,
+    IList<StudentPresentRow>? Invalid
+);
+
+public record StudentPresentRow(
+    Guid StudentId,
+    string FullName,
+    string GtuStudentId,
+    DateTime CheckInTimeUtc,
+    string? DeviceName
+);
+
+public record StudentAbsentRow (
+    Guid? StudentId,
+    string FullName,
+    string GtuStudentId
+);
 
 
 

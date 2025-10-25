@@ -28,6 +28,11 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("CodeStepSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(30);
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
@@ -47,6 +52,10 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<byte[]>("Secret")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -222,6 +231,48 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.ToTable("CourseEnrollments");
                 });
 
+            modelBuilder.Entity("GtuAttendance.Core.Entities.TeacherInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmailDomain")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int?>("MaxUses")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("UsedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("TeacherInvites");
+                });
+
             modelBuilder.Entity("GtuAttendance.Core.Entities.User", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -242,7 +293,6 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("GtuStudentId")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -336,7 +386,8 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.HasBaseType("GtuAttendance.Core.Entities.User");
 
                     b.HasIndex("GtuStudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserType] = 'Student' AND [GtuStudentId] IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("Student");
                 });
