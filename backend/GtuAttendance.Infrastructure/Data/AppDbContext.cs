@@ -44,8 +44,8 @@ public class AppDbContext : DbContext
         // Student specific
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasIndex(e => e.GtuStudentId).IsUnique();
-            entity.Property(e => e.GtuStudentId).HasMaxLength(50).IsRequired();
+            entity.HasIndex(e => e.GtuStudentId).IsUnique().HasFilter("[UserType] = 'Student' AND [GtuStudentId] IS NOT NULL");
+            // entity.Property(e => e.GtuStudentId).HasMaxLength(50).IsRequired();
         });
 
 

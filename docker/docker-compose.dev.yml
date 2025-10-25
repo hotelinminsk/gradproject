@@ -7,12 +7,39 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=HabilKalkan!34!Gtu
-      - SA_USERNAME=sa
+      - SA_USERNAME=SA
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
     volumes:
       - sqldata:/var/opt/mssql
+    networks:
+      - gtu-network
+
+  api:
+    build:
+      context: ..
+      dockerfile: backend/GtuAttendance.Api/Dockerfile
+    container_name: gtu-attendance-api
+    depends_on:
+      - sqlserver
+    ports:
+      - "7270:8443"   # host https -> container https only
+      - "8443:8443"   # optional: direct container https for debug
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:8443
+      - ASPNETCORE_HTTPS_PORT=7270
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyDevPass!
+      # Point API to the sqlserver service on the same network
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=GtuAttendanceDb;User Id=SA;Password=HabilKalkan!34!Gtu;TrustServerCertificate=True;
+      # Ensure WebAuthn origin matches exposed HTTPS origin
+      - Fido2__Origin=https://localhost:7270
+      - Fido2__RpId=localhost
+    volumes:
+      # Mount dev HTTPS cert exported from `dotnet dev-certs https`
+      - "${USERPROFILE}\\.aspnet\\https:/https:ro"
     networks:
       - gtu-network
 

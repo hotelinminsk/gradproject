@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using GtuAttendance.Core.Entities;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-// Controllers
-builder.Services.AddControllers();
+// Controllers (enforce HTTPS at MVC level too)
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -42,9 +46,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database
+// Database // ADDED RETRIES FOR DATABASE CONNECTION BUILDER
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sql => sql.EnableRetryOnFailure(5,TimeSpan.FromSeconds(2), null)));
 
 // Services
 builder.Services.AddScoped<JWTService>();
@@ -54,6 +58,13 @@ builder.Services.AddScoped<Fido2Service>();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddMemoryCache();
+
+// Explicit HTTPS redirection port (helps when behind compose)
+builder.Services.AddHttpsRedirection(o =>
+{
+    var httpsPort = Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
+    if (int.TryParse(httpsPort, out var port)) o.HttpsPort = port; else o.HttpsPort = 8443;
+});
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -103,6 +114,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Use HSTS in non-development
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
 // Serve static files from wwwroot (for local test pages)
 app.UseStaticFiles();
 app.UseCors("AllowFrontend");
@@ -138,7 +154,20 @@ app.MapHealthChecks("/health/live");
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    for (var attempt = 1; attempt <= 10; attempt++)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            break;
+        }
+        catch (SqlException ex) when (ex.Number is 1801 or 4060 or 18456) // already exists / cannot open DB / login
+        {
+            await Task.Delay(2000);
+            if (attempt == 10) throw;
+        }
+    }
     if (!await db.Users.AnyAsync(u => u.Role == "Admin"))
     {
         var email = builder.Configuration["Admin:Email"] ?? "admin@gtu.edu.tr";
