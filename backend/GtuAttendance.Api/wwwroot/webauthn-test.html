@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GTU Attendance - WebAuthn Test</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; color: #111; }
+    h1 { margin-bottom: 8px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 8px 0; max-width: 960px; }
+    label { display: block; font-size: 12px; color: #555; margin-top: 8px; }
+    input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+    button { padding: 8px 12px; border: 0; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; }
+    button.secondary { background: #0f766e; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    pre { background: #0b1220; color: #d1e1ff; padding: 12px; border-radius: 6px; overflow: auto; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>GTU Attendance - WebAuthn Test</h1>
+  <p>This page helps you exercise the WebAuthn register/login endpoints locally over HTTPS.</p>
+
+  <div class="card">
+    <div class="row">
+      <div style="flex:1 1 280px">
+        <label>API Base URL</label>
+        <input id="api" value="" placeholder="https://localhost:7000" />
+      </div>
+      <div style="flex:1 1 280px">
+        <label>Bearer JWT</label>
+        <input id="jwt" placeholder="Paste Student JWT here" />
+      </div>
+      <div style="flex:1 1 280px">
+        <label>User Id (GUID)</label>
+        <input id="userId" placeholder="00000000-0000-0000-0000-000000000000" />
+      </div>
+      <div style="flex:1 1 280px">
+        <label>Device Name</label>
+        <input id="deviceName" value="My Device" />
+      </div>
+    </div>
+    <small>Note: enroll token is not required if you use a valid Student JWT.</small>
+  </div>
+
+  <div class="row">
+    <div class="card" style="flex:1 1 460px">
+      <h3>Register (WebAuthn)</h3>
+      <div class="row">
+        <button id="reg-begin">Register - Begin</button>
+        <button id="reg-complete" class="secondary" disabled>Register - Complete</button>
+      </div>
+      <label>Options (begin response)</label>
+      <pre id="reg-options"></pre>
+      <label>Complete result</label>
+      <pre id="reg-result"></pre>
+    </div>
+
+    <div class="card" style="flex:1 1 460px">
+      <h3>Login (WebAuthn)</h3>
+      <div class="row">
+        <button id="log-begin">Login - Begin</button>
+        <button id="log-complete" class="secondary" disabled>Login - Complete</button>
+      </div>
+      <label>Options (begin response)</label>
+      <pre id="log-options"></pre>
+      <label>Complete result</label>
+      <pre id="log-result"></pre>
+    </div>
+  </div>
+
+  <script>
+    // Helpers
+    const $ = (id) => document.getElementById(id);
+    function toB64(buf) {
+      const bin = String.fromCharCode(...new Uint8Array(buf));
+      return btoa(bin);
+    }
+    function b64uToBytes(s) {
+      s = s.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      const bin = atob(s);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+
+    let regOptions = null;
+    let logOptions = null;
+
+    async function call(api, path, jwt, method = 'GET', body) {
+      const res = await fetch(api.replace(/\/$/, '') + path, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(jwt ? { 'Authorization': 'Bearer ' + jwt } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const text = await res.text();
+      try { return { status: res.status, data: JSON.parse(text) }; }
+      catch { return { status: res.status, data: text }; }
+    }
+
+    // Register begin
+    $("reg-begin").onclick = async () => {
+      const api = $("api").value || window.location.origin;
+      const jwt = $("jwt").value;
+      const userId = $("userId").value;
+      const deviceName = $("deviceName").value || 'My Device';
+
+      const { status, data } = await call(api, '/api/Auth/register-webauthn/begin', jwt, 'POST', {
+        userId,
+        deviceName
+      });
+      $("reg-options").textContent = JSON.stringify(data, null, 2);
+      if (status !== 200) return;
+      regOptions = data;
+
+      // Convert challenge and user.id to bytes
+      regOptions.challenge = b64uToBytes(regOptions.challenge);
+      regOptions.user.id = b64uToBytes(regOptions.user.id);
+
+      $("reg-complete").disabled = false;
+    };
+
+    // Register complete
+    $("reg-complete").onclick = async () => {
+      const api = $("api").value || window.location.origin;
+      const jwt = $("jwt").value;
+      const userId = $("userId").value;
+      const deviceName = $("deviceName").value || 'My Device';
+      if (!regOptions) return alert('Run Register - Begin first');
+
+      try {
+        const cred = await navigator.credentials.create({ publicKey: regOptions });
+        const body = {
+          userId,
+          id: cred.id,
+          type: cred.type,
+          rawId: toB64(cred.rawId),
+          attestationObject: toB64(cred.response.attestationObject),
+          clientDataJSON: toB64(cred.response.clientDataJSON),
+          deviceName,
+          transports: cred.response.getTransports?.() ?? null
+        };
+        const { status, data } = await call(api, '/api/Auth/register-webauthn/complete', jwt, 'POST', body);
+        $("reg-result").textContent = JSON.stringify({ status, data }, null, 2);
+      } catch (e) {
+        $("reg-result").textContent = String(e);
+      }
+    };
+
+    // Login begin
+    $("log-begin").onclick = async () => {
+      const api = $("api").value || window.location.origin;
+      const jwt = $("jwt").value;
+      const userId = $("userId").value;
+
+      const { status, data } = await call(api, '/api/Auth/login-webauthn/begin', jwt, 'POST', { userId });
+      $("log-options").textContent = JSON.stringify(data, null, 2);
+      if (status !== 200) return;
+      logOptions = data;
+
+      // Convert challenge and allowedCredentials[].id
+      logOptions.challenge = b64uToBytes(logOptions.challenge);
+      if (Array.isArray(logOptions.allowCredentials)) {
+        for (const d of logOptions.allowCredentials) {
+          if (d.id) d.id = b64uToBytes(d.id);
+        }
+      }
+      $("log-complete").disabled = false;
+    };
+
+    // Login complete
+    $("log-complete").onclick = async () => {
+      const api = $("api").value || window.location.origin;
+      const jwt = $("jwt").value;
+      const userId = $("userId").value;
+      if (!logOptions) return alert('Run Login - Begin first');
+
+      try {
+        const assertion = await navigator.credentials.get({ publicKey: logOptions });
+        const body = {
+          userId,
+          id: assertion.id,
+          type: assertion.type,
+          DeviceName: $("deviceName").value,
+          rawId: toB64(assertion.rawId),
+          authenticatorData: toB64(assertion.response.authenticatorData),
+          clientDataJSON: toB64(assertion.response.clientDataJSON),
+          signature: toB64(assertion.response.signature),
+          userHandle: assertion.response.userHandle ? toB64(assertion.response.userHandle) : null
+        };
+        const { status, data } = await call(api, '/api/Auth/login-webauthn/complete', jwt, 'POST', body);
+        $("log-result").textContent = JSON.stringify({ status, data }, null, 2);
+      } catch (e) {
+        $("log-result").textContent = String(e);
+      }
+    };
+  </script>
+</body>
+</html>
+

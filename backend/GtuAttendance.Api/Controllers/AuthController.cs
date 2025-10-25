@@ -16,6 +16,8 @@ using Fido2NetLib;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Components.Forms;
 
 
 namespace GtuAttendance.Api.Controllers;
@@ -52,9 +54,16 @@ public class AuthController : ControllerBase
 
     private bool IsStudentAuthenticated(Guid userId)
     {
-        var sub = User?.FindFirst("sub").Value ?? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!(User?.Identity?.IsAuthenticated ?? false)) return false;
+
+        var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+        if (!Guid.TryParse(sub, out var sid) || sid != userId) return false;
+
+
         var role = User?.FindFirst(ClaimTypes.Role)?.Value ?? User?.FindFirst("UserType")?.Value;
-        return Guid.TryParse(sub, out var sid) && sid == userId && string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase);
+
+        return string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase);
+
     }
 
     private bool HasEnrollToken(Guid userId, string? token)
@@ -70,6 +79,18 @@ public class AuthController : ControllerBase
         try
         {
             if (request == null) throw new ArgumentNullException("RegisterTeacher: RegisterTeacherRequest is null!");
+
+            // Validate teacher invite token (simple server-side gate)
+            var invite = await _context.Set<TeacherInvite>()
+                .FirstOrDefaultAsync(t => t.Token == request.InviteToken && t.IsActive);
+            if (invite is null)
+                return Unauthorized(new { error = "Invalid teacher invite token." });
+            if (invite.ExpiresAt <= DateTime.UtcNow)
+                return Unauthorized(new { error = "Teacher invite token expired." });
+            if (invite.MaxUses.HasValue && invite.UsedCount >= invite.MaxUses.Value)
+                return Unauthorized(new { error = "Teacher invite token usage exceeded." });
+            if (!string.IsNullOrWhiteSpace(invite.EmailDomain) && !request.Email.EndsWith("@" + invite.EmailDomain, StringComparison.OrdinalIgnoreCase))
+                return Unauthorized(new { error = $"Teacher invite restricted to @{invite.EmailDomain}." });
 
             // HOW CAN I RESTRICT STUDENTS FROM CREATING TEACHER ACCOUNTS?
             // MAYBE DOESNT ALLOW ANYBODY TO CREATE TEACHER ACCOUNT?
@@ -90,6 +111,10 @@ public class AuthController : ControllerBase
 
 
             _context.Teachers.Add(teacher);
+            await _context.SaveChangesAsync();
+
+            // consume invite (increment usage)
+            invite.UsedCount++;
             await _context.SaveChangesAsync();
 
             var token = _JWTService.GenerateToken(
@@ -406,6 +431,7 @@ public class AuthController : ControllerBase
                 throw new StudentAssertionChallengeExpiredException();
             }
 
+        
             var assertation = new AuthenticatorAssertionRawResponse
             {
                 Id = request.Id,
@@ -424,13 +450,52 @@ public class AuthController : ControllerBase
             .FirstOrDefaultAsync(c => c.UserId == user.UserId && c.CredentialId == request.RawId);
             if (cred is null) throw new WebAuthnCredIsNullException();
 
+            Console.WriteLine("Cred device name : " + cred.DeviceName);
+            Console.WriteLine("Request device name : " + request.DeviceName);
+           
+            if (cred.PublicKey is null || cred.PublicKey.Length == 0)
+            return BadRequest(new { error = "Stored public key is missing." });
+
+
             if (cred.DeviceName != null && cred.DeviceName != request.DeviceName)
             {
                 throw new DeviceMismatchException();
             }
 
+            Console.WriteLine("Assertation: " + assertation);
+            Console.WriteLine("Options " + options);
+            Console.WriteLine("Cred: " + cred);
+            Console.WriteLine("Cred public key :" + cred.PublicKey);
+            Console.WriteLine("Cred sign count : " + (uint)(cred.SignatureCounter));
 
-            var result = await _fido2Service.VerifyAssertionAsync(assertation, options, cred.PublicKey, (uint)cred.SignatureCounter);
+            IsUserHandleOwnerOfCredentialIdAsync ownerCheck = async (p, cancel) =>
+            {
+                if (p.UserHandle is null || p.UserHandle.Length == 0) return true;
+
+                var dbCred = await _context.WebAuthnCredentials
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CredentialId == p.CredentialId, cancel);
+
+                if (dbCred is null) return false;
+
+                return dbCred.UserHandle is not null && dbCred.UserHandle.AsSpan().SequenceEqual(p.UserHandle);
+            };
+
+            var result = await _fido2Service.VerifyAssertionAsync(
+                assertation,
+
+                options,
+
+                cred.PublicKey,
+
+                (uint)cred.SignatureCounter,
+
+                ownerCheck
+
+            );
+
+            
+            // var result = await _fido2Service.VerifyAssertionAsync(assertation, options, cred.PublicKey, (uint)cred.SignatureCounter);
 
             cred.SignatureCounter = (long)result.SignCount;
             cred.LastUsedAt = DateTime.UtcNow;
@@ -445,6 +510,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             _logger.LogError(ex, ex.StackTrace);
             return BadRequest(new { error = ex.Message });
         }

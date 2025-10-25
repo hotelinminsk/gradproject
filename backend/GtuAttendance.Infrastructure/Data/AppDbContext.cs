@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
     public DbSet<AttendanceSession> AttendanceSessions { get; set; }
     public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
+    public DbSet<TeacherInvite> TeacherInvites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +37,8 @@ public class AppDbContext : DbContext
             entity.HasDiscriminator<string>("UserType")
                 .HasValue<Student>("Student")
                 .HasValue<Teacher>("Teacher");
+
+            entity.Property(x => x.GtuStudentId).HasMaxLength(50).IsRequired(false);
         });
 
         // Student specific
@@ -122,6 +125,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.QRCodeToken).HasMaxLength(128).IsRequired();
             entity.Property(e => e.TeacherLatitude).HasPrecision(10, 8);
             entity.Property(e => e.TeacherLongitude).HasPrecision(11, 8);
+            entity.Property(e => e.Secret).IsRequired();
+            entity.Property(e => e.CodeStepSeconds).HasDefaultValue(30);
 
             entity.HasOne(e => e.Course)
                 .WithMany(c => c.Sessions)
@@ -162,6 +167,17 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.DeviceCredentialId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // TeacherInvite
+        modelBuilder.Entity<TeacherInvite>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Token).HasMaxLength(128).IsRequired();
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.Property(e => e.EmailDomain).HasMaxLength(255);
+            entity.Property(e => e.UsedCount).HasDefaultValue(0);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
     }
 }

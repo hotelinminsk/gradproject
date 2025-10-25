@@ -8,10 +8,8 @@ C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\G
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\GtuAttendance.Api.pdb
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Azure.Core.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Azure.Identity.dll
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\EPPlus.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\EPPlus.Interfaces.dll
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Fido2.NetFramework.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Humanizer.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
@@ -58,7 +56,6 @@ C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\M
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Mono.TextTemplating.dll
-C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\Newtonsoft.Json.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\System.ClientModel.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\System.CodeDom.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\System.Composition.AttributedModel.dll
@@ -209,3 +206,5 @@ C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\r
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\runtimes\win-arm64\native\libsodium.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\runtimes\win-x64\native\libsodium.dll
 C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\runtimes\win-x86\native\libsodium.dll
+C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\bin\Debug\net9.0\GtuAttendance.Api.staticwebassets.runtime.json
+C:\Users\root\Documents\ProjectGrad\backend\GtuAttendance.Api\obj\Debug\net9.0\compressed\8ratistjrz-7l7iba54v0.gz

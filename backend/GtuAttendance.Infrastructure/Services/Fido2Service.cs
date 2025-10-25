@@ -38,11 +38,12 @@ public class Fido2Service
             Name = username,
             DisplayName = displayName
         };
+        if(excludeCredentials is null) excludeCredentials = new List<PublicKeyCredentialDescriptor>();
 
         var request = new RequestNewCredentialParams
         {
             User = user,
-            ExcludeCredentials = excludeCredentials?.ToList(),
+            ExcludeCredentials = excludeCredentials.ToList(),
             AuthenticatorSelection = new AuthenticatorSelection
             {
                 AuthenticatorAttachment = AuthenticatorAttachment.Platform,  // cross platformdan cıkardım
@@ -86,10 +87,12 @@ public class Fido2Service
         IEnumerable<PublicKeyCredentialDescriptor>? allowedCredentials = null,
         UserVerificationRequirement userVerification = UserVerificationRequirement.Required
     )
-    {
+    {   
+        if(allowedCredentials is null) allowedCredentials = new List<PublicKeyCredentialDescriptor>();
+
         var request = new GetAssertionOptionsParams
         {
-            AllowedCredentials = allowedCredentials?.ToList(),
+            AllowedCredentials = allowedCredentials.ToList(),
             UserVerification = userVerification,
             Extensions = new AuthenticationExtensionsClientInputs
             {
@@ -113,6 +116,7 @@ public class Fido2Service
         CancellationToken cancellationToken = default
     )
     {
+        
         var request = new MakeAssertionParams
         {
             AssertionResponse = assertionRawResponse,
