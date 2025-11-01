@@ -101,16 +101,17 @@ public class AuthController : ControllerBase
                 throw new TeacherEmailExistsException();
             }
 
-            var teacher = new Teacher(
+            var teacherUser = new User(
                 email: request.Email,
-                passhash: _passwordService.HashPassword(request.Password),
-                fullname: request.FullName
-
+                passwordhash: _passwordService.HashPassword(request.Password),
+                fullname: request.FullName,
+                gtuid: null,
+                role: "Teacher"
             );
 
-
-
-            _context.Teachers.Add(teacher);
+            _context.Users.Add(teacherUser);
+            // optional profile row for future teacher-specific fields
+            _context.Set<TeacherProfile>().Add(new TeacherProfile { UserId = teacherUser.UserId });
             await _context.SaveChangesAsync();
 
             // consume invite (increment usage)
@@ -118,18 +119,18 @@ public class AuthController : ControllerBase
             await _context.SaveChangesAsync();
 
             var token = _JWTService.GenerateToken(
-                userid: teacher.UserId,
-                email: teacher.Email,
+                userid: teacherUser.UserId,
+                email: teacherUser.Email,
                 usertype: "Teacher"
                 );
 
             return Ok(new AuthResponse
             (
                 Token: token,
-                UserId: teacher.UserId,
+                UserId: teacherUser.UserId,
                 UserType: "Teacher",
-                FullName: teacher.FullName,
-                Email: teacher.Email,
+                FullName: teacherUser.FullName,
+                Email: teacherUser.Email,
                 GtuStudentId: null,
                 RequiresWebAuthn: false
             )
@@ -156,7 +157,7 @@ public class AuthController : ControllerBase
         {
             if (request == null) throw new ArgumentNullException("LoginTeacher: TeacherLoginRequest is null.");
 
-            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Email == request.Email);
+            var teacher = await _context.Users.FirstOrDefaultAsync(t => t.Email == request.Email && t.Role == "Teacher");
 
             if (teacher == null)
             {
@@ -209,33 +210,35 @@ public class AuthController : ControllerBase
                 throw new InvalidCredentialsError("The email is exists.");
             }
 
-            if (await _context.Students.AnyAsync(u => u.GtuStudentId == request.GtuStudentId))
+            if (await _context.StudentProfiles.AnyAsync(u => u.GtuStudentId == request.GtuStudentId))
             {
                 throw new GTUIDExistsException();
 
             }
 
 
-            var student = new Student(
+            var studentUser = new User(
                 email: request.Email,
-                passhash: _passwordService.HashPassword(request.Password),
+                passwordhash: _passwordService.HashPassword(request.Password),
                 fullname: request.FullName,
-                gtuid: request.GtuStudentId
+                gtuid: null,
+                role: "Student"
                 );
 
-            _context.Students.Add(student);
+            _context.Users.Add(studentUser);
+            _context.Set<StudentProfile>().Add(new StudentProfile { UserId = studentUser.UserId, GtuStudentId = request.GtuStudentId });
 
             await _context.SaveChangesAsync();
 
-            var token = _JWTService.GenerateToken(student.UserId, student.Email, "Student");
+            var token = _JWTService.GenerateToken(studentUser.UserId, studentUser.Email, "Student");
 
             return Ok(new AuthResponse(
                 Token: token,
-                UserId: student.UserId,
+                UserId: studentUser.UserId,
                 UserType: "Student",
-                FullName: student.FullName,
-                Email: student.Email,
-                GtuStudentId: student.GtuStudentId,
+                FullName: studentUser.FullName,
+                Email: studentUser.Email,
+                GtuStudentId: request.GtuStudentId,
                 RequiresWebAuthn: true
                 ));
 

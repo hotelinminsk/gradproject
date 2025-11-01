@@ -16,7 +16,7 @@ public class AttendanceSession
     public bool IsActive { get; set; } = true;
 
     public Course Course { get; set; } = null!;
-    public Teacher Teacher { get; set; } = null!;
+    public User Teacher { get; set; } = null!;
     public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
 
     // New addition for extra validaiton of qr token

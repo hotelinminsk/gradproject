@@ -10,8 +10,8 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<Student> Students { get; set; }
-    public DbSet<Teacher> Teachers { get; set; }
+    public DbSet<StudentProfile> StudentProfiles { get; set; }
+    public DbSet<TeacherProfile> TeacherProfiles { get; set; }
     public DbSet<WebAuthnCredential> WebAuthnCredentials { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseRoster> CourseRosters { get; set; }
@@ -24,160 +24,162 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // User inheritance (TPH - Table Per Hierarchy)
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<User>(e =>
         {
-            entity.HasKey(e => e.UserId);
-            entity.HasIndex(e => e.Email).IsUnique();
-            entity.Property(e => e.Email).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
-            entity.Property(e => e.FullName).HasMaxLength(255).IsRequired();
-
-            // Discriminator for inheritance
-            entity.HasDiscriminator<string>("UserType")
-                .HasValue<Student>("Student")
-                .HasValue<Teacher>("Teacher");
-
-            entity.Property(x => x.GtuStudentId).HasMaxLength(50).IsRequired(false);
+            e.HasKey(x => x.UserId);
+            e.HasIndex(x => x.Email).IsUnique();
+            e.Property(x => x.Email).HasMaxLength(255).IsRequired();
+            e.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
+            e.Property(x => x.FullName).HasMaxLength(255).IsRequired();
         });
 
-        // Student specific
-        modelBuilder.Entity<Student>(entity =>
+        modelBuilder.Entity<StudentProfile>(e =>
         {
-            entity.HasIndex(e => e.GtuStudentId).IsUnique().HasFilter("[UserType] = 'Student' AND [GtuStudentId] IS NOT NULL");
-            // entity.Property(e => e.GtuStudentId).HasMaxLength(50).IsRequired();
+            e.HasKey(x => x.UserId);
+            e.Property(x => x.GtuStudentId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => x.GtuStudentId).IsUnique();
+            e.HasOne(x => x.User)
+            .WithOne()
+            .HasForeignKey<StudentProfile>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         });
 
-
-        modelBuilder.Entity<WebAuthnCredential>(entity =>
+        modelBuilder.Entity<TeacherProfile>(e =>
         {
-
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.CredentialId).IsRequired();
-            entity.Property(e => e.PublicKey).IsRequired();
-            entity.Property(e => e.UserHandle).IsRequired();
-            entity.Property(e => e.DeviceName).HasMaxLength(255);
-            entity.Property(e => e.Transports).HasMaxLength(255);
-            entity.Property(e => e.CredentialType).HasMaxLength(255).IsRequired();
-
-            entity.HasOne(e => e.User).
-                WithMany(u => u.Credentials).
-                HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasIndex(e => e.CredentialId).IsUnique();
-
-
-        });
-        
-        // Course
-        modelBuilder.Entity<Course>(entity =>
-        {
-            entity.HasKey(e => e.CourseId);
-            entity.HasIndex(e => e.InvitationToken).IsUnique();
-            entity.Property(e => e.CourseName).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.CourseCode).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.InvitationToken).HasMaxLength(128).IsRequired();
-
-            entity.HasOne(e => e.Teacher)
-                .WithMany(t => t.CreatedCourses)
-                .HasForeignKey(e => e.TeacherId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            e.HasKey(x => x.UserId);
+            e.HasOne(x => x.User)
+            .WithOne()
+            .HasForeignKey<TeacherProfile>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // CourseRoster
-        modelBuilder.Entity<CourseRoster>(entity =>
-        {
-            entity.HasKey(e => e.RosterId);
-            entity.HasIndex(e => new { e.CourseId, e.GtuStudentId }).IsUnique();
-            entity.Property(e => e.GtuStudentId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.FullName).HasMaxLength(255).IsRequired();
+        // WebAuthnCredential → User
+modelBuilder.Entity<WebAuthnCredential>(e =>
+{
+    e.HasKey(x => x.Id);
+    e.Property(x => x.CredentialId).IsRequired();
+    e.Property(x => x.PublicKey).IsRequired();
+    e.Property(x => x.UserHandle).IsRequired();
+    e.Property(x => x.DeviceName).HasMaxLength(255);
+    e.Property(x => x.Transports).HasMaxLength(255);
+    e.Property(x => x.CredentialType).HasMaxLength(255).IsRequired();
 
-            entity.HasOne(e => e.Course)
-                .WithMany(c => c.Roster)
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+    e.HasOne(x => x.User)
+     .WithMany(u => u.Credentials)
+     .HasForeignKey(x => x.UserId)
+     .OnDelete(DeleteBehavior.Cascade);
 
-        // CourseEnrollment
-        modelBuilder.Entity<CourseEnrollment>(entity =>
-        {
-            entity.HasKey(e => e.EnrollmentId);
-            entity.HasIndex(e => new { e.CourseId, e.StudentId }).IsUnique();
+    e.HasIndex(x => x.CredentialId).IsUnique();
+});
 
-            entity.HasOne(e => e.Course)
-                .WithMany(c => c.Enrollments)
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
+// Course → TeacherId (User FK)
+modelBuilder.Entity<Course>(e =>
+{
+    e.HasKey(x => x.CourseId);
+    e.HasIndex(x => x.InvitationToken).IsUnique();
+    e.Property(x => x.CourseName).HasMaxLength(255).IsRequired();
+    e.Property(x => x.CourseCode).HasMaxLength(50).IsRequired();
+    e.Property(x => x.InvitationToken).HasMaxLength(128).IsRequired();
 
-            entity.HasOne(e => e.Student)
-                .WithMany(s => s.Enrollments)
-                .HasForeignKey(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+    // Navigation zorunlu değil; FK-only map
+    e.HasOne(x => x.Teacher)
+     .WithMany()
+     .HasForeignKey(x => x.TeacherId)
+     .OnDelete(DeleteBehavior.Restrict);
+});
 
-        // AttendanceSession
-        modelBuilder.Entity<AttendanceSession>(entity =>
-        {
-            entity.HasKey(e => e.SessionId);
-            entity.HasIndex(e => e.QRCodeToken).IsUnique();
-            entity.Property(e => e.QRCodeToken).HasMaxLength(128).IsRequired();
-            entity.Property(e => e.TeacherLatitude).HasPrecision(10, 8);
-            entity.Property(e => e.TeacherLongitude).HasPrecision(11, 8);
-            entity.Property(e => e.Secret).IsRequired();
-            entity.Property(e => e.CodeStepSeconds).HasDefaultValue(30);
+// CourseRoster (aynı)
+modelBuilder.Entity<CourseRoster>(e =>
+{
+    e.HasKey(x => x.RosterId);
+    e.HasIndex(x => new { x.CourseId, x.GtuStudentId }).IsUnique();
+    e.Property(x => x.GtuStudentId).HasMaxLength(50).IsRequired();
+    e.Property(x => x.FullName).HasMaxLength(255).IsRequired();
 
-            entity.HasOne(e => e.Course)
-                .WithMany(c => c.Sessions)
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
+    e.HasOne(x => x.Course)
+     .WithMany(c => c.Roster)
+     .HasForeignKey(x => x.CourseId)
+     .OnDelete(DeleteBehavior.Cascade);
+});
 
-            entity.HasOne(e => e.Teacher)
-                .WithMany(t => t.AttendanceSessions)
-                .HasForeignKey(e => e.TeacherId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+// CourseEnrollment → StudentId (User FK)
+modelBuilder.Entity<CourseEnrollment>(e =>
+{
+    e.HasKey(x => x.EnrollmentId);
+    e.HasIndex(x => new { x.CourseId, x.StudentId }).IsUnique();
 
-        // AttendanceRecord
-        modelBuilder.Entity<AttendanceRecord>(entity =>
-        {
-            entity.HasKey(e => e.AttendanceId);
-            entity.HasIndex(e => new { e.SessionId, e.StudentId }).IsUnique();
-            entity.Property(e => e.StudentLatitude).HasPrecision(10, 8);
-            entity.Property(e => e.StudentLongitude).HasPrecision(11, 8);
-            entity.Property(e => e.DistanceFromTeacherMeters).HasPrecision(10, 2);
+    e.HasOne(x => x.Course)
+     .WithMany(c => c.Enrollments)
+     .HasForeignKey(x => x.CourseId)
+     .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.Session)
-                .WithMany(s => s.AttendanceRecords)
-                .HasForeignKey(e => e.SessionId)
-                .OnDelete(DeleteBehavior.Cascade);
+    e.HasOne(x => x.Student)
+     .WithMany()
+     .HasForeignKey(x => x.StudentId)
+     .OnDelete(DeleteBehavior.Cascade);
+});
 
-            entity.HasOne(e => e.Course)
-                .WithMany()
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
+// AttendanceSession (aynı; TeacherId -> User)
+modelBuilder.Entity<AttendanceSession>(e =>
+{
+    e.HasKey(x => x.SessionId);
+    e.HasIndex(x => x.QRCodeToken).IsUnique();
+    e.Property(x => x.QRCodeToken).HasMaxLength(128).IsRequired();
+    e.Property(x => x.TeacherLatitude).HasPrecision(10, 8);
+    e.Property(x => x.TeacherLongitude).HasPrecision(11, 8);
+    e.Property(x => x.Secret).IsRequired();
+    e.Property(x => x.CodeStepSeconds).HasDefaultValue(30);
 
-            entity.HasOne(e => e.Student)
-                .WithMany(s => s.AttendanceRecords)
-                .HasForeignKey(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
+    e.HasOne(x => x.Course)
+     .WithMany(c => c.Sessions)
+     .HasForeignKey(x => x.CourseId)
+     .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.DeviceCredential)
-                .WithMany()
-                .HasForeignKey(e => e.DeviceCredentialId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+    e.HasOne(x => x.Teacher)
+     .WithMany()
+     .HasForeignKey(x => x.TeacherId)
+     .OnDelete(DeleteBehavior.Restrict);
+});
 
-        // TeacherInvite
-        modelBuilder.Entity<TeacherInvite>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Token).HasMaxLength(128).IsRequired();
-            entity.HasIndex(e => e.Token).IsUnique();
-            entity.Property(e => e.EmailDomain).HasMaxLength(255);
-            entity.Property(e => e.UsedCount).HasDefaultValue(0);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+// AttendanceRecord → StudentId (User FK)
+modelBuilder.Entity<AttendanceRecord>(e =>
+{
+    e.HasKey(x => x.AttendanceId);
+    e.HasIndex(x => new { x.SessionId, x.StudentId }).IsUnique();
+    e.Property(x => x.StudentLatitude).HasPrecision(10, 8);
+    e.Property(x => x.StudentLongitude).HasPrecision(11, 8);
+    e.Property(x => x.DistanceFromTeacherMeters).HasPrecision(10, 2);
+
+    e.HasOne(x => x.Session)
+     .WithMany(s => s.AttendanceRecords)
+     .HasForeignKey(x => x.SessionId)
+     .OnDelete(DeleteBehavior.Cascade);
+
+    e.HasOne(x => x.Course)
+     .WithMany()
+     .HasForeignKey(x => x.CourseId)
+     .OnDelete(DeleteBehavior.Restrict);
+
+    e.HasOne(x => x.Student)
+     .WithMany()
+     .HasForeignKey(x => x.StudentId)
+     .OnDelete(DeleteBehavior.Restrict);
+
+    e.HasOne(x => x.DeviceCredential)
+     .WithMany()
+     .HasForeignKey(x => x.DeviceCredentialId)
+     .OnDelete(DeleteBehavior.Restrict);
+});
+
+// TeacherInvite (aynı)
+    modelBuilder.Entity<TeacherInvite>(e =>
+    {
+        e.HasKey(x => x.Id);
+        e.Property(x => x.Token).HasMaxLength(128).IsRequired();
+        e.HasIndex(x => x.Token).IsUnique();
+        e.Property(x => x.EmailDomain).HasMaxLength(255);
+        e.Property(x => x.UsedCount).HasDefaultValue(0);
+        e.Property(x => x.IsActive).HasDefaultValue(true);
+    });
     }
 }

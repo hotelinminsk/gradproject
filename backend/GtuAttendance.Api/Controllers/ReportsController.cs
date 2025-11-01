@@ -304,32 +304,38 @@ public class ReportsController : ControllerBase
             if (session is null) throw new SessionNotFoundException(sessionId, courseId, DateTime.UtcNow);
 
             var present = await _context.AttendanceRecords.AsNoTracking()
-            .Where(r => r.SessionId == sessionId && r.IsWithinRange)
-            .Select(r => new StudentPresentRow(
-                r.StudentId,
-                r.Student.FullName,
-                r.Student.GtuStudentId,
-                r.CheckInTime,
-                r.DeviceCredential.DeviceName
-            ))
-            .OrderBy(x => x.FullName)
-            .ToListAsync();
+                .Where(r => r.SessionId == sessionId && r.IsWithinRange)
+                .Join(_context.Users.AsNoTracking(), r => r.StudentId, u => u.UserId, (r, u) => new { r, u })
+                .GroupJoin(_context.StudentProfiles.AsNoTracking(), ru => ru.u.UserId, sp => sp.UserId, (ru, sps) => new { ru.r, ru.u, sp = sps.FirstOrDefault() })
+                .GroupJoin(_context.WebAuthnCredentials.AsNoTracking(), rus => rus.r.DeviceCredentialId, d => d.Id, (rus, ds) => new { rus.r, rus.u, rus.sp, dev = ds.FirstOrDefault() })
+                .Select(x => new StudentPresentRow(
+                    x.r.StudentId,
+                    x.u.FullName,
+                    x.sp != null ? x.sp.GtuStudentId : null,
+                    x.r.CheckInTime,
+                    x.dev != null ? x.dev.DeviceName : null
+                ))
+                .OrderBy(x => x.FullName)
+                .ToListAsync();
 
             List<StudentPresentRow>? invalid = null;
 
             if (includeInvalid)
             {
                 invalid = await _context.AttendanceRecords.AsNoTracking()
-                .Where(r => r.SessionId == sessionId && !r.IsWithinRange)
-                .Select(r => new StudentPresentRow(
-                    r.StudentId,
-                    r.Student.FullName,
-                    r.Student.GtuStudentId,
-                    r.CheckInTime,
-                    r.DeviceCredential.DeviceName
-                ))
-                .OrderBy(k => k.FullName)
-                .ToListAsync();
+                    .Where(r => r.SessionId == sessionId && !r.IsWithinRange)
+                    .Join(_context.Users.AsNoTracking(), r => r.StudentId, u => u.UserId, (r, u) => new { r, u })
+                    .GroupJoin(_context.StudentProfiles.AsNoTracking(), ru => ru.u.UserId, sp => sp.UserId, (ru, sps) => new { ru.r, ru.u, sp = sps.FirstOrDefault() })
+                    .GroupJoin(_context.WebAuthnCredentials.AsNoTracking(), rus => rus.r.DeviceCredentialId, d => d.Id, (rus, ds) => new { rus.r, rus.u, rus.sp, dev = ds.FirstOrDefault() })
+                    .Select(x => new StudentPresentRow(
+                        x.r.StudentId,
+                        x.u.FullName,
+                        x.sp != null ? x.sp.GtuStudentId : null,
+                        x.r.CheckInTime,
+                        x.dev != null ? x.dev.DeviceName : null
+                    ))
+                    .OrderBy(k => k.FullName)
+                    .ToListAsync();
 
             }
 
@@ -338,29 +344,33 @@ public class ReportsController : ControllerBase
             if (denominator == AttendanceDenominator.Enrolled)
             {
                 absent = await _context.CourseEnrollments.AsNoTracking()
-                .Where(e => e.CourseId == courseId)
-                .Where(e => !_context.AttendanceRecords.Any(r => r.SessionId == sessionId && r.IsWithinRange && r.StudentId == e.StudentId))
-                .Select(e => new StudentAbsentRow(
-                    e.StudentId,
-                    e.Student.FullName,
-                    e.Student.GtuStudentId
-                ))
-                .OrderBy(x => x.FullName)
-                .ToListAsync();
+                    .Where(e => e.CourseId == courseId)
+                    .Join(_context.Users.AsNoTracking(), e => e.StudentId, u => u.UserId, (e, u) => new { e, u })
+                    .GroupJoin(_context.StudentProfiles.AsNoTracking(), eu => eu.u.UserId, sp => sp.UserId, (eu, sps) => new { eu.e, eu.u, sp = sps.FirstOrDefault() })
+                    .Where(x => !_context.AttendanceRecords.Any(r => r.SessionId == sessionId && r.IsWithinRange && r.StudentId == x.e.StudentId))
+                    .Select(x => new StudentAbsentRow(
+                        x.e.StudentId,
+                        x.u.FullName,
+                        x.sp != null ? x.sp.GtuStudentId : null
+                    ))
+                    .OrderBy(x => x.FullName)
+                    .ToListAsync();
 
             }
             else
             {
-                absent = await _context.CourseRosters
-                .Where(r => r.CourseId == courseId)
-                .Where(r => !_context.AttendanceRecords.Any(ar => ar.SessionId == sessionId && ar.IsWithinRange && ar.Student.GtuStudentId == r.GtuStudentId))
-                .Select(r => new StudentAbsentRow(
-                    null,
-                    r.FullName,
-                    r.GtuStudentId
-                ))
-                .OrderBy(x => x.FullName)
-                .ToListAsync();
+                absent = await _context.CourseRosters.AsNoTracking()
+                    .Where(r => r.CourseId == courseId)
+                    .Where(r => !_context.AttendanceRecords
+                        .Join(_context.StudentProfiles, ar => ar.StudentId, sp => sp.UserId, (ar, sp) => new { ar, sp })
+                        .Any(t => t.ar.SessionId == sessionId && t.ar.IsWithinRange && t.sp.GtuStudentId == r.GtuStudentId))
+                    .Select(r => new StudentAbsentRow(
+                        null,
+                        r.FullName,
+                        r.GtuStudentId
+                    ))
+                    .OrderBy(x => x.FullName)
+                    .ToListAsync();
             }
 
 

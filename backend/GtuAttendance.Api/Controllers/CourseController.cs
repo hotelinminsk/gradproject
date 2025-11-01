@@ -217,16 +217,20 @@ public class CourseController : ControllerBase
             var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
             if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("enroll-by-invite");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == studentId);
-            if (student is null) throw new Unauthorized("Student is null in enroll by invite");
+            var studentRow = await _context.Users
+                .Where(u => u.UserId == studentId && u.Role == "Student")
+                .Select(u => new { u.UserId, u.FullName })
+                .FirstOrDefaultAsync();
+            if (studentRow is null) throw new Unauthorized("Student is null in enroll by invite");
 
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.InvitationToken == request.invitationToken);
             if (course is null) throw new CourseNotFoundException($"Course not found in enroll by invite by givin token: {request.invitationToken}");
 
-            var inRoster = await _context.CourseRosters
-            .AnyAsync(r => r.CourseId == course.CourseId && r.GtuStudentId == student.GtuStudentId);
+            var studentProfile = await _context.StudentProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == studentId);
+            var inRoster = studentProfile != null && await _context.CourseRosters
+                .AnyAsync(r => r.CourseId == course.CourseId && r.GtuStudentId == studentProfile.GtuStudentId);
 
-            if (!inRoster) throw new StudentNotInRosterException(student.FullName, student.GtuStudentId);
+            if (!inRoster) throw new StudentNotInRosterException(studentRow.FullName, studentProfile?.GtuStudentId ?? "");
 
             var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId);
 
@@ -245,7 +249,7 @@ public class CourseController : ControllerBase
             }
             else
             {
-                return BadRequest(new { message = "Student:" + student.FullName + "already enrolled to this class " });
+                return BadRequest(new { message = "Student:" + studentRow.FullName + " already enrolled to this class " });
             }
 
 

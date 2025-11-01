@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\gtuattendance.api\\GtuAttendance.Api.csproj": {}
+    "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\gtuattendance.api\\GtuAttendance.Api.csproj": {
+    "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\gtuattendance.api\\GtuAttendance.Api.csproj",
+        "projectUniqueName": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj",
         "projectName": "GtuAttendance.Api",
-        "projectPath": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\gtuattendance.api\\GtuAttendance.Api.csproj",
+        "projectPath": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\GtuAttendance.Api.csproj",
         "packagesPath": "C:\\Users\\root\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\gtuattendance.api\\obj\\",
+        "outputPath": "C:\\Users\\root\\Documents\\ProjectGrad\\backend\\GtuAttendance.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
