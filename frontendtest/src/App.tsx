@@ -28,6 +28,7 @@ import TeacherSession from "./pages/teacher/TeacherSession";
 import TeacherReports from "./pages/teacher/TeacherReports";
 import TeacherCourseDetails from "./pages/teacher/TeacherCourseDetails";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
+import { TeacherSessionProvider } from "./providers";
 
 const queryClient = new QueryClient();
 
@@ -89,7 +90,7 @@ const App = () => {
                 }
               />
             </Route>
-
+            <TeacherSessionProvider>
             {/* Teacher Routes under TeacherLayout */}
             <Route element={<TeacherLayout />}>
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
@@ -104,7 +105,7 @@ const App = () => {
             {/* Auth routes without layout */}
             <Route path="/teacher/login" element={<TeacherLogin />} />
             <Route path="/teacher/register" element={<TeacherRegister />} />
-
+            </TeacherSessionProvider>
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>

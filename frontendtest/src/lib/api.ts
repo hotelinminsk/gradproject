@@ -1,38 +1,49 @@
-import { Header } from "@radix-ui/react-accordion";
-
-type Audience = "student" | "teacher" |"admin" |null;
-
-export function getAuthToken(which: Audience){
-    if(which == "student") return localStorage.getItem("student_jwt");
-    if(which == "teacher") return localStorage.getItem("teacher_jwt");
-    if(which == "admin") return localStorage.getItem("admin_jwt");
-    
-
-    return null;
-}
+import { authStore } from "./authStore";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "https://localhost:7270";
 
-export async function apiFetch<T>(path: string,
-    {method = "GET", body, audience=null, headers}:
-    {method?: string; body?: any; audience?: Audience; headers?: HeadersInit} = {}
-) {
-    const reqHeaders = new Headers(headers);
-    if(body && !(body instanceof FormData)){
-        reqHeaders.set("Content-Type", "application/json");
-        body = JSON.stringify(body);
-    }
+type Audience = "teacher" | "student" | "admin";
 
-    const token = getAuthToken(audience);
-  if (token) reqHeaders.set("Authorization", `Bearer ${token}`);
-
-  const res = await fetch(`${API_BASE}${path}`, { method, body, headers: reqHeaders });
-
-  if(!res.ok){
-    const problem = await res.json().catch(() => ({}));
-    throw new Error(problem.error ?? res.statusText);
-  }
-  return (await res.json()) as T;
+type ApiOptions = Omit<RequestInit, "body"> & {
+  audience?: Audience;
+  body?: BodyInit | Record<string,unknown>;
 }
 
 
+export async function apiFetch<T>(path: string, options: ApiOptions = {}){
+  const {audience, body, headers, ...rest} = options;
+  const reqHeaders = new Headers(headers);
+
+
+  let payload: BodyInit | undefined;
+
+  if(body instanceof FormData || typeof body === "string" || body instanceof Blob){
+    payload = body;
+  }else if(body){
+    reqHeaders.set("Content-Type", "application/json");
+    payload = JSON.stringify(body);
+  }
+
+  if(audience){
+    const token = authStore.getToken(audience);
+    if(token) reqHeaders.set("Authorization", `Bearer ${token}`);
+
+  }
+
+  const response = await fetch(`${API_BASE}${path}`,{
+    ...rest,
+    headers: reqHeaders,
+    body: payload
+  });
+
+
+  if(!response.ok){
+    const problem = await response.json().catch(() => ({}));
+    throw new Error(problem.error ?? response.statusText);
+  }
+
+
+  return (await response.json()) as T;
+
+
+}

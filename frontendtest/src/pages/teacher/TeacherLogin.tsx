@@ -8,11 +8,12 @@ import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import { AuthResponse } from "@/types/auth";
+import { useTeacherSession } from "@/providers";
 
 const TeacherLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
-
+  const { login } = useTeacherSession();
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try{
@@ -23,6 +24,8 @@ const TeacherLogin = () => {
       );
 
       if(data) toast.success("Login successfull!");
+      login(data);
+
       navigate("/teacher/dasboard");
 
     }catch(err){

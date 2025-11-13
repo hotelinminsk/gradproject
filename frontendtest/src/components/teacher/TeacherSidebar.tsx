@@ -3,6 +3,7 @@ import { Home, BookOpen, QrCode, FileText, LogOut, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTeacherSession } from "@/providers";
 
 const TeacherSidebar = () => {
   const navigate = useNavigate();
@@ -16,14 +17,14 @@ const TeacherSidebar = () => {
     { path: "/teacher/reports", icon: FileText, label: "Reports" },
   ];
 
+  const {profile, isLoading, logout} = useTeacherSession();
   const handleLogout = () => {
+    logout();
     toast.success("Logged out successfully");
     navigate("/teacher/login");
   };
 
-  // Try to read teacher identity from localStorage (set after login)
-  const fullName = (typeof window !== 'undefined' && localStorage.getItem('teacher_fullname')) || 'Professor';
-  const email = (typeof window !== 'undefined' && localStorage.getItem('teacher_email')) || '';
+
 
   return (
     <aside className="w-64 h-screen bg-sidebar border-r shadow-sm flex flex-col">
@@ -31,11 +32,11 @@ const TeacherSidebar = () => {
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sidebar-primary/25 to-sidebar-accent/40 grid place-items-center text-sm font-semibold">
-            {fullName?.[0] ?? 'P'}
+            {profile?.fullName?.[0] ?? 'P'}
           </div>
           <div>
-            <div className="text-sm font-medium">{fullName}</div>
-            {email && <div className="text-xs text-muted-foreground">{email}</div>}
+            <div className="text-sm font-medium">{profile?.fullName}</div>
+            {profile?.email && <div className="text-xs text-muted-foreground">{profile?.email}</div>}
           </div>
         </div>
       </div>
