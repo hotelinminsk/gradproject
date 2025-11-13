@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api";
+import { AuthResponse } from "@/types/auth";
 
 const TeacherLogin = () => {
   const navigate = useNavigate();
@@ -13,10 +15,19 @@ const TeacherLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Teacher login:", formData);
-    // TODO: POST /api/auth/login-teacher
-    toast.success("Login successful!");
-    navigate("/teacher/dashboard");
+    try{
+      const data = await apiFetch<AuthResponse>("/api/Auth/login-teacher",
+        {method: "POST",
+        body: formData,
+        }
+      );
+
+      if(data) toast.success("Login successfull!");
+      navigate("/teacher/dasboard");
+
+    }catch(err){
+      toast.error((err as Error) .message);
+    }
   };
 
   return (

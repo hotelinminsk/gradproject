@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KeyRound, User } from "lucide-react";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api";
+import { AuthResponse } from "@/types/auth";
 
 export default function TeacherRegister() {
   const navigate = useNavigate();
@@ -13,10 +15,19 @@ export default function TeacherRegister() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // POST /api/auth/register-teacher with inviteToken
-    console.log("Teacher register", form);
-    toast.success("Registered. Please login.");
-    navigate("/teacher/login");
+    try{
+      const data = await apiFetch<AuthResponse>("/api/Auth/login-teacher",
+              {method: "POST",
+              body: form,
+              audience: "teacher"}
+            );
+      
+      toast.success("Teacher created. Log in.");
+      navigate("/teacher/login");
+
+    }catch(err){
+      toast.error((err as Error).message);
+    }
   };
 
   return (
