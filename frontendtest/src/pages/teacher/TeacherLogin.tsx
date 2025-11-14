@@ -26,7 +26,7 @@ const TeacherLogin = () => {
       if(data) toast.success("Login successfull!");
       login(data);
 
-      navigate("/teacher/dasboard");
+      navigate("/teacher/dashboard");
 
     }catch(err){
       toast.error((err as Error) .message);

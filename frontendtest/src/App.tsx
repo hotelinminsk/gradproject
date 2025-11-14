@@ -36,6 +36,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <TeacherSessionProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -90,8 +91,7 @@ const App = () => {
                 }
               />
             </Route>
-            <TeacherSessionProvider>
-            {/* Teacher Routes under TeacherLayout */}
+            {/* Teacher routes (protected) */}
             <Route element={<TeacherLayout />}>
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
               <Route path="/teacher/courses" element={<TeacherCourses />} />
@@ -102,14 +102,14 @@ const App = () => {
               <Route path="/teacher/reports" element={<TeacherReports />} />
             </Route>
 
-            {/* Auth routes without layout */}
+            {/* Teacher auth routes (no provider) */}
             <Route path="/teacher/login" element={<TeacherLogin />} />
             <Route path="/teacher/register" element={<TeacherRegister />} />
-            </TeacherSessionProvider>
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
+        </TeacherSessionProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
