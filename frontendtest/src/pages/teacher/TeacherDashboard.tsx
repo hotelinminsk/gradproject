@@ -1,22 +1,43 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, TrendingUp, Plus } from "lucide-react";
+import { useTeacherSession } from "@/providers";
+import { useTeacherDashboardSummary } from "@/hooks/teacher";
+import { formatRelative } from "date-fns";
 const TeacherDashboard = () => {
   const navigate = useNavigate();
 
-  const stats = [
-    { label: "Active Courses", value: "5", icon: BookOpen, color: "text-primary" },
-    { label: "Total Students", value: "142", icon: Users, color: "text-secondary" },
-    { label: "Sessions This Week", value: "12", icon: Calendar, color: "text-accent" },
-    { label: "Avg Attendance", value: "87%", icon: TrendingUp, color: "text-success" },
-  ];
+  const {profile} = useTeacherSession();
+  const {data, isLoading} = useTeacherDashboardSummary();
 
-  const recentCourses = [
-    { id: 1, name: "Advanced Web Technologies", code: "CSE401", students: 45, nextSession: "Today, 10:00 AM" },
-    { id: 2, name: "Mobile App Development", code: "CSE305", students: 38, nextSession: "Tomorrow, 2:00 PM" },
-    { id: 3, name: "Database Systems", code: "CSE302", students: 42, nextSession: "Wed, 9:00 AM" },
+  if(isLoading || !data){
+    return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <span className="ml-2 text-sm text-muted-foreground">Loading dashboard…</span>
+    </div>
+  );
+  }
+  
+  const stats = [
+    { label: "Active Courses", value: data?.activeCourseCount, icon: BookOpen, color: "text-primary" },
+    { label: "Total Students", value: data?.totalStudentCount, icon: Users, color: "text-secondary" },
+    { label: "Sessions This Week", value: data?.sessionsThisWeek, icon: Calendar, color: "text-accent" },
+    { label: "Avg Attendance", value: data?.averageAttendancePCT, icon: TrendingUp, color: "text-success" },
   ];
+  
+
+
+  const recentCourses = (data?.upcomingCourses ?? []).map((course, index) => ({
+    id: index,
+    name: course.courseName,
+    code: course.courseCode,
+    students: course.studentCount,
+    nextSession: course.nextSessionTimeUtc ? formatRelative(new Date(course.nextSessionTimeUtc), new Date())
+    : "No session scheduled."
+  }));
 
   return (
     <div className="space-y-6">
@@ -25,7 +46,7 @@ const TeacherDashboard = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, Professor</p>
+              <p className="text-muted-foreground">Welcome back, {profile.fullName}</p>
             </div>
             <Button onClick={() => navigate("/teacher/courses/new")}>
               <Plus className="w-4 h-4 mr-2" />

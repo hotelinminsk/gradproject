@@ -21,18 +21,29 @@ public static class ReportMetrics
 
 
     public static async Task<int> CalculateCourseAttendancePctAsync(
-        AppDbContext context, Guid courseId, AttendanceDenominator denominator
+        AppDbContext context, Guid courseId, AttendanceDenominator denominator, DateTime since
     )
     {
-        if (denominator == AttendanceDenominator.Enrolled)
-        {
-            int val = await context.CourseEnrollments.AsNoTracking().Where(e => e.CourseId == courseId && e.IsValidated).CountAsync();
-            return val;
-        }
-        else
-        {
-            return await context.CourseRosters.AsNoTracking().Where(r => r.CourseId == courseId).CountAsync();
-        }
+
+        var denom = denominator == AttendanceDenominator.Enrolled
+        ? await context.CourseEnrollments
+            .AsNoTracking()
+            .CountAsync(e => e.CourseId == courseId && e.IsValidated)
+            : await context.CourseRosters
+            .AsNoTracking()
+            .CountAsync(r => r.CourseId == courseId);
+
+        if (denom == 0) return 0;
+
+        var CheckIns = await context.AttendanceRecords
+        .AsNoTracking()
+        .CountAsync(r =>
+            r.CourseId == courseId &&
+            r.IsWithinRange && 
+            r.CheckInTime >= since
+            );
+        
+        return (int)Math.Round(100.0 * CheckIns / denom);
     }
 }
 

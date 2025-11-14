@@ -35,10 +35,19 @@ public class TeacherDashboardController: ControllerBase
         var weekAgo = DateTime.UtcNow.Date.AddDays(-7);
         var sessionsThisWeek = await _dbContext.AttendanceSessions.CountAsync(se => se.TeacherId == teacherId && se.CreatedAt >= weekAgo);
 
+        var courseIds = await _dbContext.Courses.AsNoTracking().Where(c => c.TeacherId == teacherId).Select(c => c.CourseId).ToListAsync();
+        
+        
+        double avgSums = 0.0;
+        double steps = 0.0;
+        foreach(var courseId in courseIds)
+        {
+            var avgpct = await ReportMetrics.CalculateCourseAttendancePctAsync(_dbContext, courseId,AttendanceDenominator.Enrolled,weekAgo); // 0 MEANS ENROLLED,
+            avgSums += avgpct;
+            steps++;
+        }
 
-        var denom = await ReportMetrics.GetEnrollmentDenominatorAsync(_dbContext, courseId);
-        var avgAttendancePct = await ReportMetrics.CalculateCourseAttendancePctAsync()
-
+        var avgAttendancePCT = steps == 0 ? 0 : (int)Math.Round(avgSums / steps);
         var upcoming = await _dbContext.Courses
         .Where(c => c.TeacherId == teacherId)
         .OrderByDescending(c => c.Enrollments.Count(e => e.IsValidated))
@@ -63,7 +72,7 @@ public class TeacherDashboardController: ControllerBase
 
             sessionsThisWeek,
 
-            avgAttendancePct,
+            avgAttendancePCT,
 
             upcoming
         );
