@@ -29,6 +29,7 @@ import TeacherReports from "./pages/teacher/TeacherReports";
 import TeacherCourseDetails from "./pages/teacher/TeacherCourseDetails";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import { TeacherSessionProvider } from "./providers";
+import TeacherCreateCourse from "./pages/teacher/TeacherCreateCourse";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,7 @@ const App = () => {
               <Route path="/teacher/session" element={<TeacherSession />} />
               <Route path="/teacher/session/:sessionId" element={<TeacherSession />} />
               <Route path="/teacher/reports" element={<TeacherReports />} />
+              <Route path="/teacher/create-course" element={<TeacherCreateCourse />} />
             </Route>
 
             {/* Teacher auth routes (no provider) */}

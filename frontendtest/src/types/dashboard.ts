@@ -1,9 +1,11 @@
 export interface UpcomingCourseRow {
-    courseId: string;
+    courseId?: string;
+    courseID?: string;
     courseName: string;
     courseCode: string;
     studentCount: number;
-    nextSessionTimeUtc: string | null;
+    nextSessionTimeUtc?: string | null;
+    nextSessionTimeUTC?: string | null;
 }
 
 export interface TeacherDashboardSummary {

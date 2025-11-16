@@ -1,164 +1,340 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, Plus, Users, Link2, Upload } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useTeacherCourses, useBulkDeleteCourses } from "@/hooks/teacher";
+import { BookOpen, CalendarClock, CheckCircle2, Link2, Plus, Search, Trash2 } from "lucide-react";
+
+const formatDateTime = (value?: string) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+};
 
 const TeacherCourses = () => {
-  const [uploadOpenId, setUploadOpenId] = useState<number | null>(null);
   const navigate = useNavigate();
-  const [newCourse, setNewCourse] = useState({ name: "", code: "" });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteLinkValue, setInviteLinkValue] = useState("");
+  const [inviteCourseLabel, setInviteCourseLabel] = useState("");
+  const { data: courses = [], isLoading } = useTeacherCourses();
+  const bulkDelete = useBulkDeleteCourses();
 
-  const courses = [
-    { id: 1, name: "Advanced Web Technologies", code: "CSE401", students: 45, sessions: 12 },
-    { id: 2, name: "Mobile App Development", code: "CSE305", students: 38, sessions: 8 },
-    { id: 3, name: "Database Systems", code: "CSE302", students: 42, sessions: 10 },
-    { id: 4, name: "Software Engineering", code: "CSE303", students: 50, sessions: 14 },
-  ];
+  const filteredCourses = useMemo(() => {
+    if (!search.trim()) return courses;
+    const term = search.toLowerCase();
+    return courses.filter(
+      (course) => course.courseName.toLowerCase().includes(term) || course.courseCode.toLowerCase().includes(term),
+    );
+  }, [courses, search]);
 
-  const handleCreateCourse = () => {
-    console.log("Creating course:", newCourse);
-    // POST /api/course
-    toast.success("Course created successfully!");
-    setDialogOpen(false);
-    setNewCourse({ name: "", code: "" });
+  const selectedCourses = useMemo(
+    () => courses.filter((course) => selected.has(course.courseId)),
+    [courses, selected],
+  );
+
+  const toggleCourse = (courseId: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(courseId)) {
+        next.delete(courseId);
+      } else {
+        next.add(courseId);
+      }
+      return next;
+    });
   };
 
-  const handleGetInviteLink = (courseId: number) => {
-    // GET /api/course/{courseId}/invite-link
-    const inviteLink = `https://attendance.gtu.edu.tr/enroll/${courseId}/ABC123`;
-    navigator.clipboard.writeText(inviteLink);
-    toast.success("Invite link copied to clipboard!");
+  const toggleAll = () => {
+    if (selected.size === filteredCourses.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredCourses.map((course) => course.courseId)));
+    }
+  };
+
+  const selectionCount = selected.size;
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+    bulkDelete.mutate(ids, {
+      onSuccess: () => {
+        setSelected(new Set());
+        setConfirmOpen(false);
+      },
+    });
+  };
+
+  const handleShowInvite = (inviteLink?: string, courseCode?: string) => {
+    if (!inviteLink) {
+      toast.info("Invite link will appear once generated for this course.");
+      return;
+    }
+    setInviteLinkValue(inviteLink);
+    setInviteCourseLabel(courseCode ?? "course");
+    setInviteDialogOpen(true);
+  };
+
+  const copyInviteLink = () => {
+    if (!inviteLinkValue) return;
+    navigator.clipboard.writeText(inviteLinkValue);
+    toast.success(`Copied invite link for ${inviteCourseLabel}.`);
   };
 
   return (
-    <div className="space-y-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Course Management</h1>
-              <p className="text-muted-foreground">Create and manage your courses</p>
-            </div>
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Teacher Panel</p>
+          <h1 className="text-3xl font-bold">Courses</h1>
+          <p className="text-sm text-muted-foreground">Manage rosters, sessions, and enrollment at a glance.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={!selectionCount || bulkDelete.isPending || isLoading}
+            className="border-destructive/40 text-destructive hover:bg-destructive/10 disabled:opacity-50"
+            onClick={() => setConfirmOpen(true)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+            {selectionCount ? <span className="ml-1 rounded-full bg-destructive/10 px-2 text-xs">{selectionCount}</span> : null}
+          </Button>
+          <Button onClick={() => navigate("/teacher/create-course")}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Course
+          </Button>
+        </div>
+      </div>
 
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Course
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Course</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="courseName">Course Name</Label>
-                    <Input
-                      id="courseName"
-                      placeholder="e.g., Advanced Web Technologies"
-                      value={newCourse.name}
-                      onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="courseCode">Course Code</Label>
-                    <Input
-                      id="courseCode"
-                      placeholder="e.g., CSE401"
-                      value={newCourse.code}
-                      onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value })}
-                    />
-                  </div>
-                  <Button onClick={handleCreateCourse} className="w-full">
-                    Create Course
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+      <Card className="p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-1 items-center rounded-full border bg-card px-4 py-2">
+            <Search className="mr-2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by course name or code"
+              className="border-0 bg-transparent px-0 focus-visible:ring-0"
+            />
           </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              checked={filteredCourses.length > 0 && selectionCount === filteredCourses.length}
+              onCheckedChange={toggleAll}
+              id="select-all"
+              disabled={isLoading || filteredCourses.length === 0}
+            />
+            <label htmlFor="select-all" className="cursor-pointer">
+              Select all
+            </label>
+          </div>
+        </div>
+      </Card>
 
-          {/* Courses Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {courses.map((course) => (
-              <Card key={course.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="w-5 h-5 text-primary" />
-                      <h3 className="text-xl font-semibold">{course.name}</h3>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {!isLoading &&
+          filteredCourses.map((course) => {
+            const isSelected = selected.has(course.courseId);
+            const lastSessionLabel = course.lastSessionAt ? formatDateTime(course.lastSessionAt) : "No sessions yet";
+            const createdLabel = formatDateTime(course.createdAt);
+            const statusLabel = course.isActive ? "Active" : "Paused";
+            const host = typeof window !== "undefined" ? window.location.origin : "";
+            const derivedInviteLink =
+              course.inviteLink ||
+              (course.invitationToken && host ? `${host}/enroll/${course.invitationToken}` : undefined);
+            return (
+              <Card
+                key={course.courseId}
+                className={`group relative overflow-hidden border transition hover:border-primary/60 hover:shadow-xl hover:scale-[1.01] ${
+                  isSelected ? "border-primary/70 shadow-lg" : ""
+                }`}
+              >
+                <div className="absolute left-4 top-4 z-10 rounded-full bg-background/95 p-2 shadow-sm">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleCourse(course.courseId)}
+                    aria-label="Select course"
+                  />
+                </div>
+                <div className="flex flex-col gap-4 p-6 pl-12">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <span>{course.courseCode}</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground">{course.courseName}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{course.code}</p>
-                    
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{course.students} students</span>
+                    <Badge variant={course.isActive ? "default" : "secondary"} className="rounded-full px-3 py-1 text-xs">
+                      {statusLabel}
+                    </Badge>
+                  </div>
+
+                  <div className="rounded-2xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-foreground">Last activity</span>
+                      <CalendarClock className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="mt-1 text-foreground">{lastSessionLabel}</p>
+                    <Separator className="my-3" />
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide">Enrollment</p>
+                        <p className="text-lg font-semibold text-foreground">{course.enrollmentCount ?? 0}</p>
                       </div>
                       <div>
-                        <span>{course.sessions} sessions</span>
+                        <p className="text-xs uppercase tracking-wide">Created</p>
+                        <p className="text-sm text-foreground">{createdLabel}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-wide">Status</p>
+                        <p className="text-sm text-foreground">{statusLabel}</p>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => navigate(`/teacher/courses/${course.id}`)}
-                  >
-                    Manage Course
-                  </Button>
-                  <Button
-                    className="w-full"
-                    onClick={() => navigate(`/teacher/session?courseId=${course.id}`)}
-                  >
-                    Start Session
-                  </Button>
-                  
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleGetInviteLink(course.id)}
+                      className="flex-1 border-dashed"
+                      onClick={() => navigate(`/teacher/courses/${course.courseId}`)}
                     >
-                      <Link2 className="w-3 h-3 mr-1" />
-                      Invite Link
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Manage Course
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => setUploadOpenId(course.id)}
+                      className="flex-1 justify-center border-border/60 text-foreground hover:bg-primary/10 hover:text-primary"
+                      onClick={() => handleShowInvite(derivedInviteLink, course.courseCode)}
                     >
-                      <Upload className="w-3 h-3 mr-1" />Upload Roster</Button>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Copy Invite Link
+                  </Button>
+                    <Button
+                      className="flex-1 justify-center bg-primary/90 text-primary-foreground hover:bg-primary"
+                      onClick={() => navigate(`/teacher/courses/${course.courseId}/sessions/new`)}
+                    >
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      Create Attendance Session
+                    </Button>
                   </div>
-                  <Dialog open={uploadOpenId === course.id} onOpenChange={(o)=> !o && setUploadOpenId(null)}>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Upload Roster</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-3 pt-2">
-                        <Label htmlFor="roster-file">CSV or Excel file</Label>
-                        <Input id="roster-file" type="file" accept=".csv,.xlsx" />
-                        <Button className="w-full" onClick={() => { toast.success('Roster uploaded (mock)'); setUploadOpenId(null); }}>Upload</Button>
-                        <p className="text-xs text-muted-foreground">Columns: FullName, Email, GtuStudentId</p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </Card>
-            ))}
+            );
+          })}
+        {isLoading &&
+          Array.from({ length: 4 }).map((_, idx) => (
+            <Card key={`skeleton-${idx}`} className="p-6">
+              <div className="flex flex-col gap-4">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-24 w-full" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        {!isLoading && filteredCourses.length === 0 && (
+          <Card className="col-span-full flex flex-col items-center justify-center gap-3 p-12 text-center">
+            <p className="text-lg font-semibold text-foreground">No courses found</p>
+            <p className="text-sm text-muted-foreground">Try adjusting your search or create a new course.</p>
+            <Button onClick={() => navigate("/teacher/create-course")} variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Create course
+            </Button>
+          </Card>
+        )}
+      </div>
+
+      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Share invite link</DialogTitle>
+            <DialogDescription>Send this link to students so they can join {inviteCourseLabel}.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input value={inviteLinkValue} readOnly />
+            <DialogFooter className="gap-2 sm:justify-end">
+              <Button variant="ghost" onClick={() => setInviteDialogOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={copyInviteLink}>Copy link</Button>
+            </DialogFooter>
           </div>
-        </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent className="space-y-5">
+          <AlertDialogHeader className="space-y-2">
+            <AlertDialogTitle className="text-2xl">Delete selected courses?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground">
+              Attendance sessions, rosters, and student records related to these courses will be removed for good.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Card className="border bg-muted/30 p-4 text-sm">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span>Courses selected</span>
+              <span className="text-foreground font-semibold">{selectionCount}</span>
+            </div>
+            <Separator className="my-3" />
+            {selectedCourses.slice(0, 2).map((course) => (
+              <div key={course.courseId} className="flex items-center justify-between text-foreground">
+                <span className="font-medium">{course.courseName}</span>
+                <span className="text-xs text-muted-foreground">{course.courseCode}</span>
+              </div>
+            ))}
+            {selectionCount > 2 && (
+              <p className="mt-2 text-xs text-muted-foreground">+{selectionCount - 2} more courses selected</p>
+            )}
+          </Card>
+          <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-xs text-destructive">
+            This action can’t be undone. You’ll need to recreate courses and sessions if you remove them now.
+          </div>
+          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={!selectionCount || bulkDelete.isPending}
+              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:w-auto disabled:opacity-70"
+            >
+              {bulkDelete.isPending ? "Deleting..." : `Delete ${selectionCount ? `(${selectionCount})` : ""}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

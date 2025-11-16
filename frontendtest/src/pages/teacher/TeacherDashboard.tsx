@@ -30,14 +30,17 @@ const TeacherDashboard = () => {
   
 
 
-  const recentCourses = (data?.upcomingCourses ?? []).map((course, index) => ({
-    id: index,
-    name: course.courseName,
-    code: course.courseCode,
-    students: course.studentCount,
-    nextSession: course.nextSessionTimeUtc ? formatRelative(new Date(course.nextSessionTimeUtc), new Date())
-    : "No session scheduled."
-  }));
+  const recentCourses = (data?.upcomingCourses ?? []).map((course) => {
+    const courseId = course.courseId ?? course.courseID;
+    const nextSession = course.nextSessionTimeUtc ?? course.nextSessionTimeUTC;
+    return {
+      id: courseId,
+      name: course.courseName,
+      code: course.courseCode,
+      students: course.studentCount,
+      nextSession: nextSession ? formatRelative(new Date(nextSession), new Date()) : "No session scheduled.",
+    };
+  }).filter((course) => Boolean(course.id));
 
   return (
     <div className="space-y-6">
@@ -48,7 +51,7 @@ const TeacherDashboard = () => {
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <p className="text-muted-foreground">Welcome back, {profile.fullName}</p>
             </div>
-            <Button onClick={() => navigate("/teacher/courses/new")}>
+            <Button onClick={() => navigate("/teacher/create-course")}>
               <Plus className="w-4 h-4 mr-2" />
               New Course
             </Button>
