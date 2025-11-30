@@ -1,3 +1,4 @@
+using System;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.Extensions.Configuration;
@@ -7,20 +8,26 @@ namespace GtuAttendance.Infrastructure.Services;
 public class Fido2Service
 {
     private readonly IFido2 _fido2;
-    private readonly string _origin;
-
+    private readonly HashSet<string> _origins;
     private readonly string _rpId;
 
     public Fido2Service(IConfiguration configuration)
     {
-        _origin = configuration["Fido2:Origin"] ?? "https://localhost:7000";
+        var originFromConfig = configuration["Fido2:Origin"] ?? "https://localhost:7270";
+        var extraOrigins = configuration.GetSection("Fido2:Origins").Get<string[]>() ?? Array.Empty<string>();
+        _origins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        _origins.Add(originFromConfig);
+        foreach (var o in extraOrigins) _origins.Add(o);
+        // local dev default frontend origin
+        _origins.Add("https://localhost:5173");
+
         _rpId = configuration["Fido2:RpId"] ?? "localhost";
 
         _fido2 = new Fido2(new Fido2Configuration
         {
             ServerDomain = _rpId,
             ServerName = "GTU Attendance System",
-            Origins = new HashSet<string> { _origin },
+            Origins = _origins,
         });
 
     }

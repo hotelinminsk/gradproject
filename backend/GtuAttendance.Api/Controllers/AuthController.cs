@@ -392,8 +392,14 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId && u.Role == "Student");
-            if (user is null) throw new WebAuthnLoginUserIsNullException(request.UserId);
+            var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == request.Email && u.Role == "Student");
+            if (user is null) return BadRequest(new { error = "Invalid credentials." });
+            if (!_passwordService.VerifyPassword(request.Password, user.PasswordHash))
+            {
+                return BadRequest(new { error = "Invalid credentials." });
+            }
+            var userId = user.UserId;
 
             var q = _context.WebAuthnCredentials.Where(c => c.UserId == user.UserId && c.IsActive);
             if (!string.IsNullOrWhiteSpace(request.DeviceName)) q = q.Where(c => c.DeviceName == request.DeviceName);

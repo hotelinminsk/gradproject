@@ -5,20 +5,91 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Fingerprint } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { authStore } from "@/lib/authStore";
+import { AuthResponse } from "@/types/auth";
+import { toast } from "sonner";
 
 export default function StudentLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState(""); // backend requires userId for begin
   const [deviceName, setDeviceName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fromBase64Url = (value: string) => {
+    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = base64.length % 4 === 0 ? "" : "=".repeat(4 - (base64.length % 4));
+    const raw = atob(base64 + pad);
+    const buffer = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buffer[i] = raw.charCodeAt(i);
+    return buffer;
+  };
+
+  const toBase64 = (buffer: ArrayBuffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    bytes.forEach((b) => (binary += String.fromCharCode(b)));
+    return btoa(binary); // standard base64 to match backend DTO byte[]
+  };
+
+  const prepareAssertionOptions = (options: any) => {
+    const clone = { ...options };
+    clone.challenge = fromBase64Url(clone.challenge);
+    if (Array.isArray(clone.allowCredentials)) {
+      clone.allowCredentials = clone.allowCredentials.map((cred: any) => ({
+        ...cred,
+        id: fromBase64Url(cred.id),
+      }));
+    }
+    return clone;
+  };
 
   const beginWebAuthnLogin = async () => {
-    // TODO: wire to /api/auth/login-webauthn/begin and complete
-    // 1) resolve userId by email (backend lookup)
-    // 2) navigator.credentials.get()
-    // 3) POST to /api/auth/login-webauthn/complete and store JWT
-    // Temporary: simulate login so Home is accessible while wiring API
-    localStorage.setItem("student_jwt", "dev-token");
-    navigate("/student/home");
+    if (!userId) {
+      toast.error("UserId (GUID) gerekli. Şimdilik email'den lookup yok.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      // 1) Begin
+      const begin = await apiFetch<any>("/api/auth/login-webauthn/begin", {
+        method: "POST",
+        body: { userId, deviceName },
+        // no token required for begin
+      });
+
+      const publicKey = prepareAssertionOptions(begin);
+
+      // 2) navigator.credentials.get
+      const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential;
+      const res = assertion.response as AuthenticatorAssertionResponse;
+
+      // 3) Complete
+      const auth = await apiFetch<AuthResponse>("/api/auth/login-webauthn/complete", {
+        method: "POST",
+        body: {
+          userId,
+          id: assertion.id,
+          type: assertion.type,
+          deviceName,
+          rawId: toBase64(assertion.rawId),
+          authenticatorData: toBase64(res.authenticatorData),
+          clientDataJSON: toBase64(res.clientDataJSON),
+          signature: toBase64(res.signature),
+          userHandle: res.userHandle ? toBase64(res.userHandle) : null,
+        },
+      });
+
+      authStore.setToken("student", auth.token);
+      toast.success("Giriş başarılı.");
+      navigate("/student/home");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message ?? "Giriş başarısız");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -34,14 +105,27 @@ export default function StudentLogin() {
 
         <Card className="p-6 space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="userId">User Id (GUID)</Label>
+            <Input
+              id="userId"
+              placeholder="00000000-0000-0000-0000-000000000000"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="email">Student Email</Label>
             <Input id="email" type="email" placeholder="name@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="deviceName">Device Name (optional)</Label>
+            <Input id="deviceName" placeholder="My Device" value={deviceName} onChange={(e) => setDeviceName(e.target.value)} />
+          </div>
           <p className="text-xs text-muted-foreground">Use your fingerprint, face, or security key to continue.</p>
 
-          <Button size="lg" className="w-full h-11" onClick={beginWebAuthnLogin}>
+          <Button size="lg" className="w-full h-11" onClick={beginWebAuthnLogin} disabled={isLoading}>
             <Fingerprint className="w-4 h-4 mr-2" />
-            Continue with Passkey
+            {isLoading ? "Devam ediliyor…" : "Passkey ile devam et"}
           </Button>
         </Card>
 

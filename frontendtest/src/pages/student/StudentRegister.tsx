@@ -22,11 +22,11 @@ const StudentRegister = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toBase64Url = (buffer: ArrayBuffer) => {
+  const toBase64 = (buffer: ArrayBuffer) => {
     const bytes = new Uint8Array(buffer);
     let binary = "";
     bytes.forEach((b) => (binary += String.fromCharCode(b)));
-    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return btoa(binary); // .NET byte[] binder expects standard base64
   };
 
   const fromBase64Url = (value: string) => {
@@ -88,16 +88,16 @@ const StudentRegister = () => {
           userId: auth.userId,
           id: credential.id,
           type: credential.type,
-          rawId: toBase64Url(credential.rawId),
-          attestationObject: toBase64Url(att.attestationObject),
-          clientDataJSON: toBase64Url(att.clientDataJSON),
+          rawId: toBase64(credential.rawId),
+          attestationObject: toBase64(att.attestationObject),
+          clientDataJSON: toBase64(att.clientDataJSON),
           deviceName: formData.deviceName,
           transports: (att as any).getTransports?.() ?? undefined,
         },
         audience: "student",
       });
 
-      toast.success("Kayıt tamamlandı. Passkey oluşturuldu.");
+      toast.success("Kayıt ve passkey tamamlandı. Şimdi giriş yapabilirsiniz.");
       navigate("/student/login");
     } catch (err: any) {
       console.error(err);
