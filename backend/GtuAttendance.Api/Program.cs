@@ -97,7 +97,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+        policy.WithOrigins("http://localhost:3000",
+                "https://localhost:3000",
+                "http://127.0.0.1:5173",
+                "http://localhost:5173")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -123,25 +126,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseCors("AllowFrontend");
 
-app.Use(async (ctx, next) =>
-{
-    if (ctx.Request.Path.StartsWithSegments("/api/admin", StringComparison.OrdinalIgnoreCase))
-    {
-        var keyHeader = ctx.Request.Headers["X-Admin-Key"].FirstOrDefault();
-        var expected = builder.Configuration["Admin:Key"];
-        var isAdmin = ctx.User?.IsInRole("Admin") ?? false;
-
-        if (string.IsNullOrWhiteSpace(expected) || keyHeader != expected || !isAdmin)
-        {
-            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await ctx.Response.WriteAsJsonAsync(new { error = "Admin authorization failed." });
-            return;
-        }
-
-    }
-
-    await next();
-});
+// Admin protection is handled via [Authorize(Policy = "AdminOnly")] and [RequireAdminKey] attributes
 
 
 app.UseAuthentication();
@@ -173,9 +158,8 @@ using (var scope = app.Services.CreateScope())
         var email = builder.Configuration["Admin:Email"] ?? "admin@gtu.edu.tr";
         var pass = builder.Configuration["Admin:Password"] ?? "changeme123";
         var hasher = scope.ServiceProvider.GetRequiredService<PasswordService>();
-        db.Users.Add(new Teacher(email: email, passhash: hasher.HashPassword(pass), fullname: "Admin"));
-
-        db.ChangeTracker.Entries<User>().Last().Entity.Role = "Admin";
+        var admin = new User(email: email, passwordhash: hasher.HashPassword(pass), fullname: "Admin", gtuid: null, role: "Admin");
+        db.Users.Add(admin);
         await db.SaveChangesAsync();
     }
 }

@@ -40,3 +40,31 @@ public record CheckInResponse(
     DateTime CheckInTimeUtc
 );
 
+
+public record SessionAttendeeDto(
+    string FullName,
+    string GtuStudentId,
+    DateTime CheckInAtUtc,
+    decimal? DistanceMeters
+);
+
+public record SessionDetailResponse(
+    Guid SessionId,
+    Guid CourseId,
+    DateTime CreatedAt,
+    DateTime ExpiresAt,
+    bool IsActive,
+    IEnumerable<SessionAttendeeDto> Attendees
+);
+
+
+public record SessionSummaryDto(
+Guid SessionId,
+Guid CourseId,
+string CourseName,
+string CourseCode,
+DateTime CreatedAt,
+DateTime ExpiresAt,
+bool IsActive,
+int AttendeeCount
+);

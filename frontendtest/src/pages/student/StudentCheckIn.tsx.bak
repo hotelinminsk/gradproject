@@ -1,0 +1,179 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MapPin, QrCode, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import StudentBottomNav from "@/components/student/StudentBottomNav";
+import StudentPageHeader from "@/components/student/StudentPageHeader";
+
+const StudentCheckIn = () => {
+  const { courseId } = useParams();
+  const navigate = useNavigate();
+  const [sessionCode, setSessionCode] = useState("");
+  const [distance, setDistance] = useState<number | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "prompt">("prompt");
+
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+      setLocationPermission(result.state);
+      
+      if (result.state === "granted") {
+        getCurrentLocation();
+      }
+    } catch (error) {
+      console.error("Error checking location permission:", error);
+    }
+  };
+
+  const getCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Mock distance calculation
+        const mockDistance = Math.floor(Math.random() * 100);
+        setDistance(mockDistance);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        toast.error("Unable to get your location");
+      }
+    );
+  };
+
+  const handleCheckIn = async () => {
+    setCheckingIn(true);
+
+    // Simulated check-in flow:
+    // 1. POST /api/attendance/begin (get nonce)
+    // 2. POST /api/attendance/check-in (sessionId, nonce, code, lat, lon, credentialId)
+    
+    setTimeout(() => {
+      if (distance !== null && distance <= 50) {
+        toast.success("Check-in successful!");
+        navigate("/student/courses");
+      } else {
+        toast.error("You're too far from the session location");
+      }
+      setCheckingIn(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-safe-nav">
+      <div className="px-4 pt-2">
+        <StudentPageHeader title="Check In" subtitle="Attendance Session" />
+      </div>
+
+      <div className="px-4 space-y-4">
+        {/* Location Status */}
+        <Card className="p-4">
+          <h2 className="font-semibold mb-3 flex items-center">
+            <MapPin className="w-4 h-4 mr-2" />
+            Location Status
+          </h2>
+          
+          {locationPermission === "granted" ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Distance from session:</span>
+                <span className="font-semibold text-lg">
+                  {distance !== null ? `${distance}m` : "Calculating..."}
+                </span>
+              </div>
+              {distance !== null && (
+                <div className="flex items-center gap-2">
+                  {distance <= 50 ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-success" />
+                      <span className="text-sm text-success">Within range</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4 text-destructive" />
+                      <span className="text-sm text-destructive">Out of range (max 50m)</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground mb-3">
+                Location permission is required to verify your proximity
+              </p>
+              <Button onClick={requestLocationPermission} variant="secondary">
+                Enable Location
+              </Button>
+            </div>
+          )}
+        </Card>
+
+        {/* Check-in Code */}
+        <Card className="p-4">
+          <h2 className="font-semibold mb-3 flex items-center">
+            <QrCode className="w-4 h-4 mr-2" />
+            Enter Code or Scan QR
+          </h2>
+          
+          <div className="space-y-3">
+            <Input
+              placeholder="Enter session code"
+              value={sessionCode}
+              onChange={(e) => setSessionCode(e.target.value)}
+              className="text-center text-lg tracking-wider"
+            />
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => toast.info("QR Scanner would open here")}
+            >
+              <QrCode className="w-4 h-4 mr-2" />
+              Scan QR Code Instead
+            </Button>
+          </div>
+        </Card>
+
+        {/* Check-in Button */}
+        <Card className="p-6 bg-gradient-card">
+          <Button
+            onClick={handleCheckIn}
+            disabled={!sessionCode || locationPermission !== "granted" || checkingIn}
+            size="lg"
+            variant="success"
+            className="w-full"
+          >
+            {checkingIn ? "Checking in..." : "Complete Check-In"}
+          </Button>
+          
+          <p className="text-xs text-center text-muted-foreground mt-3">
+            Your device credential will be verified for security
+          </p>
+        </Card>
+
+        {/* Session Info */}
+        <Card className="p-4 border-l-4 border-l-primary">
+          <h3 className="font-semibold mb-2">Session Requirements</h3>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>• Valid session code from teacher's QR</li>
+            <li>• Within 50 meters of session location</li>
+            <li>• Registered device credential</li>
+            <li>• Active enrollment in course</li>
+          </ul>
+        </Card>
+      </div>
+
+      {/* Bottom nav comes from StudentLayout */}
+    </div>
+  );
+};
+
+export default StudentCheckIn;
+

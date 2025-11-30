@@ -11,7 +11,7 @@ public class Course
     public bool IsActive { get; set; } = true;
 
     // Navigation
-    public Teacher Teacher { get; set; } = null!;
+    public User Teacher { get; set; } = null!;
 
     public ICollection<CourseRoster> Roster { get; set; } = new List<CourseRoster>();
     public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();

@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 15%;
+
+    /* Brand primary: deep navy for CTAs */
+    --primary: 215 85% 26%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 189 94% 55%;
+    --secondary-foreground: 240 10% 10%;
+
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 280 80% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 10% 88%;
+    --input: 220 10% 88%;
+    --ring: 215 85% 26%;
+
+    --radius: 1rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(215 85% 26%) 0%, hsl(215 85% 26%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(220 90% 55%) 0%, hsl(215 85% 26%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(158, 64%, 52%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(240, 20%, 99%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(240, 15%, 12%) 0%, hsl(240, 20%, 15%) 100%);
+
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 20% / 0.04);
+    --shadow-md: 0 4px 10px -2px hsl(220 20% 20% / 0.08);
+    --shadow-lg: 0 16px 24px -8px hsl(220 20% 20% / 0.12);
+    --shadow-xl: 0 24px 40px -12px hsl(220 20% 20% / 0.16);
+    --shadow-glow: 0 0 40px hsl(239 84% 67% / 0.3);
+    --shadow-glow-accent: 0 0 40px hsl(189 94% 55% / 0.3);
+
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 240 10% 98%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 215 85% 26%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 94%;
+    --sidebar-accent-foreground: 240 10% 20%;
+    --sidebar-border: 240 6% 88%;
+    --sidebar-ring: 239 84% 67%;
+  }
+
+  .dark {
+    --background: 240 15% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 15% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 15% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 189 94% 55%;
+    --secondary-foreground: 240 15% 10%;
+
+    --muted: 240 10% 18%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 280 80% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 71% 50%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 215 85% 26%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(239, 84%, 67%) 0%, hsl(280, 80%, 65%) 50%, hsl(189, 94%, 55%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(189, 94%, 55%) 0%, hsl(239, 84%, 67%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142, 71%, 50%) 0%, hsl(158, 64%, 55%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(240, 15%, 12%) 0%, hsl(240, 20%, 14%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(240, 15%, 8%) 0%, hsl(240, 20%, 12%) 100%);
+
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.4);
+    --shadow-md: 0 4px 12px -2px hsl(0 0% 0% / 0.5);
+    --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.6);
+    --shadow-xl: 0 25px 50px -12px hsl(0 0% 0% / 0.7);
+    --shadow-glow: 0 0 40px hsl(239 84% 67% / 0.4);
+    --shadow-glow-accent: 0 0 40px hsl(189 94% 55% / 0.4);
+
+    --sidebar-background: 240 15% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 10% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 240 10% 20%;
+    --sidebar-ring: 239 84% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Extra bottom padding to prevent content from being hidden behind fixed bottom nav */
+  .pb-safe-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom)); /* ~h-16 + safe area */
+  }
+
+  /* Simple, subtle header gradient for student top bar */
+  .header-gradient {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--primary) / 0.9) 60%,
+      hsl(var(--primary) / 0.85) 100%
+    );
+  }
+}

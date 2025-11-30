@@ -1,0 +1,27 @@
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { BookOpen, QrCode, Settings, Compass } from "lucide-react";
+
+const StudentHome = () => {
+  const navigate = useNavigate();
+  const tiles = [
+    { title: "My Courses", desc: "View and manage your courses", icon: BookOpen, to: "/student/courses", bg: "from-primary/15 to-primary/5" },
+    { title: "Check In", desc: "Join an active session", icon: QrCode, to: "/student/check-in/1", bg: "from-accent/15 to-accent/5" },
+    { title: "Settings", desc: "Account & devices", icon: Settings, to: "/student/settings", bg: "from-secondary/15 to-secondary/5" },
+    { title: "Help", desc: "How it works", icon: Compass, to: "/student/settings", bg: "from-muted to-transparent" },
+  ];
+
+  return (
+    <div className="min-h-[calc(100vh-5rem)] grid place-items-center pb-safe-nav">
+      <div className="w-full max-w-md mx-auto space-y-5 px-2">
+        {/* Hero */}
+        <Card className="p-5 overflow-hidden relative">
+          <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-gradient-to-br from-primary/25 to-accent/25" />
+          <div className="absolute -left-8 -bottom-12 w-48 h-48 rounded-full bg-gradient-to-br from-secondary/20 to-primary/10" />
+          <div className="relative">
+            <h1 className="text-xl font-semibold">Welcome</h1>
+            <p className="text-sm text-muted-foreground mb-3">GTU Attendance • StudentHome;
+
+
+
+

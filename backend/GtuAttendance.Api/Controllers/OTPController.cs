@@ -61,7 +61,7 @@ public class OTPController : ControllerBase
 
             if (request.userId == Guid.Empty) throw new ArgumentNullException("BeginDeviceResetRequest userId is null.");
 
-            var user = await _context.Students.FirstOrDefaultAsync(u => u.UserId == request.userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.userId && u.Role == "Student");
             if (user is null) throw new WebAuthnResetUserIsNullException(request.userId);
 
             var OTP = GENERATE_OTP(6);
@@ -92,7 +92,7 @@ public class OTPController : ControllerBase
             if (request == null) throw new ArgumentNullException("ConfirmDeviceResetRequest is null.");
             if (request.userId == Guid.Empty) throw new ArgumentNullException("ConfirmDeviceResetRequest userId is null.");
 
-            var user = await _context.Students.FirstOrDefaultAsync(u => u.UserId == request.userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.userId && u.Role == "Student");
 
             if (user is null) throw new WebAuthnResetUserIsNullException(request.userId, 2);
             if (!_memoryCache.TryGetValue($"webauthn:reset:{request.userId}", out string? otp) || otp is null)

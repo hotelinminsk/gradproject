@@ -11,6 +11,7 @@ using GtuAttendance.Core.Entities;
 using GtuAttendance.Api.DTOs;
 using GtuAttendance.Infrastructure.Errors;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using GtuAttendance.Api.Extensions;
 
 namespace GtuAttendance.Api.Controllers;
 
@@ -285,6 +286,52 @@ public class AttendanceController : ControllerBase
         }
     }
 
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("sessions/{sessionId:guid}")]
+    public async Task<IActionResult> GetSessionDetails([FromRoute] Guid sessionId)
+    {
+        try
+        {
+            var teacherId = User.GetUserId();
+            if(teacherId is null) throw new Unauthorized($"sessions/sessionId:{sessionId} : Teacher id is null.");
+
+            var session = await _context.AttendanceSessions
+            .Include(s => s.AttendanceRecords)
+            .ThenInclude(r => r.Student)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.TeacherId == teacherId);
+
+            if(session == null) throw new SessionDoesNotExistException(teacherId.Value, sessionId);
+
+
+            var attendess = session.AttendanceRecords
+            .Select( r => new SessionAttendeeDto(
+                r.Student.FullName,
+                r.Student.GtuStudentId,
+                r.CheckInTime,
+                r.DistanceFromTeacherMeters
+            ))
+            .ToList();
+
+            var response = new SessionDetailResponse(
+                session.SessionId,
+                session.CourseId,
+                session.CreatedAt,
+                session.ExpiresAt,
+                session.IsActive && session.ExpiresAt > DateTime.UtcNow,
+                attendess
+            );
+
+            return Ok(response);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex,ex.StackTrace);
+            return BadRequest(new {error = ex.Message});
+        }
+    }
+
     [Authorize(Roles = "Teacher")]
     [HttpPost("sessions/{sessionId:guid}/close")]
     public async Task<IActionResult> CloseAttendanceSession([FromRoute] Guid sessionId)
@@ -331,7 +378,7 @@ public class AttendanceController : ControllerBase
             .FirstOrDefaultAsync();
 
 
-            if (session is null) return BadRequest(new { msg = $"There is no valid session for course : {courseId} and teacher : {teacherId}" });
+            if (session is null) return NotFound(new {msg = "No active session."});
 
             
 
@@ -342,6 +389,47 @@ public class AttendanceController : ControllerBase
         {
             _logger.LogError(EX, EX.StackTrace);
             return BadRequest(new { error = EX.Message });
+        }
+    }
+
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("sessions")]
+    public async Task<IActionResult> GetSessions([FromQuery] Guid? courseId)
+    {
+        try
+        {
+            var teacherId = User.GetUserId();
+            if(teacherId is null) throw new Unauthorized("sessions: teacherId is null");
+
+            var query = _context.AttendanceSessions
+            .AsNoTracking()
+            .Where(s => s.TeacherId == teacherId.Value);
+
+            if(courseId.HasValue)
+                query = query.Where(s => s.CourseId == courseId.Value);
+            
+
+            var sessions = await query
+            .OrderByDescending( s => s.CreatedAt)
+            .Select(s => new SessionSummaryDto(
+                s.SessionId,
+                s.CourseId,
+                s.Course.CourseName,
+                s.Course.CourseCode,
+                s.CreatedAt,
+                s.ExpiresAt,
+                s.IsActive && s.ExpiresAt > DateTime.UtcNow,
+                s.AttendanceRecords.Count()
+            ))
+            .ToListAsync();
+
+
+            return Ok(sessions);
+        }catch(Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new {error = ex.Message});
         }
     }
 

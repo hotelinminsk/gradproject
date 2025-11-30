@@ -2,11 +2,11 @@ using System;
 
 namespace  GtuAttendance.Api.DTOs;
 
-public enum AttendanceDenominator
-{
-    Enrolled = 0,
-    Roster = 1,
-};
+// public enum AttendanceDenominator
+// {
+//     Enrolled = 0,
+//     Roster = 1,
+// };
 
 public record CourseReportOverviewResponse(
     Guid CourseId,

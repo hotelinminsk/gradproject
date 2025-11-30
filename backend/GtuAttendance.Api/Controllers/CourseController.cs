@@ -12,9 +12,11 @@ using OfficeOpenXml;
 using GtuAttendance.Infrastructure.Data;
 using GtuAttendance.Core.Entities;
 using GtuAttendance.Infrastructure.Services;
-using System.IO.Compression;
-using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
+
+using GtuAttendance.Infrastructure.Helpers;
+using GtuAttendance.Api.Extensions;
+using Microsoft.Identity.Client;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 
 namespace GtuAttendance.Api.Controllers;
@@ -42,8 +44,6 @@ public class CourseController : ControllerBase
         _passwordService = passwordService;
     }
 
-    private Guid? GetUserId() => Guid.TryParse(User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value, out var g) ? g : null;
-
     private static string NewInviteToken()
     {
         Span<byte> bytes = stackalloc byte[16];
@@ -52,6 +52,45 @@ public class CourseController : ControllerBase
     }
 
     private static string NormalizeName(string s) => string.Join(' ', (s ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)).ToUpperInvariant();
+
+
+    [Authorize(Roles = "Teacher")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteCourses([FromBody] DeleteCoursesRequest request)
+    {
+        try
+        {
+            if(request is null || request.CourseIds?.Any() == false)
+            {
+                throw new ArgumentNullException("You can't call delete with empty request.");
+            } 
+
+            var teacherId = User.GetUserId();
+
+            if (teacherId is null) throw new UnauthorizedAccessException("Unauthorized acces in delete course, teacher id is null");
+
+            // delete courses
+
+            var toBeDeleted = await _context.Courses.Where(c => c.TeacherId == teacherId && c.IsActive && request.CourseIds.Contains(c.CourseId)).ToListAsync();
+            int removed=0, skipped =0;
+
+            removed = toBeDeleted.Count;
+            var payloadIds = request.CourseIds.Distinct().ToHashSet();
+            
+            skipped = payloadIds.Count - removed;
+            _context.Courses.RemoveRange(toBeDeleted);
+            await _context.SaveChangesAsync();
+
+            
+
+            return Ok(new {removed, skipped});
+
+        }catch(System.Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message});
+        }
+    }
 
     [Authorize(Roles = "Teacher")]
     [HttpPost]
@@ -64,7 +103,7 @@ public class CourseController : ControllerBase
                 throw new CourseDataCantBeNullOrEmptyException();
             }
 
-            var teacher = GetUserId();
+            var teacher = User.GetUserId();
 
             if (teacher is null) throw new UnauthorizedAccessException("Unauthorized acces in create course, teacher id is null");
 
@@ -97,7 +136,7 @@ public class CourseController : ControllerBase
 
         try
         {
-            var teacherId = GetUserId();
+            var teacherId = User.GetUserId();
 
             if (teacherId is null) throw new Unauthorized();
 
@@ -123,7 +162,7 @@ public class CourseController : ControllerBase
 
         try
         {
-            var teacherId = GetUserId();
+            var teacherId = User.GetUserId();
             if (teacherId is null) throw new Unauthorized();
             if (rosterfile is null || rosterfile.Length == 0) throw new InvalidFileException(atroute: "upload-roster");
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId);
@@ -207,6 +246,58 @@ public class CourseController : ControllerBase
 
     }
 
+    [Authorize(Roles = "Teacher")]
+    [HttpPost("{courseId:guid}/roster/bulk")]
+    public async Task<IActionResult> UploadRosterBulk([FromRoute] Guid courseId, [FromBody] BulkRosterUploadRequest payload)
+    {
+        try
+        {
+            var teacherId = User.GetUserId();
+            if (teacherId is null) throw new Unauthorized();
+            if (payload?.Students is null || payload.Students.Count == 0)
+                throw new InvalidFileException(atroute: "upload-roster-bulk");
+
+            var course = await _context.Courses
+                .Include(c => c.Roster)
+                .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId);
+            if (course is null) throw new CourseNotFoundException();
+
+            if (payload.ReplaceExisting && course.Roster.Any())
+            {
+                _context.CourseRosters.RemoveRange(course.Roster);
+                await _context.SaveChangesAsync();
+            }
+
+            var added = 0;
+            foreach (var row in payload.Students)
+            {
+                if (string.IsNullOrWhiteSpace(row.FullName) || string.IsNullOrWhiteSpace(row.GtuStudentId))
+                    continue;
+
+                _context.CourseRosters.Add(new CourseRoster
+                {
+                    CourseId = course.CourseId,
+                    FullName = row.FullName.Trim(),
+                    GtuStudentId = row.GtuStudentId.Trim()
+                });
+                added++;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { courseId, added });
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogWarning(ex, "Roster bulk insert: duplicates skipped");
+            return Ok(new { courseId, added = "Partial (duplicates skipped)" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     [Authorize(Roles = "Student")]
     [HttpPost("enroll-by-invite")]
     public async Task<IActionResult> EnrollByInvite([FromBody] EnrollByInviteRequest request)
@@ -217,16 +308,20 @@ public class CourseController : ControllerBase
             var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
             if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("enroll-by-invite");
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == studentId);
-            if (student is null) throw new Unauthorized("Student is null in enroll by invite");
+            var studentRow = await _context.Users
+                .Where(u => u.UserId == studentId && u.Role == "Student")
+                .Select(u => new { u.UserId, u.FullName })
+                .FirstOrDefaultAsync();
+            if (studentRow is null) throw new Unauthorized("Student is null in enroll by invite");
 
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.InvitationToken == request.invitationToken);
             if (course is null) throw new CourseNotFoundException($"Course not found in enroll by invite by givin token: {request.invitationToken}");
 
-            var inRoster = await _context.CourseRosters
-            .AnyAsync(r => r.CourseId == course.CourseId && r.GtuStudentId == student.GtuStudentId);
+            var studentProfile = await _context.StudentProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == studentId);
+            var inRoster = studentProfile != null && await _context.CourseRosters
+                .AnyAsync(r => r.CourseId == course.CourseId && r.GtuStudentId == studentProfile.GtuStudentId);
 
-            if (!inRoster) throw new StudentNotInRosterException(student.FullName, student.GtuStudentId);
+            if (!inRoster) throw new StudentNotInRosterException(studentRow.FullName, studentProfile?.GtuStudentId ?? "");
 
             var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId);
 
@@ -245,7 +340,7 @@ public class CourseController : ControllerBase
             }
             else
             {
-                return BadRequest(new { message = "Student:" + student.FullName + "already enrolled to this class " });
+                return BadRequest(new { message = "Student:" + studentRow.FullName + " already enrolled to this class " });
             }
 
 
@@ -266,12 +361,36 @@ public class CourseController : ControllerBase
             var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
             if (!Guid.TryParse(sub, out var teacherGuid)) throw new Unauthorized("mine/courses/teacher");
 
-            var list = _context.Courses.Where(c => c.TeacherId == teacherGuid).OrderByDescending(c => c.CreatedAt)
-            .Select(c => new { c.CourseId, c.CourseName, c.CourseCode, c.CreatedAt, c.IsActive })
+            var courses = await _context.Courses.Where(c => c.TeacherId == teacherGuid)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new
+            {
+                c.CourseId,
+                c.CourseName,
+                c.CreatedAt,
+                c.IsActive,
+                EnrollmentCount = c.Enrollments.Count(),
+                LastSession = c.Sessions.OrderByDescending(s => s.CreatedAt)
+                .Select(s => new
+                {
+                    s.SessionId,
+                    s.CreatedAt,
+                    ExpiresAtUtc = s.ExpiresAt,
+                    s.IsActive
+                })
+                .FirstOrDefault(),
+                InviteLink = $"{Request.Scheme}://{Request.Host}/enroll/{c.InvitationToken}"
+
+            })
             .AsNoTracking()
             .ToListAsync();
+            
+            // var list = _context.Courses.Where(c => c.TeacherId == teacherGuid).OrderByDescending(c => c.CreatedAt)
+            // .Select(c => new { c.CourseId, c.CourseName, c.CourseCode, c.CreatedAt, c.IsActive })
+            // .AsNoTracking()
+            // .ToListAsync();
 
-            return Ok(list);
+            return Ok(courses);
 
         }
         catch (System.Exception EX)
@@ -301,7 +420,74 @@ public class CourseController : ControllerBase
         {
             _logger.LogError(EX, EX.StackTrace);
             return BadRequest(new { error = EX.Message });
-            throw;
         }
+    }
+
+
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("{courseId:guid}/manage-detail")]
+    public async Task<IActionResult> GetCourseDetailsManagePage([FromRoute] Guid CourseId)
+    {
+        try
+        {
+            var teacherId = User.GetUserId();
+            if(teacherId is null) return Unauthorized("Teacher id is null. in course detail.");
+
+            var course = await _context.Courses
+            .Where(c => c.CourseId == CourseId && c.TeacherId == teacherId && c.IsActive)
+            .Select(c => new
+            {
+                c.CourseId,
+                c.CourseName,
+                c.CourseCode,
+                c.InvitationToken,
+                c.CreatedAt,
+                c.IsActive,
+                Roster = c.Roster.ToList(),
+                Enrollments = c.Enrollments.ToList(),
+                Sessions = c.Sessions
+                .OrderByDescending(s => s.CreatedAt)
+                .Take(10)
+                .ToList(),
+                CourseStudents = c.Enrollments
+                .Where(e => e.IsValidated)
+                .Select(e => new CourseStudent(
+                    e.StudentId,
+                    e.Student.Email,
+                    e.Student.FullName,
+                    e.Student.GtuStudentId,
+                    true
+                ))
+                .ToList()
+            })
+            .FirstOrDefaultAsync();
+
+            if(course is null) return NotFound();
+
+            var response = new CourseDetailsResponse(
+                course.CourseId,
+                course.CourseName,
+                course.CourseCode,
+                CourseInvitationToken: $"{Request.Scheme}://{Request.Host}/enroll/{course.InvitationToken}",
+                course.CreatedAt,
+                course.IsActive,
+                course.Roster,
+                course.Enrollments,
+                course.Sessions,
+                course.CourseStudents
+            );
+
+            
+
+            return Ok(response);
+
+        }
+        catch(System.Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message });
+
+        } 
     }
 }

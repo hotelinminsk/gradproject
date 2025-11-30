@@ -17,6 +17,6 @@ public class AttendanceRecord
     // Navigation
     public AttendanceSession Session { get; set; } = null!;
     public Course Course { get; set; } = null!;
-    public Student Student { get; set; } = null!;
+    public User Student { get; set; } = null!;
     public WebAuthnCredential DeviceCredential { get; set; } = null!;
 }

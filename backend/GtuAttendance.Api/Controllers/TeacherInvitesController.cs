@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using GtuAttendance.Infrastructure.Data;
 using GtuAttendance.Core.Entities;
+using GtuAttendance.Api.Filters;
 
 namespace GtuAttendance.Api.Controllers;
 
@@ -32,15 +33,15 @@ public class TeacherInvitesController : ControllerBase
     public record CreateInviteResponse(Guid Id, string Token, DateTime ExpiresAtUtc, int? MaxUses, string? EmailDomain);
 
     // Simple admin-key protected endpoint; replace with real admin auth later.
+    
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateInviteRequest req, [FromHeader(Name = "X-Admin-Key")] string? adminKey)
+    [RequireAdminKey]
+    public async Task<IActionResult> Create([FromBody] CreateInviteRequest req)
     {
         try
         {
-            var expected = _config["Admin:Key"];
-            if (string.IsNullOrWhiteSpace(expected) || adminKey != expected)
-                return Unauthorized(new { error = "Invalid admin key" });
-
+            
             var token = NewToken();
             var invite = new TeacherInvite
             {
