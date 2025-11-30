@@ -323,7 +323,7 @@ public class CourseController : ControllerBase
 
             if (!inRoster) throw new StudentNotInRosterException(studentRow.FullName, studentProfile?.GtuStudentId ?? "");
 
-            var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId);
+            var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId && !e.IsDropped);
 
             if (!exists)
             {
@@ -369,7 +369,7 @@ public class CourseController : ControllerBase
                 c.CourseName,
                 c.CreatedAt,
                 c.IsActive,
-                EnrollmentCount = c.Enrollments.Count(),
+                EnrollmentCount = c.Enrollments.Count(e => !e.IsDropped),
                 LastSession = c.Sessions.OrderByDescending(s => s.CreatedAt)
                 .Select(s => new
                 {
@@ -407,10 +407,10 @@ public class CourseController : ControllerBase
     {
         try
         {
-            var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub").Value;
-            if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("mine/courses/student");
+            var studentId = User.GetUserId();
+            if (studentId is null ) throw new Unauthorized("mine/courses/student");
 
-            var list = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId)
+            var list = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId && !cr.IsDropped)
             .Select(e => new { e.Course.CourseId, e.Course.CourseName, e.Course.CourseCode })
             .ToListAsync();
 
@@ -423,6 +423,67 @@ public class CourseController : ControllerBase
         }
     }
 
+
+    [Authorize(Roles = "Teacher")]
+    [HttpPost("{courseId:guid}/students/{studentId:guid}/drop")]
+    public async Task<IActionResult>DropStudent([FromRoute] Guid CourseId, [FromRoute] Guid StudentId)
+    {
+        try{
+            var teacherId = User.GetUserId();
+            if(teacherId is null) return Unauthorized("Teacherid is null, in DropStudent");
+
+            var ownsCourse = await _context.Courses.AsNoTracking()
+            .AnyAsync(c => c.CourseId == CourseId && c.TeacherId == teacherId);
+            if(!ownsCourse) return Forbid();
+
+            var enrollment = await _context.CourseEnrollments
+            .FirstOrDefaultAsync(e => e.CourseId == CourseId && e.StudentId == StudentId);
+
+            if(enrollment is null) return NotFound($"Not found any enrollment for {StudentId} in course {CourseId}.");
+            if(enrollment.IsDropped) return Conflict($"Already dropped for this student {StudentId}");
+
+            enrollment.IsDropped = true;
+            enrollment.DroppedAtUtc = DateTime.UtcNow;
+            enrollment.DroppedByTeacherId = teacherId;
+
+            await _context.SaveChangesAsync();
+            return Ok(new {dropped = 1});
+        }catch(Exception ex)
+        {
+            _logger.LogError(ex,ex.StackTrace);
+            return BadRequest(new {error = ex.Message});
+        }
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpPost("{CourseId:guid}/student/dropself/{StudentId:guid}")]
+    public async Task<IActionResult> DropMyEnrollment([FromRoute] Guid CourseId , [FromRoute] Guid StudentId)
+    {
+        try{
+            var studentId = User.GetUserId();
+            if(studentId is null) return Unauthorized("Student id is null, in DropMyEnrollment");
+            if(studentId != StudentId) return Forbid("You can drop only your own enrollment.");
+
+            var enrollment = await _context.CourseEnrollments
+            .FirstOrDefaultAsync(e => e.CourseId == CourseId && e.StudentId == StudentId);
+
+            if(enrollment is null) return NotFound($"Not found any enrollment for {StudentId} in course {CourseId}.");
+            if(enrollment.IsDropped) return Conflict($"Already dropped for this student {StudentId}");
+
+            enrollment.IsDropped = true;
+            enrollment.DroppedAtUtc = DateTime.UtcNow;
+            enrollment.DroppedByTeacherId = null;
+
+            await _context.SaveChangesAsync();
+
+            return  Ok(new {dropped = 1});
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex,ex.StackTrace);
+            return BadRequest(new {error = ex.Message});
+        }
+    }
 
 
     [Authorize(Roles = "Teacher")]
@@ -445,13 +506,13 @@ public class CourseController : ControllerBase
                 c.CreatedAt,
                 c.IsActive,
                 Roster = c.Roster.ToList(),
-                Enrollments = c.Enrollments.ToList(),
+                Enrollments = c.Enrollments.Where(e => !e.IsDropped).ToList(),
                 Sessions = c.Sessions
                 .OrderByDescending(s => s.CreatedAt)
                 .Take(10)
                 .ToList(),
                 CourseStudents = c.Enrollments
-                .Where(e => e.IsValidated)
+                .Where(e => e.IsValidated && !e.IsDropped)
                 .Select(e => new CourseStudent(
                     e.StudentId,
                     e.Student.Email,
@@ -490,4 +551,5 @@ public class CourseController : ControllerBase
 
         } 
     }
+
 }

@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Fingerprint } from "lucide-react";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api";
+import { authStore } from "@/lib/authStore";
+import { AuthResponse } from "@/types/auth";
 
 const StudentRegister = () => {
   const navigate = useNavigate();
@@ -17,23 +20,91 @@ const StudentRegister = () => {
     deviceName: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toBase64Url = (buffer: ArrayBuffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    bytes.forEach((b) => (binary += String.fromCharCode(b)));
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
+
+  const fromBase64Url = (value: string) => {
+    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = base64.length % 4 === 0 ? "" : "=".repeat(4 - (base64.length % 4));
+    const raw = atob(base64 + pad);
+    const buffer = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buffer[i] = raw.charCodeAt(i);
+    return buffer;
+  };
+
+  const preparePublicKeyOptions = (options: any) => {
+    return {
+      ...options,
+      challenge: fromBase64Url(options.challenge),
+      user: {
+        ...options.user,
+        id: fromBase64Url(options.user.id),
+      },
+      excludeCredentials: (options.excludeCredentials || []).map((cred: any) => ({
+        ...cred,
+        id: fromBase64Url(cred.id),
+      })),
+    };
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simulated WebAuthn registration flow
-    console.log("Starting WebAuthn registration...", formData);
-    
-    // In production:
-    // 1. POST to /api/auth/register-student (Email, Password, FullName, GtuStudentId)
-    // 2. POST to /api/auth/register-webauthn/begin (UserId from response, DeviceName)
-    // 3. Call navigator.credentials.create()
-    // 4. POST to /api/auth/register-webauthn/complete
-    
-    toast.success("Registration successful! Please authenticate with your device");
-    
-    setTimeout(() => {
+    setIsSubmitting(true);
+    try {
+      // 1) Create student account
+      const auth = await apiFetch<AuthResponse>("/api/auth/register-student", {
+        method: "POST",
+        body: {
+          email: formData.email.trim(),
+          password: formData.password,
+          fullName: formData.fullName.trim(),
+          gtuStudentId: formData.gtuStudentId.trim(),
+        },
+      });
+      authStore.setToken("student", auth.token);
+
+      // 2) Begin WebAuthn
+      const begin = await apiFetch<any>("/api/auth/register-webauthn/begin", {
+        method: "POST",
+        body: { userId: auth.userId, deviceName: formData.deviceName },
+        audience: "student",
+      });
+      const publicKey = preparePublicKeyOptions(begin);
+
+      // 3) navigator.credentials.create
+      const credential = (await navigator.credentials.create({ publicKey })) as PublicKeyCredential;
+      const att = credential.response as AuthenticatorAttestationResponse;
+
+      // 4) Complete WebAuthn
+      await apiFetch("/api/auth/register-webauthn/complete", {
+        method: "POST",
+        body: {
+          userId: auth.userId,
+          id: credential.id,
+          type: credential.type,
+          rawId: toBase64Url(credential.rawId),
+          attestationObject: toBase64Url(att.attestationObject),
+          clientDataJSON: toBase64Url(att.clientDataJSON),
+          deviceName: formData.deviceName,
+          transports: (att as any).getTransports?.() ?? undefined,
+        },
+        audience: "student",
+      });
+
+      toast.success("Kayıt tamamlandı. Passkey oluşturuldu.");
       navigate("/student/login");
-    }, 1200);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message ?? "Kayıt başarısız");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -97,9 +168,9 @@ const StudentRegister = () => {
             />
           </div>
 
-          <Button type="submit" size="lg" className="w-full" variant="secondary">
+          <Button type="submit" size="lg" className="w-full" variant="secondary" disabled={isSubmitting}>
             <Fingerprint className="mr-2" />
-            Register with Biometrics
+            {isSubmitting ? "Kaydediliyor…" : "Biometrik ile kayıt ol"}
           </Button>
         </form>
         <p className="text-xs text-center text-muted-foreground">
