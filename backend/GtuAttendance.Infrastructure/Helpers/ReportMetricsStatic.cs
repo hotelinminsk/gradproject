@@ -1,4 +1,3 @@
-using System.IO.Compression;
 using GtuAttendance.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
