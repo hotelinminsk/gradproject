@@ -26,7 +26,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { useTeacherCourses, useBulkDeleteCourses } from "@/hooks/teacher";
+import { useTeacherCourses, useBulkDeleteCourses, useTeacherSessions } from "@/hooks/teacher";
+import { apiFetch } from "@/lib/api";
 import { BookOpen, CalendarClock, CheckCircle2, Link2, Plus, Search, Trash2 } from "lucide-react";
 
 const formatDateTime = (value?: string) => {
@@ -34,6 +35,24 @@ const formatDateTime = (value?: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+};
+
+const parseUtc = (value?: string) => {
+  if (!value) return null;
+  const raw = value.endsWith("Z") ? value : `${value}Z`;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatFriendlyDateTr = (date: Date | null) => {
+  if (!date) return "—";
+  return new Intl.DateTimeFormat("tr-TR", {
+    weekday: "short",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 };
 
 const TeacherCourses = () => {
@@ -45,14 +64,17 @@ const TeacherCourses = () => {
   const [inviteLinkValue, setInviteLinkValue] = useState("");
   const [inviteCourseLabel, setInviteCourseLabel] = useState("");
   const { data: courses = [], isLoading } = useTeacherCourses();
+  const { data: allSessions = [] } = useTeacherSessions();
   const bulkDelete = useBulkDeleteCourses();
 
   const filteredCourses = useMemo(() => {
     if (!search.trim()) return courses;
     const term = search.toLowerCase();
-    return courses.filter(
-      (course) => course.courseName.toLowerCase().includes(term) || course.courseCode.toLowerCase().includes(term),
-    );
+    return courses.filter((course) => {
+      const name = (course.courseName ?? "").toLowerCase();
+      const code = (course.courseCode ?? "").toLowerCase();
+      return name.includes(term) || code.includes(term);
+    });
   }, [courses, search]);
 
   const selectedCourses = useMemo(
@@ -82,6 +104,35 @@ const TeacherCourses = () => {
 
   const selectionCount = selected.size;
 
+  const activeSessionByCourse = useMemo(() => {
+    const map = new Map<string, string>();
+    allSessions.forEach((s) => {
+      if (s.isActive) map.set(s.courseId, s.sessionId);
+    });
+    return map;
+  }, [allSessions]);
+
+  const handleStartSession = async (courseId: string) => {
+    const existing = activeSessionByCourse.get(courseId);
+    if (existing) {
+      navigate(`/teacher/session/${existing}`);
+      return;
+    }
+    try {
+      const active = await apiFetch<{ sessionId: string; expiresAt: string }>(
+        `/api/Attendance/courses/${courseId}/active-session`,
+        { audience: "teacher" },
+      );
+      if (active?.sessionId) {
+        navigate(`/teacher/session/${active.sessionId}`);
+        return;
+      }
+    } catch {
+      // no active session, continue to create
+    }
+    navigate(`/teacher/courses/${courseId}/sessions/new`);
+  };
+
   const handleBulkDelete = () => {
     const ids = Array.from(selected);
     if (!ids.length) return;
@@ -110,7 +161,7 @@ const TeacherCourses = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Teacher Panel</p>
@@ -164,13 +215,22 @@ const TeacherCourses = () => {
         {!isLoading &&
           filteredCourses.map((course) => {
             const isSelected = selected.has(course.courseId);
-            const lastSessionLabel = course.lastSessionAt ? formatDateTime(course.lastSessionAt) : "No sessions yet";
+            const lastSessionCreated = parseUtc(course.lastSession?.createdAt);
+            const lastSessionExpires = parseUtc(course.lastSession?.expiresAtUtc || (course as any).lastSession?.expiresAt);
+            const lastSessionLabel = course.lastSession
+              ? `${course.lastSession.isActive ? "Aktif" : "Kapandı"} - Son yoklama ${formatFriendlyDateTr(
+                  lastSessionExpires || lastSessionCreated,
+                )}`
+              : "No sessions yet";
             const createdLabel = formatDateTime(course.createdAt);
             const statusLabel = course.isActive ? "Active" : "Paused";
-            const host = typeof window !== "undefined" ? window.location.origin : "";
+            const host =
+              (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
+              (typeof window !== "undefined" ? window.location.origin : "");
             const derivedInviteLink =
               course.inviteLink ||
-              (course.invitationToken && host ? `${host}/enroll/${course.invitationToken}` : undefined);
+              (course.invitationToken && host ? `${String(host).replace(/\/$/, "")}/enroll/${course.invitationToken}` : undefined);
+            const activeSessionId = activeSessionByCourse.get(course.courseId);
             return (
               <Card
                 key={course.courseId}
@@ -186,18 +246,20 @@ const TeacherCourses = () => {
                   />
                 </div>
                 <div className="flex flex-col gap-4 p-6 pl-12">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                        <span>{course.courseCode}</span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-foreground">{course.courseName}</h3>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <BookOpen className="h-4 w-4 text-primary" />
+                      <span>{course.courseCode}</span>
                     </div>
-                    <Badge variant={course.isActive ? "default" : "secondary"} className="rounded-full px-3 py-1 text-xs">
-                      {statusLabel}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold text-foreground">{course.courseName}</h3>
+                      {activeSessionId && (
+                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Aktif yoklama</Badge>
+                      )}
+                    </div>
                   </div>
+                </div>
 
                   <div className="rounded-2xl border bg-muted/40 p-4 text-sm text-muted-foreground">
                     <div className="flex items-center justify-between">
@@ -225,7 +287,7 @@ const TeacherCourses = () => {
                   <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
-                      className="flex-1 border-dashed"
+                      className="flex-1 border-dashed hover:bg-primary/5 hover:border-primary/40"
                       onClick={() => navigate(`/teacher/courses/${course.courseId}`)}
                     >
                       <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -236,15 +298,19 @@ const TeacherCourses = () => {
                       className="flex-1 justify-center border-border/60 text-foreground hover:bg-primary/10 hover:text-primary"
                       onClick={() => handleShowInvite(derivedInviteLink, course.courseCode)}
                     >
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Copy Invite Link
-                  </Button>
+                      <Link2 className="mr-2 h-4 w-4" />
+                      Copy Invite Link
+                    </Button>
                     <Button
-                      className="flex-1 justify-center bg-primary/90 text-primary-foreground hover:bg-primary"
-                      onClick={() => navigate(`/teacher/courses/${course.courseId}/sessions/new`)}
+                      className={`flex-1 basis-full justify-center text-primary-foreground ${
+                        activeSessionId
+                          ? "bg-emerald-500 hover:bg-emerald-600"
+                          : "bg-primary/80 hover:bg-primary/70"
+                      }`}
+                      onClick={() => handleStartSession(course.courseId)}
                     >
                       <CalendarClock className="mr-2 h-4 w-4" />
-                      Create Attendance Session
+                      {activeSessionId ? "View Active Session" : "Create Attendance Session"}
                     </Button>
                   </div>
                 </div>

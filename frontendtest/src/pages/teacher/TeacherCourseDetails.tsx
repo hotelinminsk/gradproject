@@ -15,11 +15,13 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useNavigate } from "react-router-dom";
 import { BookOpen, Users, Link2, Upload, Play, Plus, CheckCircle2, Clock3 } from "lucide-react";
-import { useTeacherCourse, useUploadRosterBulk } from "@/hooks/teacher";
+import { useTeacherCourse, useUploadRosterBulk, useActiveSession } from "@/hooks/teacher";
 import { toast } from "sonner";
 import { useState, useCallback } from "react";
 import * as XLSX from "xlsx";
 import type { RosterStudentRow } from "@/types/course";
+
+const API_BASE_FALLBACK = "https://localhost:7270";
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
@@ -47,12 +49,17 @@ const getValueByHeader = (row: Record<string, unknown>, candidates: string[]) =>
   return null;
 };
 
+const INVITE_HOST =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
+  (typeof window !== "undefined" ? window.location.origin : API_BASE_FALLBACK);
+
 export default function TeacherCourseDetails() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { data: course, isLoading, isError } = useTeacherCourse(courseId);
   const uploadRosterBulk = useUploadRosterBulk(courseId);
   const manualAddMutation = useUploadRosterBulk(courseId);
+  const { data: activeSession } = useActiveSession(courseId);
 
   const verifiedStudents = course?.courseStudents ?? [];
   const rosterEntries = course?.roster ?? [];
@@ -91,12 +98,16 @@ export default function TeacherCourseDetails() {
 
   const handleStartSession = () => {
     if (!courseId) return;
-    navigate(`/teacher/courses/${courseId}/sessions/new`);
+    const active = activeSession && activeSession.isActive && activeSession.expiresAt && new Date(activeSession.expiresAt) > new Date();
+    if (active && activeSession.sessionId) {
+      navigate(`/teacher/session/${activeSession.sessionId}`);
+    } else {
+      navigate(`/teacher/courses/${courseId}/sessions/new`);
+    }
   };
 
-  const inviteLink = course?.courseInvitationToken
-    ? `${window.location.origin}/enroll/${course.courseInvitationToken}`
-    : "";
+  // Backend now returns a full invite URL in CourseInvitationToken; trust it as-is.
+  const inviteLink = course?.courseInvitationToken ?? "";
 
   const handleManualSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -298,7 +309,8 @@ export default function TeacherCourseDetails() {
                   onClick={handleStartSession}
                   disabled={isLoading}
                 >
-                  <Play className="mr-2 h-4 w-4" /> Start attendance session
+                  <Play className="mr-2 h-4 w-4" />
+                  {activeSession && activeSession.isActive ? "View active session" : "Start attendance session"}
                 </Button>
                 <div className="grid grid-cols-2 gap-2">
                   <Button

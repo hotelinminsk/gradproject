@@ -1,8 +1,18 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-import { TeacherCourseSummary, type RosterStudentRow, type TeacherCourseDetail } from "@/types/course";
+import {
+  TeacherCourseSummary,
+  type RosterStudentRow,
+  type TeacherCourseDetail,
+  type CreateSessionPayload,
+  type CreateSessionResponse,
+} from "@/types/course";
+import { type SessionDetail, type SessionQrPoll, type SessionSummary, type ActiveSessionInfo } from "@/types/attendance";
 import { toast } from "sonner";
 import type { TeacherDashboardSummary } from "@/types/dashboard";
+
+
+  
 
 export function useTeacherDashboardSummary(){
     return useQuery({
@@ -81,6 +91,82 @@ export const useTeacherCourse = (courseId?: string) =>
       });
     },
     staleTime: 30 * 1000,
+  });
+
+export const useCreateSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateSessionPayload) =>
+      apiFetch<CreateSessionResponse>("/api/Attendance/createsession", {
+        method: "POST",
+        body: { ...payload },
+        audience: "teacher",
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["teacher-course", variables.courseId] });
+      toast.success("Attendance session created.");
+    },
+    onError: (err) => toast.error(err.message ?? "Failed to create session"),
+  });
+};
+
+export const useSessionDetail = (sessionId?: string) =>
+  useQuery({
+    queryKey: ["session-detail", sessionId],
+    enabled: !!sessionId,
+    refetchInterval: 4000,
+    queryFn: () =>
+      apiFetch<SessionDetail>(`/api/Attendance/sessions/${sessionId}`, {
+        audience: "teacher",
+      }),
+  });
+
+export const useSessionQrPoll = (sessionId?: string, enabled = true) =>
+  useQuery({
+    queryKey: ["session-qr", sessionId],
+    enabled: !!sessionId && enabled,
+    refetchInterval: 1000,
+    queryFn: () =>
+      apiFetch<SessionQrPoll>(`/api/Attendance/sessions/${sessionId}/qr-poll`, {
+        audience: "teacher",
+      }),
+  });
+
+export const useCloseSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) =>
+      apiFetch<{ msg: string; sessionId: string }>(`/api/Attendance/sessions/${sessionId}/close`, {
+        method: "POST",
+        audience: "teacher",
+      }),
+    onSuccess: (_, sessionId) => {
+      queryClient.invalidateQueries({ queryKey: ["session-detail", sessionId] });
+      queryClient.invalidateQueries({ queryKey: ["session-qr", sessionId] });
+      toast.success("Session ended.");
+    },
+    onError: (err) => toast.error(err.message ?? "Failed to end session"),
+  });
+};
+
+export const useTeacherSessions = () =>
+  useQuery({
+    queryKey: ["teacher-sessions"],
+    queryFn: () =>
+      apiFetch<SessionSummary[]>("/api/Attendance/sessions", {
+        audience: "teacher",
+      }),
+    staleTime: 10 * 1000,
+  });
+
+export const useActiveSession = (courseId?: string) =>
+  useQuery({
+    queryKey: ["active-session", courseId],
+    enabled: !!courseId,
+    queryFn: () =>
+      apiFetch<ActiveSessionInfo>(`/api/Attendance/courses/${courseId}/active-session`, {
+        audience: "teacher",
+      }),
   });
 
     export const useBulkDeleteCourses = () => {

@@ -4,6 +4,12 @@ export interface Course {
   courseCode: string;
   invitationToken?: string;
   isActive?: boolean;
+  lastSession?: {
+    sessionId: string;
+    createdAt: string;
+    expiresAtUtc: string;
+    isActive: boolean;
+  }
 }
 
 export interface RosterStudentRow {
@@ -19,7 +25,13 @@ export interface TeacherCourseSummary {
   createdAt: string;
   isActive: boolean;
   enrollmentCount: number;
-  lastSessionAt?: string;
+  lastSession?: {
+    sessionId: string;
+    createdAt: string;
+    expiresAtUtc?: string;
+    isActive: boolean;
+  };
+  lastSessionAt?: string; // legacy
   nextSessionAt?: string;
   inviteLink?: string;
   invitationToken?: string;
@@ -73,4 +85,18 @@ export interface TeacherCourseDetail {
   enrollments: CourseEnrollmentEntry[];
   sessions: AttendanceSessionSummary[];
   courseStudents: CourseStudentEntry[];
+}
+
+export interface CreateSessionPayload {
+  courseId: string;
+  teacherLatitude: number;
+  teacherLongitude: number;
+  maxDistanceMeters: number;
+  expiresAtUtc: string;
+}
+
+export interface CreateSessionResponse {
+  sessionId: string;
+  qrToken: string;
+  expiresAtUtc: string;
 }

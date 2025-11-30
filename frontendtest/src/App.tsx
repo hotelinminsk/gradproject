@@ -28,8 +28,11 @@ import TeacherSession from "./pages/teacher/TeacherSession";
 import TeacherReports from "./pages/teacher/TeacherReports";
 import TeacherCourseDetails from "./pages/teacher/TeacherCourseDetails";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherSessionClosed from "./pages/teacher/TeacherSessionClosed";
 import { TeacherSessionProvider } from "./providers";
 import TeacherCreateCourse from "./pages/teacher/TeacherCreateCourse";
+import TeacherCreateSession from "./pages/teacher/TeacherCreateSession";
+import TeacherSessions from "./pages/teacher/TeacherSessions";
 
 const queryClient = new QueryClient();
 
@@ -97,9 +100,12 @@ const App = () => {
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
               <Route path="/teacher/courses" element={<TeacherCourses />} />
               <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetails />} />
+              <Route path="/teacher/courses/:courseId/sessions/new" element={<TeacherCreateSession />} />
+              <Route path="/teacher/sessions" element={<TeacherSessions />} />
               <Route path="/teacher/students" element={<TeacherStudents />} />
               <Route path="/teacher/session" element={<TeacherSession />} />
               <Route path="/teacher/session/:sessionId" element={<TeacherSession />} />
+              <Route path="/teacher/session/:sessionId/closed" element={<TeacherSessionClosed />} />
               <Route path="/teacher/reports" element={<TeacherReports />} />
               <Route path="/teacher/create-course" element={<TeacherCreateCourse />} />
             </Route>

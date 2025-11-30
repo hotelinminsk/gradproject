@@ -13,7 +13,7 @@ const TeacherSidebar = () => {
     { path: "/teacher/dashboard", icon: Home, label: "Dashboard" },
     { path: "/teacher/courses", icon: BookOpen, label: "Courses" },
     { path: "/teacher/students", icon: Users, label: "Students" },
-    { path: "/teacher/session", icon: QrCode, label: "Start Session" },
+    { path: "/teacher/sessions", icon: QrCode, label: "Sessions" },
     { path: "/teacher/reports", icon: FileText, label: "Reports" },
   ];
 
