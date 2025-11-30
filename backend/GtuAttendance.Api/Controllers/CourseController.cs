@@ -371,7 +371,13 @@ public class CourseController : ControllerBase
                 c.IsActive,
                 EnrollmentCount = c.Enrollments.Count(),
                 LastSession = c.Sessions.OrderByDescending(s => s.CreatedAt)
-                .Select(s => new {s.SessionId, s.CreatedAt})
+                .Select(s => new
+                {
+                    s.SessionId,
+                    s.CreatedAt,
+                    ExpiresAtUtc = s.ExpiresAt,
+                    s.IsActive
+                })
                 .FirstOrDefault(),
                 InviteLink = $"{Request.Scheme}://{Request.Host}/enroll/{c.InvitationToken}"
 
@@ -463,7 +469,7 @@ public class CourseController : ControllerBase
                 course.CourseId,
                 course.CourseName,
                 course.CourseCode,
-                course.InvitationToken,
+                CourseInvitationToken: $"{Request.Scheme}://{Request.Host}/enroll/{course.InvitationToken}",
                 course.CreatedAt,
                 course.IsActive,
                 course.Roster,

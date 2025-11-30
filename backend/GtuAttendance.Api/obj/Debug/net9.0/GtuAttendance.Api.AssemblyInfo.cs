@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GtuAttendance.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+134b24454a5ff62895988df0cecbf8ca3adfed6e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+77a2279f0243b47c5666a9f837a6e93ca06a89c3")]
 [assembly: System.Reflection.AssemblyProductAttribute("GtuAttendance.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GtuAttendance.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
