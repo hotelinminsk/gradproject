@@ -30,7 +30,7 @@ public class TeacherDashboardController: ControllerBase
         if (teacherId is null) return Unauthorized();
 
         var activeCourseCount = await _dbContext.Courses.CountAsync(ce => ce.IsActive && ce.TeacherId == teacherId);
-        var totalStudentCount = await _dbContext.CourseEnrollments.CountAsync(ce => ce.Course.TeacherId == teacherId && ce.IsValidated);
+        var totalStudentCount = await _dbContext.CourseEnrollments.CountAsync(ce => ce.Course.TeacherId == teacherId && ce.IsValidated && !ce.IsDropped);
 
         var weekAgo = DateTime.UtcNow.Date.AddDays(-7);
         var sessionsThisWeek = await _dbContext.AttendanceSessions.CountAsync(se => se.TeacherId == teacherId && se.CreatedAt >= weekAgo);
@@ -50,7 +50,7 @@ public class TeacherDashboardController: ControllerBase
         var avgAttendancePCT = steps == 0 ? 0 : (int)Math.Round(avgSums / steps);
         var upcoming = await _dbContext.Courses
         .Where(c => c.TeacherId == teacherId)
-        .OrderByDescending(c => c.Enrollments.Count(e => e.IsValidated))
+        .OrderByDescending(c => c.Enrollments.Count(e => e.IsValidated && !e.IsDropped))
         .Select(c => new UpcomingCourseRow(
             c.CourseId,
 
@@ -58,7 +58,7 @@ public class TeacherDashboardController: ControllerBase
 
             c.CourseCode,
 
-            c.Enrollments.Count(e => e.IsValidated),
+            c.Enrollments.Count(e => e.IsValidated && !e.IsDropped),
 
             null
         ))

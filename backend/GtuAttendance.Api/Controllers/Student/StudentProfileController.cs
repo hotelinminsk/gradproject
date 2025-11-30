@@ -50,7 +50,7 @@ public class StudentProfileController : ControllerBase
 
             u.CreatedAt,
 
-            _context.CourseEnrollments.Count(ce => ce.StudentId == u.UserId && ce.IsValidated)
+            _context.CourseEnrollments.Count(ce => ce.StudentId == u.UserId && ce.IsValidated && !ce.IsDropped)
 
         )).FirstOrDefaultAsync();
 
