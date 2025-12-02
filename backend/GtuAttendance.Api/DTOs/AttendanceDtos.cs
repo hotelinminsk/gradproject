@@ -5,7 +5,8 @@ public record CreateSessionRequest(
     decimal TeacherLatitude,
     decimal TeacherLongitude,
     int MaxDistanceMeters,
-    DateTime ExpiresAtUtc
+    DateTime ExpiresAtUtc,
+    int? QrCodeValiditySeconds
 );  
 
 public record CreateSessionResponse(

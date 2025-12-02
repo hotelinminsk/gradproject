@@ -40,7 +40,11 @@ public record CompleteWebAuthnRegisterRequest(
     string? EnrollToken
 );
 
-public record BeginWebAuthnLoginRequest(Guid UserId, string? DeviceName);
+public record BeginWebAuthnLoginRequest(
+    string Email,
+    string Password,
+    string? DeviceName
+);
 
 public record CompleteWebAuthnLoginRequest(
     Guid UserId,

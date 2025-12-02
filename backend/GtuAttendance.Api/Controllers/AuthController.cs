@@ -392,8 +392,14 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId && u.Role == "Student");
-            if (user is null) throw new WebAuthnLoginUserIsNullException(request.UserId);
+            var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == request.Email && u.Role == "Student");
+            if (user is null) return BadRequest(new { error = "Invalid credentials." });
+            if (!_passwordService.VerifyPassword(request.Password, user.PasswordHash))
+            {
+                return BadRequest(new { error = "Invalid credentials." });
+            }
+            var userId = user.UserId;
 
             var q = _context.WebAuthnCredentials.Where(c => c.UserId == user.UserId && c.IsActive);
             if (!string.IsNullOrWhiteSpace(request.DeviceName)) q = q.Where(c => c.DeviceName == request.DeviceName);
@@ -409,7 +415,7 @@ public class AuthController : ControllerBase
             var options = _fido2Service.CreateAssertionOptions(allowed, UserVerificationRequirement.Required);
             _memoryCache.Set($"webauthn:assert:{user.UserId}", options, TimeSpan.FromMinutes(10));
 
-            return Ok(options);
+            return Ok(new {userId, options});
         }
         catch (Exception ex)
         {
@@ -460,10 +466,10 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = "Stored public key is missing." });
 
 
-            if (cred.DeviceName != null && cred.DeviceName != request.DeviceName)
-            {
-                throw new DeviceMismatchException();
-            }
+            // if (cred.DeviceName != null && cred.DeviceName != request.DeviceName)
+            // {
+            //     throw new DeviceMismatchException();
+            // }
 
             Console.WriteLine("Assertation: " + assertation);
             Console.WriteLine("Options " + options);

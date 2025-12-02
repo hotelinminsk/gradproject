@@ -9,10 +9,17 @@ import { formatRelative } from "date-fns";
 const TeacherDashboard = () => {
   const navigate = useNavigate();
 
-  const {profile} = useTeacherSession();
-  const {data, isLoading} = useTeacherDashboardSummary();
+  const { profile } = useTeacherSession();
+  const { data, isLoading } = useTeacherDashboardSummary();
   const { data: sessions = [] } = useTeacherSessions();
 
+  if (!profile || !profile.fullName) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">
+        Please sign in as a teacher to view the dashboard.
+      </div>
+    );
+  }
   if(isLoading || !data){
     return (
     <div className="flex min-h-[60vh] items-center justify-center">

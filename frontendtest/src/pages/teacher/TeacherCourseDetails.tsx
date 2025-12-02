@@ -15,17 +15,21 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useNavigate } from "react-router-dom";
 import { BookOpen, Users, Link2, Upload, Play, Plus, CheckCircle2, Clock3 } from "lucide-react";
-import { useTeacherCourse, useUploadRosterBulk, useActiveSession } from "@/hooks/teacher";
+import { useTeacherCourse, useUploadRosterBulk } from "@/hooks/teacher";
 import { toast } from "sonner";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import * as XLSX from "xlsx";
 import type { RosterStudentRow } from "@/types/course";
+import { useTeacherSession } from "@/providers";
+import { queryOptions, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE_FALLBACK = "https://localhost:7270";
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
-  const date = new Date(value);
+  // Ensure the date string is parsed as UTC for correct timezone conversion
+  const raw = value.endsWith("Z") ? value : `${value}Z`;
+  const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
 };
@@ -59,11 +63,32 @@ export default function TeacherCourseDetails() {
   const { data: course, isLoading, isError } = useTeacherCourse(courseId);
   const uploadRosterBulk = useUploadRosterBulk(courseId);
   const manualAddMutation = useUploadRosterBulk(courseId);
-  const { data: activeSession } = useActiveSession(courseId);
+  const queryClient = useQueryClient();
+  const {hub} = useTeacherSession();
+
+  useEffect(() => {
+    if(!hub) return;
+    const onCreated = (p) => {
+      if(p.courseId === courseId){
+        queryClient.invalidateQueries({queryKey: ["teacher-course", courseId]});  //buna sonrasında student da eklenecek
+      }
+      queryClient.invalidateQueries({queryKey: ["teacher-courses"]});
+    };
+    const onClosed = onCreated;
+    hub.on("SessionCreated", onCreated);
+    hub.on("SessionClosed", onClosed);
+    return () => {
+      hub.off("SessionCreated", onCreated);
+      hub.off("SessionClosed", onClosed);
+
+    };
+
+  },[hub, courseId, queryClient]);
 
   const verifiedStudents = course?.courseStudents ?? [];
   const rosterEntries = course?.roster ?? [];
   const sessions = course?.sessions ?? [];
+  const activeSession = sessions.find((s) => s.isActive);
   const enrolledStudentIds = new Set(
     verifiedStudents
       .map((student) => student.gtustudentid?.trim().toLowerCase())
@@ -95,11 +120,13 @@ export default function TeacherCourseDetails() {
   const [parsedRoster, setParsedRoster] = useState<RosterStudentRow[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const activeSessionInfo = activeSession?.isActive
+    ? `Active session #${activeSession.sessionId?.slice(0, 8)} · expires ${formatDate(activeSession.expiresAt)}`
+    : "No active session";
 
   const handleStartSession = () => {
     if (!courseId) return;
-    const active = activeSession && activeSession.isActive && activeSession.expiresAt && new Date(activeSession.expiresAt) > new Date();
-    if (active && activeSession.sessionId) {
+    if (activeSession && activeSession.isActive && activeSession.sessionId) {
       navigate(`/teacher/session/${activeSession.sessionId}`);
     } else {
       navigate(`/teacher/courses/${courseId}/sessions/new`);
@@ -107,7 +134,7 @@ export default function TeacherCourseDetails() {
   };
 
   // Backend now returns a full invite URL in CourseInvitationToken; trust it as-is.
-  const inviteLink = course?.courseInvitationToken ?? "";
+  const inviteLink = course?.inviteToken ?? "";
 
   const handleManualSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -293,6 +320,12 @@ export default function TeacherCourseDetails() {
                   <h1 className="text-3xl font-bold text-foreground">{course.courseName}</h1>
                   <p className="text-sm text-muted-foreground">{course.courseCode}</p>
                 </div>
+                <Badge
+                  variant="secondary"
+                  className={`w-fit ${activeSession?.isActive ? "bg-success/15 text-success" : ""}`}
+                >
+                  {activeSessionInfo}
+                </Badge>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {stats.map((stat) => (
                     <Card key={stat.label} className="rounded-2xl border bg-background/80 p-3 shadow-sm">
@@ -305,7 +338,11 @@ export default function TeacherCourseDetails() {
               </div>
               <div className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-sm">
                 <Button
-                  className="w-full justify-center bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+                  className={`w-full justify-center text-primary-foreground shadow-lg ${
+                    activeSession && activeSession.isActive
+                      ? "bg-emerald-500 hover:bg-emerald-600"
+                      : "bg-primary hover:bg-primary/90"
+                  }`}
                   onClick={handleStartSession}
                   disabled={isLoading}
                 >
@@ -317,7 +354,7 @@ export default function TeacherCourseDetails() {
                     variant="outline"
                     className="justify-center border-border text-foreground hover:bg-primary/10 hover:text-primary"
                     onClick={() => {
-                      if (!course?.courseInvitationToken) {
+                      if (!course?.inviteToken) {
                         toast.info("Generate an invite token to share enrollment link.");
                         return;
                       }

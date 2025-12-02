@@ -12,6 +12,8 @@ using GtuAttendance.Api.DTOs;
 using GtuAttendance.Infrastructure.Errors;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using GtuAttendance.Api.Extensions;
+using Microsoft.AspNetCore.SignalR;
+using GtuAttendance.Api.Hubs;
 
 namespace GtuAttendance.Api.Controllers;
 
@@ -23,11 +25,15 @@ public class AttendanceController : ControllerBase
     private readonly IMemoryCache _cache;
     private readonly ILogger<AttendanceController> _logger;
 
-    public AttendanceController(AppDbContext context, IMemoryCache cache, ILogger<AttendanceController> logger)
+    private readonly IHubContext<AttendanceHub> _attendanceHub;
+
+
+    public AttendanceController(AppDbContext context, IMemoryCache cache, ILogger<AttendanceController> logger, IHubContext<AttendanceHub> attendanceHub)
     {
         _context = context;
         _cache = cache;
         _logger = logger;
+        _attendanceHub = attendanceHub;
     }
 
     private Guid? GetUserId()
@@ -104,14 +110,23 @@ public class AttendanceController : ControllerBase
                 ExpiresAt = request.ExpiresAtUtc,
                 IsActive = true,
                 Secret = secret,
-                CodeStepSeconds = 30
+                CodeStepSeconds = request.QrCodeValiditySeconds ?? 30,
             };
 
             _context.AttendanceSessions.Add(session);
             await _context.SaveChangesAsync();
 
-            return Ok(new CreateSessionResponse(session.SessionId, session.QRCodeToken, session.ExpiresAt));
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("SessionCreated", new
+            {
+                session.SessionId,
+                session.CourseId,
+                CreatedAtUtc = session.CreatedAt.ToUniversalTime(),  // BUNLARI UTC TUTMUYOR MUYUM BEN AMK
+                ExpiresAtUtc = session.ExpiresAt.ToUniversalTime(),  // UTC NORMALIZE GEREKIYOR GALIBA
+                IsActive = session.IsActive
+            });
 
+            return Ok(new CreateSessionResponse(session.SessionId, session.QRCodeToken, session.ExpiresAt.ToUniversalTime()));
         }
         catch (Exception EX)
         {
@@ -275,6 +290,18 @@ public class AttendanceController : ControllerBase
 
             var status = within ? "Present" : "OutOfRange";
 
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("CheckInRecorded", new
+            {
+                session.SessionId,
+                session.CourseId,
+                studentId,
+                studentName = record.Student?.FullName,
+                withinRange = record.IsWithinRange,
+                distanceMeters = record.DistanceFromTeacherMeters,
+                checkInTimeUtc = record.CheckInTime.ToUniversalTime()
+            });
+
             return Ok(new CheckInResponse(status, record.DistanceFromTeacherMeters, record.IsWithinRange, record.CheckInTime));
 
 
@@ -354,6 +381,15 @@ public class AttendanceController : ControllerBase
 
             await _context.SaveChangesAsync();
 
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("SessionClosed", new
+            {
+                session.SessionId,
+                session.CourseId,
+                ClosedAtUtc = DateTime.UtcNow
+            });
+
+
             return Ok(new { msg = $"Session with session id : {sessionId} closed", sessionId });
 
         }
@@ -373,16 +409,23 @@ public class AttendanceController : ControllerBase
             var teacherId = GetUserId();
             if (teacherId is null) throw new Unauthorized("courses/{courseId}/active-session : teacherId is null");
 
-            var session = await _context.AttendanceSessions.AsNoTracking().Where(c => c.CourseId == courseId && c.TeacherId == teacherId.Value && c.IsActive && c.ExpiresAt > DateTime.UtcNow)
+            var session = await _context.AttendanceSessions.AsNoTracking()
+            .Where(c => c.CourseId == courseId && c.TeacherId == teacherId.Value && c.IsActive && c.ExpiresAt > DateTime.UtcNow)
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync();
 
 
             if (session is null) return NotFound(new {msg = "No active session."});
 
-            
 
-            return Ok(new { session.SessionId, session.ExpiresAt });
+
+            return Ok(new
+            {
+                session.SessionId,
+                session.CourseId,
+                session.ExpiresAt,
+                IsActive = session.IsActive && session.ExpiresAt > DateTime.UtcNow
+            });
 
         }
         catch(System.Exception EX)

@@ -55,6 +55,7 @@ builder.Services.AddScoped<JWTService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<Fido2Service>();
 
+
 builder.Services.AddHealthChecks();
 
 builder.Services.AddMemoryCache();
@@ -82,14 +83,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
             ClockSkew = TimeSpan.Zero
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var accessToken = ctx.Request.Query["access_token"];
+                var path =ctx.HttpContext.Request.Path;
+                if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/attendance"))
+                {
+                    ctx.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
-builder.Services.AddAuthorization();
+ builder.Services.AddAuthorization();
 
-builder.Services.AddAuthorization(o =>
-{
-    o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
-});
+ builder.Services.AddAuthorization(o =>
+ {
+     o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+ });
+
+ builder.Services.AddSignalR();
 
 
 // CORS
@@ -100,7 +116,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:3000",
                 "https://localhost:3000",
                 "http://127.0.0.1:5173",
-                "http://localhost:5173")
+                "http://localhost:5173",
+                "https://localhost:5173")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -132,6 +149,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<GtuAttendance.Api.Hubs.AttendanceHub>("/hubs/attendance");
 
 app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready");
