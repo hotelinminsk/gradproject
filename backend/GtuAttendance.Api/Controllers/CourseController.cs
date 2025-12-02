@@ -376,10 +376,11 @@ public class CourseController : ControllerBase
                     s.SessionId,
                     s.CreatedAt,
                     ExpiresAtUtc = s.ExpiresAt,
-                    s.IsActive
+                    IsActive = s.IsActive && s.ExpiresAt > DateTime.UtcNow
                 })
                 .FirstOrDefault(),
-                InviteLink = $"{Request.Scheme}://{Request.Host}/enroll/{c.InvitationToken}"
+                // Return raw token; frontend can display/copy token as needed.
+                InviteToken = c.InvitationToken
 
             })
             .AsNoTracking()
@@ -507,10 +508,11 @@ public class CourseController : ControllerBase
                 c.IsActive,
                 Roster = c.Roster.ToList(),
                 Enrollments = c.Enrollments.Where(e => !e.IsDropped).ToList(),
-                Sessions = c.Sessions
-                .OrderByDescending(s => s.CreatedAt)
-                .Take(10)
-                .ToList(),
+                Sessions = _context.AttendanceSessions
+                    .AsNoTracking()
+                    .Where(s => s.CourseId == CourseId && s.TeacherId == teacherId)
+                    .OrderByDescending(s => s.CreatedAt)
+                    .ToList(),
                 CourseStudents = c.Enrollments
                 .Where(e => e.IsValidated && !e.IsDropped)
                 .Select(e => new CourseStudent(
@@ -526,16 +528,28 @@ public class CourseController : ControllerBase
 
             if(course is null) return NotFound();
 
+            var now = DateTime.UtcNow;
+            var sessionsComputed = course.Sessions
+                .Select(s => new CourseSessionDto(
+                    s.SessionId,
+                    s.CreatedAt,
+                    s.ExpiresAt,
+                    s.IsActive && s.ExpiresAt > now
+                ))
+                .ToList();
+            var activeSessionDto = sessionsComputed.FirstOrDefault(s => s.IsActive);
+
             var response = new CourseDetailsResponse(
                 course.CourseId,
                 course.CourseName,
                 course.CourseCode,
-                CourseInvitationToken: $"{Request.Scheme}://{Request.Host}/enroll/{course.InvitationToken}",
+                InviteToken: course.InvitationToken,
                 course.CreatedAt,
                 course.IsActive,
                 course.Roster,
                 course.Enrollments,
-                course.Sessions,
+                sessionsComputed,
+                activeSessionDto,
                 course.CourseStudents
             );
 
@@ -551,5 +565,6 @@ public class CourseController : ControllerBase
 
         } 
     }
+
 
 }

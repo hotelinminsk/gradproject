@@ -26,23 +26,28 @@ export function createAuthSessionProvider<TProfile>(
     {
         const queryClient = useQueryClient();
         const token = authStore.getToken(audience);
-        const query = useQuery({
-            queryKey: [audience, "profile", token],
-            queryFn: () => apiFetch<TProfile>(profileEndPoint, {audience}),
-            enabled: Boolean(token),
-            staleTime: 1000 * 60
-        });
-
-        const login = (auth: AuthResponse) => {
-            authStore.setToken(audience, auth.token);
-            queryClient.invalidateQueries({queryKey: [audience, "profile"]});
-
-        };
 
         const logout = () => {
             authStore.clear(audience);
             queryClient.removeQueries({queryKey: [audience]});
-        }
+        };
+
+        const login = (auth: AuthResponse) => {
+            authStore.setToken(audience, auth.token);
+            queryClient.invalidateQueries({queryKey: [audience, "profile"]});
+        };
+
+        const query = useQuery({
+            queryKey: [audience, "profile", token],
+            queryFn: () => apiFetch<TProfile>(profileEndPoint, {audience}),
+            enabled: Boolean(token),
+            staleTime: 1000 * 60,
+            retry: false,
+            onError: () => {
+                // Token invalid/expired; clear session so UI doesn't crash
+                logout();
+            },
+        });
 
         return (
             <AuthSessionContext.Provider
@@ -69,5 +74,3 @@ export function createAuthSessionProvider<TProfile>(
     return [Provider, useSession] as const;
 
 }
-
-

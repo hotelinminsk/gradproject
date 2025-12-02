@@ -224,12 +224,8 @@ const TeacherCourses = () => {
               : "No sessions yet";
             const createdLabel = formatDateTime(course.createdAt);
             const statusLabel = course.isActive ? "Active" : "Paused";
-            const host =
-              (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
-              (typeof window !== "undefined" ? window.location.origin : "");
-            const derivedInviteLink =
-              course.inviteLink ||
-              (course.invitationToken && host ? `${String(host).replace(/\/$/, "")}/enroll/${course.invitationToken}` : undefined);
+            // We now share raw token instead of URL.
+            const derivedInviteLink = course.inviteToken ?? course.inviteToken ?? course.inviteToken;
             const activeSessionId = activeSessionByCourse.get(course.courseId);
             return (
               <Card
@@ -299,7 +295,7 @@ const TeacherCourses = () => {
                       onClick={() => handleShowInvite(derivedInviteLink, course.courseCode)}
                     >
                       <Link2 className="mr-2 h-4 w-4" />
-                      Copy Invite Link
+                      Copy Invite Token
                     </Button>
                     <Button
                       className={`flex-1 basis-full justify-center text-primary-foreground ${
@@ -344,14 +340,14 @@ const TeacherCourses = () => {
         )}
       </div>
 
-      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>Share invite link</DialogTitle>
-            <DialogDescription>Send this link to students so they can join {inviteCourseLabel}.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input value={inviteLinkValue} readOnly />
+          <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+            <DialogContent className="sm:max-w-[480px]">
+              <DialogHeader>
+                <DialogTitle>Share invite token</DialogTitle>
+                <DialogDescription>Send this token to students so they can join {inviteCourseLabel}.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                <Input value={inviteLinkValue} readOnly />
             <DialogFooter className="gap-2 sm:justify-end">
               <Button variant="ghost" onClick={() => setInviteDialogOpen(false)}>
                 Close

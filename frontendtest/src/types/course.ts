@@ -33,8 +33,13 @@ export interface TeacherCourseSummary {
   };
   lastSessionAt?: string; // legacy
   nextSessionAt?: string;
-  inviteLink?: string;
-  invitationToken?: string;
+  inviteToken?: string;
+}
+
+export interface StudentCourseSummary {
+  courseId: string;
+  courseName: string;
+  courseCode: string;
 }
 
 export interface CourseRosterEntry {
@@ -74,16 +79,18 @@ export interface CourseStudentEntry {
   isVerifiedEnrollment: boolean;
 }
 
+
 export interface TeacherCourseDetail {
   courseId: string;
   courseName: string;
   courseCode: string;
-  courseInvitationToken?: string;
+  inviteToken?: string;
   createdAt: string;
   isActive: boolean;
   roster: CourseRosterEntry[];
   enrollments: CourseEnrollmentEntry[];
   sessions: AttendanceSessionSummary[];
+  activeSession?: AttendanceSessionSummary | null;
   courseStudents: CourseStudentEntry[];
 }
 
@@ -99,4 +106,27 @@ export interface CreateSessionResponse {
   sessionId: string;
   qrToken: string;
   expiresAtUtc: string;
+}
+
+
+export interface CourseSessionV2{
+  sessionId: string;
+  createdAtUtc: string;
+  expiresAtUtc: string;
+  isActive: boolean;
+  attendeeCount: number
+}
+
+export interface TeacherCourseDetailV2{
+  courseId: string;
+  courseName: string;
+  courseCode: string;
+  inviteToken: string;
+  createdAtUtc: string;
+  isActive: boolean;
+  roster: CourseRosterEntry[];
+  enrollments: CourseEnrollmentEntry[];
+  sessions: CourseSessionV2[];
+  activeSession?: CourseSessionV2 | null;
+  courseStudents: CourseStudentEntry[];
 }

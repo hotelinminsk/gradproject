@@ -13,7 +13,7 @@ import { toast } from "sonner";
 export default function StudentLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [userId, setUserId] = useState(""); // backend requires userId for begin
+  const [password, setPassword] = useState("");
   const [deviceName, setDeviceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,20 +46,20 @@ export default function StudentLogin() {
   };
 
   const beginWebAuthnLogin = async () => {
-    if (!userId) {
-      toast.error("UserId (GUID) gerekli. Şimdilik email'den lookup yok.");
+    if (!email || !password) {
+      toast.error("E-posta ve şifre gerekli.");
       return;
     }
     setIsLoading(true);
     try {
-      // 1) Begin
+      // 1) Begin (now with email/password)
       const begin = await apiFetch<any>("/api/auth/login-webauthn/begin", {
         method: "POST",
-        body: { userId, deviceName },
-        // no token required for begin
+        body: { email, password, deviceName },
       });
 
-      const publicKey = prepareAssertionOptions(begin);
+      const userId = begin.userId;
+      const publicKey = prepareAssertionOptions(begin.options ?? begin);
 
       // 2) navigator.credentials.get
       const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential;
@@ -105,17 +105,18 @@ export default function StudentLogin() {
 
         <Card className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="userId">User Id (GUID)</Label>
-            <Input
-              id="userId"
-              placeholder="00000000-0000-0000-0000-000000000000"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="email">Student Email</Label>
             <Input id="email" type="email" placeholder="name@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="deviceName">Device Name (optional)</Label>

@@ -80,6 +80,7 @@ export const useTeacherCourses = () =>
         staleTime: 60 * 1000,
     });
 
+
 export const useTeacherCourse = (courseId?: string) =>
   useQuery({
     queryKey: ["teacher-course", courseId],
@@ -90,7 +91,8 @@ export const useTeacherCourse = (courseId?: string) =>
         audience: "teacher",
       });
     },
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchInterval: 5000,
   });
 
 export const useCreateSession = () => {
@@ -104,6 +106,8 @@ export const useCreateSession = () => {
       }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["teacher-course", variables.courseId] });
+      queryClient.invalidateQueries({ queryKey: ["active-session", variables.courseId] });
+      queryClient.invalidateQueries({ queryKey: ["teacher-sessions"] });
       toast.success("Attendance session created.");
     },
     onError: (err) => toast.error(err.message ?? "Failed to create session"),
@@ -159,14 +163,35 @@ export const useTeacherSessions = () =>
     staleTime: 10 * 1000,
   });
 
-export const useActiveSession = (courseId?: string) =>
+export const useTeacherSessionsByCourse = (courseId?: string) =>
   useQuery({
-    queryKey: ["active-session", courseId],
+    queryKey: ["teacher-sessions", courseId],
     enabled: !!courseId,
     queryFn: () =>
-      apiFetch<ActiveSessionInfo>(`/api/Attendance/courses/${courseId}/active-session`, {
+      apiFetch<SessionSummary[]>(`/api/Attendance/sessions${courseId ? `?courseId=${courseId}` : ""}`, {
         audience: "teacher",
       }),
+    staleTime: 10 * 1000,
+  });
+
+export const useActiveSession = (courseId?: string) =>
+  useQuery<ActiveSessionInfo | null>({
+    queryKey: ["active-session", courseId],
+    enabled: !!courseId,
+    retry: false,
+    refetchInterval: 8000,
+    queryFn: async () => {
+      try {
+        return await apiFetch<ActiveSessionInfo>(`/api/Attendance/courses/${courseId}/active-session`, {
+          audience: "teacher",
+        });
+      } catch (err: any) {
+        // Treat 404/not found as "no active session"
+        const msg = err?.message?.toLowerCase?.() ?? "";
+        if (msg.includes("not found") || msg.includes("404")) return null;
+        throw err;
+      }
+    },
   });
 
     export const useBulkDeleteCourses = () => {

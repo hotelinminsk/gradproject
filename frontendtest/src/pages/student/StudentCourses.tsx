@@ -7,45 +7,21 @@ import { Input } from "@/components/ui/input";
 import { BookOpen, QrCode, Plus, Calendar, Users, ChevronRight } from "lucide-react";
 import StudentBottomNav from "@/components/student/StudentBottomNav";
 import StudentPageHeader from "@/components/student/StudentPageHeader";
+import { useStudentCourses, useEnrollByInvite } from "@/hooks/student";
+import { toast } from "sonner";
 
 const StudentCourses = () => {
   const navigate = useNavigate();
   const [inviteToken, setInviteToken] = useState("");
-
-  // Mock course data
-  const courses = [
-    {
-      id: 1,
-      name: "Advanced Web Technologies",
-      code: "CSE401",
-      teacher: "Dr. Smith",
-      sessions: 12,
-      attended: 9,
-      hasActiveSession: true,
-    },
-    {
-      id: 2,
-      name: "Mobile Application Development",
-      code: "CSE305",
-      teacher: "Prof. Johnson",
-      sessions: 8,
-      attended: 3,
-      hasActiveSession: false,
-    },
-    {
-      id: 3,
-      name: "Database Systems",
-      code: "CSE302",
-      teacher: "Dr. Williams",
-      sessions: 10,
-      attended: 9,
-      hasActiveSession: false,
-    },
-  ];
+  const { data: courses = [], isLoading } = useStudentCourses();
+  const enroll = useEnrollByInvite();
 
   const handleEnrollByInvite = () => {
-    console.log("Enrolling with token:", inviteToken);
-    // POST /api/course/enroll-by-invite
+    if (!inviteToken.trim()) {
+      toast.error("Davet kodu gerekli.");
+      return;
+    }
+    enroll.mutate(inviteToken.trim());
   };
 
   return (
@@ -75,65 +51,39 @@ const StudentCourses = () => {
 
         {/* Course List */}
         <div className="space-y-3">
+          {!isLoading && courses.length === 0 && (
+            <Card className="p-6 text-center text-muted-foreground">Henüz kayıtlı kurs yok.</Card>
+          )}
           {courses.map((course) => (
             <Card
-              key={course.id}
+              key={course.courseId}
               className="p-4 cursor-pointer hover:shadow-md transition-shadow rounded-2xl border"
-              onClick={() => navigate(`/student/courses/${course.id}`)}
+              onClick={() => navigate(`/student/courses/${course.courseId}`)}
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <BookOpen className="w-4 h-4 text-primary" />
-                    <h3 className="font-semibold">{course.name}</h3>
+                    <h3 className="font-semibold">{course.courseName}</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">{course.code}</p>
+                  <p className="text-sm text-muted-foreground">{course.courseCode}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {course.hasActiveSession && (
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-0">Active</Badge>
-                  )}
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               </div>
 
+              {/* Placeholder metadata; real stats can be wired later */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Users className="w-3 h-3" />
-                  <span>{course.teacher}</span>
+                  <span>Kayıtlı öğrenci</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  <span>{course.attended}/{course.sessions} attended</span>
+                  <span>Ders kodu: {course.courseCode}</span>
                 </div>
               </div>
-
-              {/* Progress bar */}
-              <div className="mt-3">
-                <div className="h-2 w-full rounded-full bg-muted"></div>
-                <div
-                  className="h-2 -mt-2 rounded-full bg-emerald-500"
-                  style={{ width: `${Math.round((course.attended / course.sessions) * 100)}%` }}
-                />
-                <div className="flex justify-end text-xs text-muted-foreground mt-1">
-                  {Math.round((course.attended / course.sessions) * 100)}%
-                </div>
-              </div>
-
-              {course.hasActiveSession && (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/student/check-in/${course.id}`);
-                  }}
-                  variant="default"
-                  className="w-full mt-3"
-                  size="sm"
-                >
-                  <QrCode className="w-4 h-4 mr-2" />
-                  Check In Now
-                </Button>
-              )}
             </Card>
           ))}
         </div>

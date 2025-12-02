@@ -373,16 +373,23 @@ public class AttendanceController : ControllerBase
             var teacherId = GetUserId();
             if (teacherId is null) throw new Unauthorized("courses/{courseId}/active-session : teacherId is null");
 
-            var session = await _context.AttendanceSessions.AsNoTracking().Where(c => c.CourseId == courseId && c.TeacherId == teacherId.Value && c.IsActive && c.ExpiresAt > DateTime.UtcNow)
+            var session = await _context.AttendanceSessions.AsNoTracking()
+            .Where(c => c.CourseId == courseId && c.TeacherId == teacherId.Value && c.IsActive && c.ExpiresAt > DateTime.UtcNow)
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync();
 
 
             if (session is null) return NotFound(new {msg = "No active session."});
 
-            
 
-            return Ok(new { session.SessionId, session.ExpiresAt });
+
+            return Ok(new
+            {
+                session.SessionId,
+                session.CourseId,
+                session.ExpiresAt,
+                IsActive = session.IsActive && session.ExpiresAt > DateTime.UtcNow
+            });
 
         }
         catch(System.Exception EX)

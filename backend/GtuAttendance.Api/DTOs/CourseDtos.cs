@@ -37,17 +37,27 @@ public record CourseStudent
     bool isVerifiedEnrollment
 );
 
+public record CourseSessionDto
+(
+    Guid SessionId,
+    DateTime CreatedAt,
+    DateTime ExpiresAt,
+    bool IsActive
+);
+
 public record CourseDetailsResponse
 (
     Guid CourseId,
     string CourseName,
     string CourseCode,
-    string CourseInvitationToken,
+    string InviteToken,
     DateTime createdAt,
     bool IsActive,
     ICollection<CourseRoster> Roster,
     ICollection<CourseEnrollment> Enrollments,
-    ICollection<AttendanceSession> Sessions,
+    ICollection<CourseSessionDto> Sessions,
+    CourseSessionDto? ActiveSession,
     ICollection<CourseStudent> CourseStudents
 );
     
+

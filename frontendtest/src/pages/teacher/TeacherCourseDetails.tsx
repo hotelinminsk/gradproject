@@ -25,7 +25,9 @@ const API_BASE_FALLBACK = "https://localhost:7270";
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
-  const date = new Date(value);
+  // Ensure the date string is parsed as UTC for correct timezone conversion
+  const raw = value.endsWith("Z") ? value : `${value}Z`;
+  const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
 };
@@ -98,8 +100,7 @@ export default function TeacherCourseDetails() {
 
   const handleStartSession = () => {
     if (!courseId) return;
-    const active = activeSession && activeSession.isActive && activeSession.expiresAt && new Date(activeSession.expiresAt) > new Date();
-    if (active && activeSession.sessionId) {
+    if (activeSession && activeSession.isActive && activeSession.sessionId) {
       navigate(`/teacher/session/${activeSession.sessionId}`);
     } else {
       navigate(`/teacher/courses/${courseId}/sessions/new`);
@@ -107,7 +108,7 @@ export default function TeacherCourseDetails() {
   };
 
   // Backend now returns a full invite URL in CourseInvitationToken; trust it as-is.
-  const inviteLink = course?.courseInvitationToken ?? "";
+  const inviteLink = course?.inviteToken ?? "";
 
   const handleManualSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -305,7 +306,11 @@ export default function TeacherCourseDetails() {
               </div>
               <div className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-sm">
                 <Button
-                  className="w-full justify-center bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+                  className={`w-full justify-center text-primary-foreground shadow-lg ${
+                    activeSession && activeSession.isActive
+                      ? "bg-emerald-500 hover:bg-emerald-600"
+                      : "bg-primary hover:bg-primary/90"
+                  }`}
                   onClick={handleStartSession}
                   disabled={isLoading}
                 >
@@ -317,7 +322,7 @@ export default function TeacherCourseDetails() {
                     variant="outline"
                     className="justify-center border-border text-foreground hover:bg-primary/10 hover:text-primary"
                     onClick={() => {
-                      if (!course?.courseInvitationToken) {
+                      if (!course?.inviteToken) {
                         toast.info("Generate an invite token to share enrollment link.");
                         return;
                       }

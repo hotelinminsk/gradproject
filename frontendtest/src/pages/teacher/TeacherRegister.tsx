@@ -15,17 +15,14 @@ export default function TeacherRegister() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try{
-      const data = await apiFetch<AuthResponse>("/api/Auth/login-teacher",
-              {method: "POST",
-              body: form,
-              audience: "teacher"}
-            );
-      
+    try {
+      const data = await apiFetch<AuthResponse>("/api/Auth/register-teacher", {
+        method: "POST",
+        body: form,
+      });
       toast.success("Teacher created. Log in.");
       navigate("/teacher/login");
-
-    }catch(err){
+    } catch (err) {
       toast.error((err as Error).message);
     }
   };

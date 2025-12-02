@@ -415,7 +415,7 @@ public class AuthController : ControllerBase
             var options = _fido2Service.CreateAssertionOptions(allowed, UserVerificationRequirement.Required);
             _memoryCache.Set($"webauthn:assert:{user.UserId}", options, TimeSpan.FromMinutes(10));
 
-            return Ok(options);
+            return Ok(new {userId, options});
         }
         catch (Exception ex)
         {
@@ -466,10 +466,10 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = "Stored public key is missing." });
 
 
-            if (cred.DeviceName != null && cred.DeviceName != request.DeviceName)
-            {
-                throw new DeviceMismatchException();
-            }
+            // if (cred.DeviceName != null && cred.DeviceName != request.DeviceName)
+            // {
+            //     throw new DeviceMismatchException();
+            // }
 
             Console.WriteLine("Assertation: " + assertation);
             Console.WriteLine("Options " + options);
