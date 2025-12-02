@@ -12,6 +12,8 @@ using GtuAttendance.Api.DTOs;
 using GtuAttendance.Infrastructure.Errors;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using GtuAttendance.Api.Extensions;
+using Microsoft.AspNetCore.SignalR;
+using GtuAttendance.Api.Hubs;
 
 namespace GtuAttendance.Api.Controllers;
 
@@ -23,11 +25,15 @@ public class AttendanceController : ControllerBase
     private readonly IMemoryCache _cache;
     private readonly ILogger<AttendanceController> _logger;
 
-    public AttendanceController(AppDbContext context, IMemoryCache cache, ILogger<AttendanceController> logger)
+    private readonly IHubContext<AttendanceHub> _attendanceHub;
+
+
+    public AttendanceController(AppDbContext context, IMemoryCache cache, ILogger<AttendanceController> logger, IHubContext<AttendanceHub> attendanceHub)
     {
         _context = context;
         _cache = cache;
         _logger = logger;
+        _attendanceHub = attendanceHub;
     }
 
     private Guid? GetUserId()
@@ -104,11 +110,21 @@ public class AttendanceController : ControllerBase
                 ExpiresAt = request.ExpiresAtUtc,
                 IsActive = true,
                 Secret = secret,
-                CodeStepSeconds = 30
+                CodeStepSeconds = request.QrCodeValiditySeconds ?? 30,
             };
 
             _context.AttendanceSessions.Add(session);
             await _context.SaveChangesAsync();
+
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("SessionCreated", new
+            {
+                session.SessionId,
+                session.CourseId,
+                session.CreatedAt,  // BUNLARI UTC TUTMUYOR MUYUM BEN AMK
+                session.ExpiresAt,  // UTC NORMALIZE GEREKIYOR GALIBA
+                IsActive = session.IsActive
+            });
 
             return Ok(new CreateSessionResponse(session.SessionId, session.QRCodeToken, session.ExpiresAt));
 
@@ -353,6 +369,14 @@ public class AttendanceController : ControllerBase
             session.IsActive = false;
 
             await _context.SaveChangesAsync();
+
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("SessionClosed", new
+            {
+                session.SessionId,
+                session.CourseId
+            });
+            
 
             return Ok(new { msg = $"Session with session id : {sessionId} closed", sessionId });
 

@@ -55,6 +55,7 @@ builder.Services.AddScoped<JWTService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<Fido2Service>();
 
+
 builder.Services.AddHealthChecks();
 
 builder.Services.AddMemoryCache();
@@ -84,12 +85,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+ builder.Services.AddAuthorization();
 
-builder.Services.AddAuthorization(o =>
-{
-    o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
-});
+ builder.Services.AddAuthorization(o =>
+ {
+     o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+ });
+
+ builder.Services.AddSignalR();
 
 
 // CORS
@@ -133,6 +136,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<GtuAttendance.Api.Hubs.AttendanceHub>("/hubs/attendance");
 
 app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready");
