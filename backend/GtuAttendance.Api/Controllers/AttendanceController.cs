@@ -121,13 +121,12 @@ public class AttendanceController : ControllerBase
             {
                 session.SessionId,
                 session.CourseId,
-                session.CreatedAt,  // BUNLARI UTC TUTMUYOR MUYUM BEN AMK
-                session.ExpiresAt,  // UTC NORMALIZE GEREKIYOR GALIBA
+                CreatedAtUtc = session.CreatedAt.ToUniversalTime(),  // BUNLARI UTC TUTMUYOR MUYUM BEN AMK
+                ExpiresAtUtc = session.ExpiresAt.ToUniversalTime(),  // UTC NORMALIZE GEREKIYOR GALIBA
                 IsActive = session.IsActive
             });
 
-            return Ok(new CreateSessionResponse(session.SessionId, session.QRCodeToken, session.ExpiresAt));
-
+            return Ok(new CreateSessionResponse(session.SessionId, session.QRCodeToken, session.ExpiresAt.ToUniversalTime()));
         }
         catch (Exception EX)
         {
@@ -291,6 +290,18 @@ public class AttendanceController : ControllerBase
 
             var status = within ? "Present" : "OutOfRange";
 
+            await _attendanceHub.Clients.Group($"course-{session.CourseId}")
+            .SendAsync("CheckInRecorded", new
+            {
+                session.SessionId,
+                session.CourseId,
+                studentId,
+                studentName = record.Student?.FullName,
+                withinRange = record.IsWithinRange,
+                distanceMeters = record.DistanceFromTeacherMeters,
+                checkInTimeUtc = record.CheckInTime.ToUniversalTime()
+            });
+
             return Ok(new CheckInResponse(status, record.DistanceFromTeacherMeters, record.IsWithinRange, record.CheckInTime));
 
 
@@ -374,9 +385,10 @@ public class AttendanceController : ControllerBase
             .SendAsync("SessionClosed", new
             {
                 session.SessionId,
-                session.CourseId
+                session.CourseId,
+                ClosedAtUtc = DateTime.UtcNow
             });
-            
+
 
             return Ok(new { msg = $"Session with session id : {sessionId} closed", sessionId });
 
