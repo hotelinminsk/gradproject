@@ -27,7 +27,7 @@ const TeacherSidebar = () => {
 
 
   return (
-    <aside className="w-64 h-screen bg-sidebar border-r shadow-sm flex flex-col">
+    <aside className="w-64 min-h-screen bg-sidebar border-r shadow-sm flex flex-col">
       {/* Account header */}
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">

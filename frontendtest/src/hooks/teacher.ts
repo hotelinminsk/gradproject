@@ -77,7 +77,7 @@ export const useTeacherCourses = () =>
         queryKey: ["teacher-courses"],
         queryFn: () => 
             apiFetch<TeacherCourseSummary[]>("/api/course/mine/courses/teacher", {audience: "teacher"}),
-        staleTime: 60 * 1000,
+        staleTime: Infinity,
     });
 
 
@@ -91,7 +91,7 @@ export const useTeacherCourse = (courseId?: string) =>
         audience: "teacher",
       });
     },
-    staleTime: 60 * 1000,
+    staleTime: Infinity,
   });
 
 export const useCreateSession = () => {
