@@ -10,6 +10,8 @@ import { CalendarClock, Clock3, Link2, Users, ArrowLeft, Maximize } from "lucide
 import QRCodeDisplay from "@/components/shared/QRCodeDisplay";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { useTeacherSession } from "@/providers";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function TeacherSession() {
   const { sessionId } = useParams();
@@ -21,7 +23,21 @@ export default function TeacherSession() {
   const isActive = detail?.isActive ?? true;
   const { data: qrPoll, isLoading: qrLoading } = useSessionQrPoll(sessionId, isActive);
   const closeSession = useCloseSession();
+  const {hub} = useTeacherSession();
+  const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if(!hub) return;
+    const handler = (payload: { sessionId: string }) => {
+      if(payload.sessionId  === sessionId){
+        queryClient.invalidateQueries({queryKey: ["teacher-session", sessionId ]});
+      }
+    };
+    hub.on("CheckInRecorded", handler);
+    return () => {
+      hub.off("CheckInRecorded", handler);
+    };
+  }, [hub, sessionId, queryClient]);
   // If the session is closed but user is on the live page, redirect to the closed detail page.
   useEffect(() => {
     if (!detailLoading && sessionId && !isActive) {

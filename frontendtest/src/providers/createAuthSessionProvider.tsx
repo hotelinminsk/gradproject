@@ -13,6 +13,7 @@ export interface AuthSessionContextValue<TProfile> {
     isLoading: boolean;
     login: (auth: AuthResponse) => void;
     logout: () => void;
+    hub? : HubConnection | null;
 }
 
 
@@ -78,6 +79,7 @@ export function createAuthSessionProvider<TProfile>(
                 isLoading: query.isLoading,
                 login,
                 logout,
+                hub,
             }} 
             >
                 {children}
