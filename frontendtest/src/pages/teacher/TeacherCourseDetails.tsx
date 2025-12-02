@@ -15,7 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useNavigate } from "react-router-dom";
 import { BookOpen, Users, Link2, Upload, Play, Plus, CheckCircle2, Clock3 } from "lucide-react";
-import { useTeacherCourse, useUploadRosterBulk, useActiveSession } from "@/hooks/teacher";
+import { useTeacherCourse, useUploadRosterBulk } from "@/hooks/teacher";
 import { toast } from "sonner";
 import { useState, useCallback, useEffect } from "react";
 import * as XLSX from "xlsx";
@@ -63,7 +63,6 @@ export default function TeacherCourseDetails() {
   const { data: course, isLoading, isError } = useTeacherCourse(courseId);
   const uploadRosterBulk = useUploadRosterBulk(courseId);
   const manualAddMutation = useUploadRosterBulk(courseId);
-  const { data: activeSession } = useActiveSession(courseId);
   const queryClient = useQueryClient();
   const {hub} = useTeacherSession();
 
@@ -89,6 +88,7 @@ export default function TeacherCourseDetails() {
   const verifiedStudents = course?.courseStudents ?? [];
   const rosterEntries = course?.roster ?? [];
   const sessions = course?.sessions ?? [];
+  const activeSession = sessions.find((s) => s.isActive);
   const enrolledStudentIds = new Set(
     verifiedStudents
       .map((student) => student.gtustudentid?.trim().toLowerCase())

@@ -91,8 +91,7 @@ export const useTeacherCourse = (courseId?: string) =>
         audience: "teacher",
       });
     },
-    staleTime: 0,
-    refetchInterval: 5000,
+    staleTime: 60 * 1000,
   });
 
 export const useCreateSession = () => {
