@@ -14,3 +14,4 @@ export interface StudentProfile {
     createdAt: string;
     enrolledCourseCount: number;
 }
+

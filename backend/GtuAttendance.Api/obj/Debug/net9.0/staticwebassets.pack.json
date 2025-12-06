@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/wwwroot/admin-test.html",
+      "PackagePath": "staticwebassets/admin-test.html"
+    },
+    {
+      "Id": "/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/wwwroot/webauthn-test.html",
+      "PackagePath": "staticwebassets/webauthn-test.html"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.GtuAttendance.Api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.GtuAttendance.Api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.build.GtuAttendance.Api.props",
+      "PackagePath": "build\\GtuAttendance.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.GtuAttendance.Api.props",
+      "PackagePath": "buildMultiTargeting\\GtuAttendance.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.GtuAttendance.Api.props",
+      "PackagePath": "buildTransitive\\GtuAttendance.Api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -20,6 +20,7 @@
           "net9.0"
         ],
         "sources": {
+          "/usr/lib64/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -45,7 +46,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -93,7 +94,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/kleinerprinze/.dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/9.0.112/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
@@ -113,6 +114,7 @@
           "net9.0"
         ],
         "sources": {
+          "/usr/lib64/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -131,7 +133,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -152,7 +154,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/kleinerprinze/.dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/9.0.112/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
@@ -172,6 +174,7 @@
           "net9.0"
         ],
         "sources": {
+          "/usr/lib64/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -194,7 +197,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -241,7 +244,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/kleinerprinze/.dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/9.0.112/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -84,7 +84,28 @@ export default function TeacherSession() {
         <h1 className="text-3xl font-bold">{isActive ? "Live Session" : "Session Details"}</h1>
         <p className="text-sm text-muted-foreground">Session ID: {sessionId}</p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 justify-end">
+        {qrValue && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="border-border text-foreground hover:bg-primary/10 hover:text-primary"
+              >
+                <Maximize className="mr-2 h-4 w-4" />
+                Full screen QR
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[820px]">
+              <DialogHeader>
+                <DialogTitle>Scan to check in</DialogTitle>
+              </DialogHeader>
+              <div className="flex justify-center py-4">
+                <QRCodeDisplay code={qrValue} size={520} />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         <Button
           variant="outline"
           className="border-border text-foreground hover:bg-primary/10 hover:text-primary"
@@ -196,138 +217,80 @@ export default function TeacherSession() {
     <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6">
       {header}
 
-      <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] items-start">
         <Card className="p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Rotating QR</h2>
-              <p className="text-sm text-muted-foreground">
-                Refreshes automatically. Project this or open full screen for students to check in.
-              </p>
+              <p className="text-sm text-muted-foreground">Refreshes automatically for student check-ins.</p>
             </div>
             <Badge variant="secondary" className="bg-primary/10 text-primary">
               {countdown !== null ? `Next in ${countdown}s` : "Polling…"}
             </Badge>
           </div>
-          <div className="flex flex-col items-center gap-3 rounded-2xl border bg-background/80 p-4">
+          <div className="flex min-h-[520px] flex-col items-center justify-center gap-6 rounded-2xl border bg-background/80 p-6">
             {qrLoading ? (
-              <Skeleton className="h-64 w-64" />
+              <Skeleton className="h-[420px] w-[420px]" />
             ) : qrValue ? (
-              <div className="flex flex-col items-center gap-3">
-                <QRCodeDisplay code={qrValue} size={240} />
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="border-border text-foreground hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Maximize className="mr-2 h-4 w-4" />
-                      Full screen
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[520px]">
-                    <DialogHeader>
-                      <DialogTitle>Scan to check in</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex justify-center py-4">
-                      <QRCodeDisplay code={qrValue} size={360} />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <QRCodeDisplay code={qrValue} size={440} />
             ) : (
               <p className="text-sm text-muted-foreground">Waiting for QR code…</p>
             )}
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                variant="outline"
-                className="border-border text-foreground hover:bg-primary/10 hover:text-primary"
-                onClick={handleCopyCode}
-                disabled={!qrValue}
-              >
-                <Link2 className="mr-2 h-4 w-4" />
-                Copy code
-              </Button>
-            </div>
           </div>
         </Card>
-
         <Card className="p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Session status</h2>
-            <Badge className="bg-primary text-primary-foreground">Active</Badge>
+          <div className="flex items-center justify-between border-b pb-3">
+            <div className="flex items-center gap-3">
+              <Users className="h-5 w-5 text-primary" />
+              <div>
+                <h2 className="text-lg font-semibold">Checked-in students</h2>
+                <p className="text-sm text-muted-foreground">Live attendee list for this session.</p>
+              </div>
+            </div>
+            <Badge variant="secondary" className="bg-primary/10 text-primary">
+              {attendees.length}
+            </Badge>
           </div>
-          <div className="grid gap-3">
-            <div className="rounded-xl border bg-muted/40 p-3">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Attendees</p>
-              <p className="text-2xl font-semibold text-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" /> {attendees.length}
-              </p>
-            </div>
-            <div className="rounded-xl border bg-muted/40 p-3">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Expires</p>
-              <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                <Clock3 className="h-4 w-4 text-primary" /> {expiresLabel}
-              </p>
-            </div>
-            <div className="rounded-xl border bg-muted/40 p-3">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Created</p>
-              <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                <CalendarClock className="h-4 w-4 text-primary" />
-                {createdDate ? createdDate.toLocaleString() : "—"}
-              </p>
-            </div>
+          <div className="max-h-[520px] overflow-y-auto">
+            {detailLoading ? (
+              <div className="space-y-2 py-4">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <Skeleton key={`attendee-skel-${idx}`} className="h-4 w-full" />
+                ))}
+              </div>
+            ) : attendees.length ? (
+              <div className="mt-4 overflow-hidden rounded-xl border">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-muted/60 text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Name</th>
+                      <th className="px-4 py-2 font-medium">GTU ID</th>
+                      <th className="px-4 py-2 font-medium">Checked in</th>
+                      <th className="px-4 py-2 font-medium text-right">Distance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendees.map((attendee) => (
+                      <tr key={`${attendee.gtuStudentId}-${attendee.checkedInAtUtc}`} className="border-t">
+                        <td className="px-4 py-2">{attendee.fullName}</td>
+                        <td className="px-4 py-2 text-muted-foreground">{attendee.gtuStudentId}</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          {new Date(attendee.checkedInAtUtc).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2 text-right text-muted-foreground">
+                          {attendee.distanceMeters ? `${Math.round(attendee.distanceMeters)} m` : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="py-4 text-sm text-muted-foreground">No check-ins yet.</p>
+            )}
           </div>
         </Card>
       </div>
-
-      <Card className="p-5">
-        <div className="flex items-center justify-between border-b pb-3">
-          <div>
-            <h2 className="text-lg font-semibold">Checked-in students</h2>
-            <p className="text-sm text-muted-foreground">Live attendee list for this session.</p>
-          </div>
-          <Badge variant="secondary" className="bg-primary/10 text-primary">
-            {attendees.length}
-          </Badge>
-        </div>
-        {detailLoading ? (
-          <div className="space-y-2 py-4">
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <Skeleton key={`attendee-skel-${idx}`} className="h-4 w-full" />
-            ))}
-          </div>
-        ) : attendees.length ? (
-          <div className="mt-4 overflow-hidden rounded-xl border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-muted/60 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Name</th>
-                  <th className="px-4 py-2 font-medium">GTU ID</th>
-                  <th className="px-4 py-2 font-medium">Checked in</th>
-                  <th className="px-4 py-2 font-medium text-right">Distance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendees.map((attendee) => (
-                  <tr key={`${attendee.gtuStudentId}-${attendee.checkedInAtUtc}`} className="border-t">
-                    <td className="px-4 py-2">{attendee.fullName}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{attendee.gtuStudentId}</td>
-                    <td className="px-4 py-2 text-muted-foreground">
-                      {new Date(attendee.checkedInAtUtc).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-2 text-right text-muted-foreground">
-                      {attendee.distanceMeters ? `${Math.round(attendee.distanceMeters)} m` : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="py-4 text-sm text-muted-foreground">No check-ins yet.</p>
-        )}
-      </Card>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { apiFetch } from "@/lib/api";
 import { StudentCourseSummary } from "@/types/course";
 import { toast } from "sonner";
 
+
 export const useStudentCourses = () =>
   useQuery({
     queryKey: ["student-courses"],
