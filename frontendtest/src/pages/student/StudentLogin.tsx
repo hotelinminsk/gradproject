@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Fingerprint } from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import { authStore } from "@/lib/authStore";
 import { AuthResponse } from "@/types/auth";
 import { toast } from "sonner";
+import { useStudentSession } from "@/providers";
 
 export default function StudentLogin() {
   const navigate = useNavigate();
+  const { login } = useStudentSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [deviceName, setDeviceName] = useState("");
@@ -81,7 +82,9 @@ export default function StudentLogin() {
         },
       });
 
-      authStore.setToken("student", auth.token);
+      localStorage.setItem("student_device_name", deviceName || "Bu cihaz (passkey)");
+
+      login(auth);
       toast.success("Giriş başarılı.");
       navigate("/student/home");
     } catch (err: any) {

@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
-import { authStore } from "@/lib/authStore";
 import { AuthResponse } from "@/types/auth";
+import { useStudentSession } from "@/providers";
 
 const StudentRegister = () => {
   const navigate = useNavigate();
+  const { login } = useStudentSession();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -67,7 +68,7 @@ const StudentRegister = () => {
           gtuStudentId: formData.gtuStudentId.trim(),
         },
       });
-      authStore.setToken("student", auth.token);
+      login(auth);
 
       // 2) Begin WebAuthn
       const begin = await apiFetch<any>("/api/auth/register-webauthn/begin", {
@@ -97,8 +98,10 @@ const StudentRegister = () => {
         audience: "student",
       });
 
+      localStorage.setItem("student_device_name", formData.deviceName || "Bu cihaz (passkey)");
+
       toast.success("Kayıt ve passkey tamamlandı. Şimdi giriş yapabilirsiniz.");
-      navigate("/student/login");
+      navigate("/student/home");
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message ?? "Kayıt başarısız");

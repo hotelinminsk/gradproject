@@ -90,9 +90,19 @@ export default function TeacherCourseDetails() {
   const sessions = course?.sessions ?? [];
   const activeSession = sessions.find((s) => s.isActive);
   const enrolledStudentIds = new Set(
+    [
+      ...verifiedStudents
+        .map((student) => student.gtustudentid?.trim().toLowerCase())
+        .filter((id): id is string => Boolean(id)),
+      ...((course?.enrollments ?? [])
+        .filter((enr) => enr.isValidated && enr.student?.gtuStudentId)
+        .map((enr) => enr.student!.gtuStudentId.trim().toLowerCase())),
+    ],
+  );
+  const enrolledNames = new Set(
     verifiedStudents
-      .map((student) => student.gtustudentid?.trim().toLowerCase())
-      .filter((id): id is string => Boolean(id)),
+      .map((s) => s.fullname?.trim().toLowerCase())
+      .filter((n): n is string => Boolean(n)),
   );
   const stats = [
     {
@@ -662,7 +672,11 @@ export default function TeacherCourseDetails() {
                   </thead>
                   <tbody>
                     {rosterEntries.slice(0, 8).map((entry) => {
-                      const isEnrolled = enrolledStudentIds.has(entry.gtuStudentId?.trim().toLowerCase());
+                      const normalizedId = entry.gtuStudentId?.trim().toLowerCase();
+                      const normalizedName = entry.fullName?.trim().toLowerCase();
+                      const isEnrolled =
+                        (normalizedId && enrolledStudentIds.has(normalizedId)) ||
+                        (normalizedName && enrolledNames.has(normalizedName));
                       return (
                         <tr key={entry.rosterId} className="border-t">
                           <td className="px-4 py-2">{entry.fullName}</td>

@@ -7,10 +7,10 @@ const StudentBottomNav = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: "/student/home", icon: Home, label: "Home" },
-    { path: "/student/courses", icon: BookOpen, label: "Courses" },
-    { path: "/student/check-in", icon: QrCode, label: "Check In" },
-    { path: "/student/settings", icon: Settings, label: "Settings" },
+    { path: "/student/home", icon: Home, label: "Ana sayfa" },
+    { path: "/student/courses", icon: BookOpen, label: "Dersler" },
+    { path: "/student/check-in", icon: QrCode, label: "Yoklama" },
+    { path: "/student/settings", icon: Settings, label: "Ayarlar" },
   ];
 
   return (

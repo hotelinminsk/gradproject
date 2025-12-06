@@ -411,6 +411,25 @@ public class CourseController : ControllerBase
             var studentId = User.GetUserId();
             if (studentId is null ) throw new Unauthorized("mine/courses/student");
 
+            var courses = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId && !cr.IsDropped)
+            .Select(e => new {
+                CourseId = e.Course.CourseId,
+                CourseName = e.Course.CourseName,
+                CourseCode = e.Course.CourseCode,
+                TeacherName = e.Course.Teacher.FullName,
+                LatestSession = e.Course.Sessions.
+                OrderByDescending(s => s.CreatedAt)
+                .Select(s => new
+                {
+                    SessionId = s.SessionId,
+                    SessionCreatedAt = s.CreatedAt,
+                    SessionExpiredAt = s.ExpiresAt,
+                    SessionIsActive = s.IsActive && s.ExpiresAt > DateTime.UtcNow,
+                    IsAttended = s.AttendanceRecords.Any(ar => ar.StudentId == studentId)
+                })
+                
+            }).ToListAsync();  
+
             var list = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId && !cr.IsDropped)
             .Select(e => new { e.Course.CourseId, e.Course.CourseName, e.Course.CourseCode })
             .ToListAsync();
