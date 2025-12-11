@@ -413,28 +413,27 @@ public class CourseController : ControllerBase
 
             var courses = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId && !cr.IsDropped)
             .Select(e => new {
-                CourseId = e.Course.CourseId,
-                CourseName = e.Course.CourseName,
-                CourseCode = e.Course.CourseCode,
-                TeacherName = e.Course.Teacher.FullName,
-                LatestSession = e.Course.Sessions.
-                OrderByDescending(s => s.CreatedAt)
-                .Select(s => new
-                {
-                    SessionId = s.SessionId,
-                    SessionCreatedAt = s.CreatedAt,
-                    SessionExpiredAt = s.ExpiresAt,
-                    SessionIsActive = s.IsActive && s.ExpiresAt > DateTime.UtcNow,
-                    IsAttended = s.AttendanceRecords.Any(ar => ar.StudentId == studentId)
-                })
+                courseId = e.Course.CourseId,
+                courseName = e.Course.CourseName,
+                courseCode = e.Course.CourseCode,
+                teacherName = e.Course.Teacher.FullName,
+                latestSession = e.Course.Sessions
+                    .OrderByDescending(s => s.CreatedAt)
+                    .Select(s => new
+                    {
+                        sessionId = s.SessionId,
+                        sessionCreatedAt = s.CreatedAt,
+                        sessionExpiredAt = s.ExpiresAt,
+                        sessionIsActive = s.IsActive && s.ExpiresAt > DateTime.UtcNow,
+                        isAttended = s.AttendanceRecords.Any(ar => ar.StudentId == studentId)
+                    })
+                    .FirstOrDefault()
                 
             }).ToListAsync();  
 
-            var list = await _context.CourseEnrollments.Where(cr => cr.StudentId == studentId && !cr.IsDropped)
-            .Select(e => new { e.Course.CourseId, e.Course.CourseName, e.Course.CourseCode })
-            .ToListAsync();
+            
 
-            return Ok(list);
+            return Ok(courses);
         }
         catch (System.Exception EX)
         {

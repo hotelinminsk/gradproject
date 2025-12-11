@@ -1,27 +1,62 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, GraduationCap, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, GraduationCap, Clock3, MapPin, Calendar } from "lucide-react";
 import StudentBottomNav from "@/components/student/StudentBottomNav";
+import { useStudentCourses } from "@/hooks/student";
+import { StudentCourseSummary } from "@/types/course";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const sessions = {
-  upcoming: [
-    { kind: "Lecture", when: "Mon, Oct 28, 10:00 AM - 11:30 AM", room: "Room 203" },
-    { kind: "Lab", when: "Wed, Oct 30, 1:00 PM - 2:30 PM", room: "Lab B" },
-  ],
-  history: [
-    { date: "Oct 21, 2024", kind: "Lecture", status: "Present" as const },
-    { date: "Oct 18, 2024", kind: "Lab", status: "Absent" as const },
-    { date: "Oct 14, 2024", kind: "Lecture", status: "Late" as const },
-  ],
+const parseUtc = (value?: string) => {
+  if (!value) return new Date(NaN);
+  const raw = value.endsWith("Z") ? value : `${value}Z`;
+  return new Date(raw);
+};
+
+const formatDateTr = (value?: string) => {
+  if (!value) return "—";
+  const date = parseUtc(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("tr-TR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
+};
+
+const formatRelative = (value?: string) => {
+  if (!value) return "—";
+  const date = parseUtc(value);
+  const target = date.getTime();
+  if (Number.isNaN(target)) return "—";
+  const diffMin = Math.round((target - Date.now()) / 60000);
+  if (diffMin <= -1) return "Süre doldu";
+  if (diffMin === 0) return "Az önce doluyor";
+  if (diffMin < 60) return `${diffMin} dk içinde bitiyor`;
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} saat içinde bitiyor`;
+  const diffDay = Math.round(diffHr / 24);
+  return `${diffDay} gün içinde bitiyor`;
 };
 
 export default function StudentCourseDetails() {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const [activeTab, setActiveTab] = React.useState<"upcoming" | "history">("upcoming");
+  const { data: courses = [], isLoading } = useStudentCourses();
+
+  const course = useMemo<StudentCourseSummary | undefined>(
+    () => courses.find((c) => c.courseId === courseId),
+    [courses, courseId],
+  );
+
+  const latest = course?.latestSession;
+  const hasActive = Boolean(latest?.sessionIsActive);
+
+  const handleAttend = () => {
+    if (!courseId || !hasActive) return;
+    navigate(`/student/check-in/${courseId}`);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-safe-nav">
@@ -31,91 +66,98 @@ export default function StudentCourseDetails() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-center flex-1">
-            <h1 className="text-lg font-bold">Course Details</h1>
-            <p className="text-xs text-muted-foreground">CS-101</p>
+            <h1 className="text-lg font-bold">{course?.courseName || "Ders Detayı"}</h1>
+            <p className="text-xs text-muted-foreground">{course?.courseCode}</p>
           </div>
           <div className="w-7" />
         </div>
       </div>
 
       <div className="px-4 space-y-4">
-        <Card className="p-4">
-          <h2 className="font-semibold text-lg">Introduction to Computer Science</h2>
-          <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" /> Prof. Ada Lovelace
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> Building A, Room 203
-            </div>
-          </div>
-        </Card>
-
-        {/* Tabs */}
-        <div className="flex gap-2 bg-muted/40 rounded-xl p-1">
-          <button
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${activeTab === "upcoming" ? "bg-background shadow" : "text-muted-foreground"}`}
-            onClick={() => setActiveTab("upcoming")}
-          >
-            Upcoming Sessions
-          </button>
-          <button
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${activeTab === "history" ? "bg-background shadow" : "text-muted-foreground"}`}
-            onClick={() => setActiveTab("history")}
-          >
-            Attendance History
-          </button>
-        </div>
-
-        {/* Lists */}
-        {activeTab === "upcoming" ? (
-          <div className="space-y-3">
-            {sessions.upcoming.map((s, i) => (
-              <Card key={i} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{s.kind}</p>
-                    <div className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Calendar className="w-4 h-4" /> {s.when}
-                    </div>
-                  </div>
-                  <span className="text-sm text-muted-foreground">{s.room}</span>
-                </div>
-              </Card>
-            ))}
-          </div>
+        {isLoading ? (
+          <Card className="p-4 space-y-3">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-10 w-full" />
+          </Card>
+        ) : !course ? (
+          <Card className="p-4 text-center text-muted-foreground">Ders bulunamadı.</Card>
         ) : (
-          <div className="space-y-3">
-            {sessions.history.map((h, i) => (
-              <Card key={i} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{h.date}</p>
-                    <p className="text-sm text-muted-foreground">{h.kind}</p>
+          <>
+            <Card className="p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-primary" />
+                    {course.teacherName || "Öğretim görevlisi"}
+                  </p>
+                  <h2 className="text-xl font-semibold text-foreground">{course.courseName}</h2>
+                  <p className="text-sm text-muted-foreground">{course.courseCode}</p>
+                </div>
+                {hasActive && <Badge className="bg-emerald-100 text-emerald-700">Aktif yoklama</Badge>}
+              </div>
+
+              <div className="rounded-2xl border bg-muted/40 p-3 text-sm">
+                {latest ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-foreground">
+                        <Clock3 className="w-4 h-4 text-primary" />
+                        <span>{latest.sessionIsActive ? "Aktif yoklama" : "Son yoklama"}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{formatRelative(latest.sessionExpiredAt)}</span>
+                    </div>
+                    <p className="text-muted-foreground mt-2">
+                      Başlangıç: {formatDateTr(latest.sessionCreatedAt)}
+                      <br />
+                      Bitiş: {formatDateTr(latest.sessionExpiredAt)}
+                      {latest.isAttended && (
+                        <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-700">
+                          Katıldın
+                        </span>
+                      )}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">Henüz yoklama oluşturulmamış.</p>
+                )}
+              </div>
+
+              <Button
+                className="w-full h-12 text-base"
+                disabled={!hasActive}
+                onClick={handleAttend}
+              >
+                {hasActive ? "Yoklamaya katıl" : "Aktif yoklama yok"}
+              </Button>
+            </Card>
+
+            {/* Basit geçmiş (özet) */}
+            <Card className="p-4">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                Son yoklama özeti
+              </h3>
+              {latest ? (
+                <div className="flex items-center justify-between text-sm">
+                  <div className="text-muted-foreground">
+                    <p>Oluşturma: {formatDateTr(latest.sessionCreatedAt)}</p>
+                    <p>Bitiş: {formatDateTr(latest.sessionExpiredAt)}</p>
                   </div>
-                  <Badge
-                    className={
-                      h.status === "Present" ? "bg-emerald-100 text-emerald-700" :
-                      h.status === "Absent" ? "bg-red-100 text-red-700" :
-                      "bg-amber-100 text-amber-700"
-                    }
-                  >
-                    {h.status}
+                  <Badge variant="outline" className={latest.sessionIsActive ? "border-emerald-200 text-emerald-700" : ""}>
+                    {latest.sessionIsActive ? "Aktif" : "Kapandı"}
                   </Badge>
                 </div>
-              </Card>
-            ))}
-          </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">Kayıt yok.</p>
+              )}
+            </Card>
+          </>
         )}
-
-        <Button className="w-full h-12 text-base" variant="default">
-          View Syllabus
-        </Button>
       </div>
 
       <StudentBottomNav />
     </div>
   );
 }
-
 

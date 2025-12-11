@@ -40,6 +40,14 @@ export interface StudentCourseSummary {
   courseId: string;
   courseName: string;
   courseCode: string;
+  teacherName?: string;
+  latestSession?: {
+    sessionId: string;
+    sessionCreatedAt: string;
+    sessionExpiredAt: string;
+    sessionIsActive: boolean;
+    isAttended: boolean;
+  } | null;
 }
 
 export interface CourseRosterEntry {

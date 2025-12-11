@@ -11,7 +11,9 @@ export const useStudentCourses = () =>
       apiFetch<StudentCourseSummary[]>("/api/course/mine/courses/student", {
         audience: "student",
       }),
-    staleTime: 30_000,
+    staleTime: 5_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
 export const useEnrollByInvite = () => {
