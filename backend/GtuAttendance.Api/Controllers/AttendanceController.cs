@@ -378,6 +378,8 @@ public class AttendanceController : ControllerBase
                 return Ok(new { msg = $"Session with session id : {sessionId} is already closed", sessionId });
             }
             session.IsActive = false;
+            // Manual close: bitişi şimdiye çek ki istemci relative sürede "Süre doldu" göstersin.
+            session.ExpiresAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 

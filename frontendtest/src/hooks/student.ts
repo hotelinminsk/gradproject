@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { StudentCourseSummary } from "@/types/course";
 import { toast } from "sonner";
+import { useStudentSession } from "@/providers";
 
 
 export const useStudentCourses = () =>
@@ -18,13 +19,24 @@ export const useStudentCourses = () =>
 
 export const useEnrollByInvite = () => {
   const queryClient = useQueryClient();
+  const { hub } = useStudentSession();
   return useMutation({
-    mutationFn: (invitationToken: string) =>
-      apiFetch("/api/course/enroll-by-invite", {
+    mutationFn: async (invitationToken: string) => {
+      const res = await apiFetch<{ courseId: string }>("/api/course/enroll-by-invite", {
         method: "POST",
         body: { invitationToken },
         audience: "student",
-      }),
+      });
+      // yeni kurs grubu için huba bağlan
+      if (res?.courseId && hub) {
+        try {
+          await hub.invoke("JoinCourseGroupAsStudent", res.courseId);
+        } catch {
+          // sessiz geç
+        }
+      }
+      return res;
+    },
     onSuccess: () => {
       toast.success("Kursa kayıt başarılı.");
       queryClient.invalidateQueries({ queryKey: ["student-courses"] });

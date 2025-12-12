@@ -17,6 +17,8 @@ using GtuAttendance.Infrastructure.Helpers;
 using GtuAttendance.Api.Extensions;
 using Microsoft.Identity.Client;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.AspNetCore.SignalR;
+using GtuAttendance.Api.Hubs;
 
 
 namespace GtuAttendance.Api.Controllers;
@@ -29,12 +31,14 @@ public class CourseController : ControllerBase
     private readonly AppDbContext _context;
 
     private readonly PasswordService _passwordService;
+    private readonly IHubContext<GtuAttendance.Api.Hubs.AttendanceHub> _attendanceHub;
 
 
     public CourseController(
         ILogger<CourseController> logger,
         AppDbContext context,
-        PasswordService passwordService
+        PasswordService passwordService,
+        IHubContext<GtuAttendance.Api.Hubs.AttendanceHub> attendanceHub
     )
     {
         _logger = logger;
@@ -42,6 +46,7 @@ public class CourseController : ControllerBase
         _context = context;
 
         _passwordService = passwordService;
+        _attendanceHub = attendanceHub;
     }
 
     private static string NewInviteToken()
@@ -335,6 +340,15 @@ public class CourseController : ControllerBase
 
 
                 await _context.SaveChangesAsync();
+
+                await _attendanceHub.Clients.Group($"course-{course.CourseId}")
+                    .SendAsync("EnrollmentUpdated", new
+                    {
+                        courseId = course.CourseId,
+                        studentId,
+                        fullName = studentRow.FullName,
+                        gtuStudentId = studentProfile?.GtuStudentId
+                    });
 
                 return Ok(new { succes = true, course.CourseId, course.CourseName, course.CourseCode });
             }
