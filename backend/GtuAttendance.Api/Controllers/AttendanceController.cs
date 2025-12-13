@@ -324,6 +324,7 @@ public class AttendanceController : ControllerBase
             if(teacherId is null) throw new Unauthorized($"sessions/sessionId:{sessionId} : Teacher id is null.");
 
             var session = await _context.AttendanceSessions
+            .Include(s => s.Course)
             .Include(s => s.AttendanceRecords)
             .ThenInclude(r => r.Student)
             .AsNoTracking()
@@ -344,6 +345,8 @@ public class AttendanceController : ControllerBase
             var response = new SessionDetailResponse(
                 session.SessionId,
                 session.CourseId,
+                session.Course.CourseName,
+                session.Course.CourseCode,
                 session.CreatedAt,
                 session.ExpiresAt,
                 session.IsActive && session.ExpiresAt > DateTime.UtcNow,

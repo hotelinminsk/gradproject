@@ -41,6 +41,33 @@ export const useEnrollByInvite = () => {
       toast.success("Kursa kayıt başarılı.");
       queryClient.invalidateQueries({ queryKey: ["student-courses"] });
     },
+    // ... existing code ...
     onError: (err: any) => toast.error(err?.message ?? "Kursa kayıt başarısız"),
+  });
+};
+
+export const useDropCourse = () => {
+  const queryClient = useQueryClient();
+  const { profile } = useStudentSession();
+
+  return useMutation({
+    mutationFn: async (courseId: string) => {
+      if (!profile?.userId) throw new Error("Student ID missing");
+
+      // Matches the backend endpoint: POST /api/course/{CourseId}/student/dropself/{StudentId}
+      // Note: Backend endpoint uses {CourseId} and {StudentId} in route.
+      return apiFetch<{ dropped: number }>(`/api/course/${courseId}/student/dropself/${profile.userId}`, {
+        method: "POST",
+        audience: "student",
+      });
+    },
+    onSuccess: () => {
+      toast.success("Ders başarıyla bırakıldı.");
+      queryClient.invalidateQueries({ queryKey: ["student-courses"] });
+    },
+    onError: (err: any) => {
+      console.error(err);
+      toast.error(err?.message ?? "Ders bırakılamadı.");
+    },
   });
 };

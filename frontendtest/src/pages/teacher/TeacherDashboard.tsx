@@ -15,28 +15,27 @@ const TeacherDashboard = () => {
 
   if (!profile || !profile.fullName) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">
+      <div className="flex min-h-[60vh] items-center justify-center text-slate-500">
         Please sign in as a teacher to view the dashboard.
       </div>
     );
   }
-  if(isLoading || !data){
-    return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <span className="ml-2 text-sm text-muted-foreground">Loading dashboard…</span>
-    </div>
-  );
-  }
-  
-  const stats = [
-    { label: "Active Courses", value: data?.activeCourseCount, icon: BookOpen, color: "text-primary" },
-    { label: "Total Students", value: data?.totalStudentCount, icon: Users, color: "text-secondary" },
-    { label: "Sessions This Week", value: data?.sessionsThisWeek, icon: Calendar, color: "text-accent" },
-    { label: "Avg Attendance", value: data?.averageAttendancePCT, icon: TrendingUp, color: "text-success" },
-  ];
-  
 
+  if (isLoading || !data) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center gap-3">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+        <span className="text-sm font-medium text-slate-600">Loading dashboard...</span>
+      </div>
+    );
+  }
+
+  const stats = [
+    { label: "Active Courses", value: data?.activeCourseCount ?? 0, icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Total Students", value: data?.totalStudentCount ?? 0, icon: Users, color: "text-violet-600", bg: "bg-violet-50" },
+    { label: "Sessions This Week", value: data?.sessionsThisWeek ?? 0, icon: Calendar, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "Avg Attendance", value: `${data?.averageAttendancePCT ?? 0}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+  ];
 
   const activeByCourse = new Map<string, string>();
   sessions.forEach((s) => {
@@ -51,83 +50,107 @@ const TeacherDashboard = () => {
       name: course.courseName,
       code: course.courseCode,
       students: course.studentCount,
-      nextSession: nextSession ? formatRelative(new Date(nextSession), new Date()) : "No session scheduled.",
+      nextSession: nextSession ? formatRelative(new Date(nextSession), new Date()) : "No upcoming session",
       activeSessionId: courseId ? activeByCourse.get(courseId) : undefined,
     };
   }).filter((course) => Boolean(course.id));
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {profile.fullName}</p>
-          </div>
-          <Button onClick={() => navigate("/teacher/create-course")}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Course
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Welcome back, {profile.fullName}</p>
+        </div>
+        <Button
+          onClick={() => navigate("/teacher/create-course")}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Course
+        </Button>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label} className="p-5 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow rounded-xl">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+                  <p className="text-3xl font-semibold text-slate-900 mt-2 tracking-tight">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-xl ${stat.bg}`}>
+                  <Icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Recent Courses */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">Your Courses</h2>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/courses")} className="text-slate-500 hover:text-slate-900">
+            View All
           </Button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.label} className="p-5 hover:shadow-sm transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-semibold">{stat.value}</p>
+        <Card className="border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden">
+          {recentCourses.length === 0 ? (
+            <div className="p-12 text-center text-slate-400">
+              <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p>No courses found. Create one to get started.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {recentCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 hover:bg-slate-50/80 cursor-pointer transition-colors group"
+                  onClick={() => navigate(`/teacher/courses/${course.id}`)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                      <span className="text-xs font-bold">{course.code.substring(0, 3)}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">{course.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
+                        <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{course.code}</span>
+                        <span>•</span>
+                        <span>{course.students} students</span>
+                      </div>
+                    </div>
                   </div>
-                  <Icon className={`w-7 h-7 ${stat.color}`} />
-                </div>
-              </Card>
-            );
-          })}
-        </div>
 
-        {/* Recent Courses */}
-        <Card className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Your Courses</h2>
-            <Button variant="outline" onClick={() => navigate("/teacher/courses")}>
-              View All
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            {recentCourses.map((course) => (
-              <div
-                key={course.id}
-                className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/80 cursor-pointer transition-colors"
-                onClick={() => navigate(`/teacher/courses/${course.id}`)}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{course.name}</h3>
-                    <p className="text-sm text-muted-foreground">{course.code} • {course.students} students</p>
-                    {course.activeSessionId && (
-                      <p className="text-xs text-primary mt-1">Active session live</p>
+                  <div className="mt-4 sm:mt-0 flex items-center justify-between sm:justify-end gap-6 min-w-[200px]">
+                    {course.activeSessionId ? (
+                      <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-xs font-bold uppercase tracking-wide">Live Session</span>
+                      </div>
+                    ) : (
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Next Session</p>
+                        <p className="text-sm font-medium text-slate-700">{course.nextSession}</p>
+                      </div>
                     )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">
-                    {course.activeSessionId ? "Active session" : "Next Session"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {course.activeSessionId ? "Tap to view" : course.nextSession}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
+      </div>
     </div>
   );
 };

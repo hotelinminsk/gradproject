@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, BookOpen, QrCode, Settings } from "lucide-react";
+import { Home, BookOpen, Settings, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const StudentBottomNav = () => {
@@ -9,7 +9,7 @@ const StudentBottomNav = () => {
   const navItems = [
     { path: "/student/home", icon: Home, label: "Ana sayfa" },
     { path: "/student/courses", icon: BookOpen, label: "Dersler" },
-    { path: "/student/check-in", icon: QrCode, label: "Yoklama" },
+    { path: "/student/weekly-plan", icon: CalendarClock, label: "Program" },
     { path: "/student/settings", icon: Settings, label: "Ayarlar" },
   ];
 

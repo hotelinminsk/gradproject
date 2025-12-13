@@ -4,7 +4,7 @@ import TeacherSidebar from "@/components/teacher/TeacherSidebar";
 
 export default function TeacherLayout({ children }: PropsWithChildren) {
   return (
-    <div className="min-h-screen grid lg:grid-cols-[260px_1fr] bg-background">
+    <div className="min-h-screen grid lg:grid-cols-[280px_1fr] bg-slate-50">
       <aside className="hidden lg:block sticky top-0 h-screen">
         <TeacherSidebar />
       </aside>

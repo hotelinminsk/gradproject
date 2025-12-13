@@ -6,9 +6,11 @@ public class Course
     public Guid TeacherId { get; set; }
     public string CourseName { get; set; } = string.Empty;
     public string CourseCode { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string InvitationToken { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public DateTime? FirstSessionAt { get; set; }
 
     // Navigation
     public User Teacher { get; set; } = null!;
@@ -16,4 +18,5 @@ public class Course
     public ICollection<CourseRoster> Roster { get; set; } = new List<CourseRoster>();
     public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
     public ICollection<AttendanceSession> Sessions { get; set; } = new List<AttendanceSession>();
+    public ICollection<CourseSchedule> Schedules { get; set; } = new List<CourseSchedule>();
 }

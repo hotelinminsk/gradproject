@@ -66,11 +66,12 @@ public class ReportsController : ControllerBase
         [FromRoute] Guid courseId,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
-        [FromQuery] AttendanceDenominator denom = AttendanceDenominator.Enrolled
+        [FromQuery] AttendanceDenominator? denom = null
     )
     {
         try
         {
+             var denomVal = denom ?? AttendanceDenominator.Enrolled;
             var teacherId = GetUserId();
             if (teacherId is null) throw new Unauthorized($"course/{courseId}/overview : teacher id returned null.");
             if (!await TeacherOwnsCourse(teacherId.Value, courseId)) throw new TeacherDoesntOwnCourseException(teacherId.Value, courseId);
@@ -123,7 +124,7 @@ public class ReportsController : ControllerBase
 
             }
 
-            var denominator = await GetDenominatorAsync(courseId, denom);
+            var denominator = await GetDenominatorAsync(courseId, denomVal);
             var avgPct = 0;
             if (denominator > 0 && totalSessions > 0)
             {
@@ -166,11 +167,12 @@ public class ReportsController : ControllerBase
         [FromRoute] Guid courseId,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
-        [FromQuery] AttendanceDenominator denominator = AttendanceDenominator.Enrolled
+        [FromQuery] AttendanceDenominator? denominator = null
     )
     {
         try
         {
+             var denomVal = denominator ?? AttendanceDenominator.Enrolled;
             var teacherId = GetUserId();
             if (teacherId is null) throw new Unauthorized($"Teacher is null in weekly report :course/{courseId}/weekly");
 
@@ -178,30 +180,22 @@ public class ReportsController : ControllerBase
 
             var (fromUtc, toUtc) = NormalizeRange(from, to);
 
-            var denom = await GetDenominatorAsync(courseId, denominator);
+            var denom = await GetDenominatorAsync(courseId, denomVal);
             denom = Math.Max(denom, 1);
 
-            var sessions = await _context.AttendanceSessions.AsNoTracking()
+            var sessionsRaw = await _context.AttendanceSessions.AsNoTracking()
             .Where(s => s.CourseId == courseId && s.CreatedAt >= fromUtc && s.CreatedAt < toUtc)
-            .Select(s => new SessionRow(
+            .Select(s => new 
+            {
                 s.SessionId,
                 s.CreatedAt,
-                _context.AttendanceRecords.Count(r => r.SessionId == s.SessionId && r.IsWithinRange),
-                0
-            ))
-            .OrderBy(x => x.CreatedAtUtc).ToListAsync();
+                CheckIns = _context.AttendanceRecords.Count(r => r.SessionId == s.SessionId && r.IsWithinRange)
+            })
+            .OrderBy(x => x.CreatedAt).ToListAsync();
 
-            // var sessions = await _context.AttendanceSessions.Where(s => s.TeacherId == teacherId && s.CourseId == courseId)
-            // .Select(s => new SessionRow(
-            //     s.SessionId,
-            //     s.CreatedAt,
-            //     _context.AttendanceRecords.Where(r => r.SessionId == s.SessionId && r.IsWithinRange).Count(),
-            //     0
-            //   )).OrderBy(x => x.CreatedAtUtc).ToListAsync();
-
-            var computed = sessions.Select(s => new SessionRow(
+            var computed = sessionsRaw.Select(s => new SessionRow(
                 s.SessionId,
-                s.CreatedAtUtc,
+                s.CreatedAt,
                 s.CheckIns,
                 (int)Math.Round(100.0 * s.CheckIns / denom)
             )).ToList();
@@ -239,31 +233,32 @@ public class ReportsController : ControllerBase
         [FromRoute] Guid courseId,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
-        [FromQuery] AttendanceDenominator denominator = AttendanceDenominator.Enrolled
+        [FromQuery] AttendanceDenominator? denominator = null
     )
     {
         try
         {
+            var denomVal = denominator ?? AttendanceDenominator.Enrolled;
             var teacherId = GetUserId();
             if (teacherId is null) throw new Unauthorized($"Teacher is null in monthly report :course/{courseId}/monthly");
             if (!await TeacherOwnsCourse(teacherId: teacherId.Value, courseId: courseId)) throw new TeacherDoesntOwnCourseException(teacherId: teacherId.Value, courseId: courseId);
 
             var (fromUtc, toUtc) = NormalizeRange(from, to);
 
-            var denom = await GetDenominatorAsync(courseId, denominator);
+            var denom = await GetDenominatorAsync(courseId, denomVal);
             denom = Math.Max(denom, 1);
 
             var recordsQ = _context.AttendanceRecords.AsNoTracking()
             .Where(r => r.CourseId == courseId && r.IsWithinRange && r.CheckInTime >= fromUtc && r.CheckInTime < toUtc);
 
-            var months = await recordsQ
+            var monthsRaw = await recordsQ
             .GroupBy(
                 r => new { r.CheckInTime.Year, r.CheckInTime.Month }
             )
-            .Select(k => new MonthBucket(k.Key.Year, k.Key.Month, k.Count(), 0))
+            .Select(k => new { Year = k.Key.Year, MonthIndex = k.Key.Month, Count = k.Count() })
             .OrderBy(x => x.Year).ThenBy(x => x.MonthIndex).ToListAsync();
 
-            var computed = months.Select(m => new MonthBucket(m.Year, m.MonthIndex, m.Count, (int)Math.Round(100.0 * m.Count / denom))).ToList();
+            var computed = monthsRaw.Select(m => new MonthBucket(m.Year, m.MonthIndex, m.Count, (int)Math.Round(100.0 * m.Count / denom))).ToList();
 
             var resp = new CourseReportMonthlyResponse(
                 CourseId: courseId,
@@ -290,12 +285,13 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetSessionAttendance(
         [FromRoute] Guid courseId,
         [FromRoute] Guid sessionId,
-        [FromQuery] AttendanceDenominator denominator = AttendanceDenominator.Enrolled,
+        [FromQuery] AttendanceDenominator? denominator = null,
         [FromQuery] bool includeInvalid = false
         )
     {
         try
         {
+             var denomVal = denominator ?? AttendanceDenominator.Enrolled;
             var TeacherId = GetUserId();
             if (TeacherId is null) throw new Unauthorized($"course/{courseId:guid}/sessions/{sessionId:guid}/attendance");
 
@@ -342,7 +338,7 @@ public class ReportsController : ControllerBase
 
             List<StudentAbsentRow> absent;
 
-            if (denominator == AttendanceDenominator.Enrolled)
+            if (denomVal == AttendanceDenominator.Enrolled)
             {
                 absent = await _context.CourseEnrollments.AsNoTracking()
                     .Where(e => e.CourseId == courseId)
@@ -382,7 +378,7 @@ public class ReportsController : ControllerBase
 
                 CreatedAtUtc: session.CreatedAt,
 
-                Denominator: denominator.ToString(),
+                Denominator: denomVal.ToString(),
 
                 PresentCount: present.Count,
                 AbsentCount: absent.Count,
@@ -404,5 +400,84 @@ public class ReportsController : ControllerBase
     }
 
     
+
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("course/{courseId:guid}/students")]
+    public async Task<IActionResult> GetCourseStudentStatistics(
+        [FromRoute] Guid courseId,
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null
+    )
+    {
+        try
+        {
+            var teacherId = GetUserId();
+            if (teacherId is null) throw new Unauthorized($"Teacher is null in students report :course/{courseId}/students");
+            if (!await TeacherOwnsCourse(teacherId: teacherId.Value, courseId: courseId)) throw new TeacherDoesntOwnCourseException(teacherId: teacherId.Value, courseId: courseId);
+
+            var (fromUtc, toUtc) = NormalizeRange(from, to);
+
+            // 1. Get total sessions in range
+            var totalSessions = await _context.AttendanceSessions.AsNoTracking()
+                .Where(s => s.CourseId == courseId && s.CreatedAt >= fromUtc && s.CreatedAt < toUtc)
+                .CountAsync();
+
+
+            // 2. Get students (enrolled)
+            // We only care about enrolled for this report usually, but could be adapted if needed.
+            // Using Enrolled Logic
+             var students = await _context.CourseEnrollments.AsNoTracking()
+                    .Where(e => e.CourseId == courseId && e.IsValidated) // Ensure validated if that logic matters
+                    .Join(_context.Users.AsNoTracking(), e => e.StudentId, u => u.UserId, (e, u) => new { e, u })
+                    .GroupJoin(_context.StudentProfiles.AsNoTracking(), eu => eu.u.UserId, sp => sp.UserId, (eu, sps) => new { eu.e, eu.u, sp = sps.FirstOrDefault() })
+                    .Select(x => new 
+                    {
+                        StudentId = x.e.StudentId,
+                        FullName = x.u.FullName,
+                        GtuStudentId = x.sp != null ? x.sp.GtuStudentId : "N/A"
+                    })
+                    .ToListAsync();
+
+            // 3. Get attendance counts per student
+            // We can group by StudentId from AttendanceRecords
+            var attendanceCounts = await _context.AttendanceRecords.AsNoTracking()
+                .Where(r => r.CourseId == courseId && r.IsWithinRange && r.CheckInTime >= fromUtc && r.CheckInTime < toUtc)
+                .GroupBy(r => r.StudentId)
+                .Select(g => new { StudentId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(k => k.StudentId, v => v.Count);
+
+
+            // 4. Merge
+            var studentRows = students.Select(s => 
+            {
+                var attended = attendanceCounts.GetValueOrDefault(s.StudentId, 0);
+                var rate = totalSessions > 0 ? (int)Math.Round(100.0 * attended / totalSessions) : 0;
+                
+                return new StudentReportRow(
+                    s.StudentId,
+                    s.FullName,
+                    s.GtuStudentId,
+                    attended,
+                    totalSessions,
+                    rate
+                );
+            }).OrderBy(x => x.FullName).ToList();
+
+            var response = new CourseStudentStatisticsResponse(
+                courseId,
+                totalSessions,
+                studentRows
+            );
+
+            return Ok(response);
+
+        }
+        catch (System.Exception ex)
+        {
+             _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
 }

@@ -81,3 +81,18 @@ public record StudentAbsentRow (
 
 
 
+
+public record CourseStudentStatisticsResponse(
+    Guid CourseId,
+    int TotalSessions,
+    IList<StudentReportRow> Students
+);
+
+public record StudentReportRow(
+    Guid StudentId,
+    string FullName,
+    string GtuStudentId,
+    int AttendedCount,
+    int TotalSessions,
+    int AttendanceRate
+);

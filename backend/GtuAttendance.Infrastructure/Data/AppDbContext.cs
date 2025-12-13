@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<AttendanceSession> AttendanceSessions { get; set; }
     public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
     public DbSet<TeacherInvite> TeacherInvites { get; set; }
+    public DbSet<CourseSchedule> CourseSchedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -180,6 +181,21 @@ modelBuilder.Entity<AttendanceRecord>(e =>
         e.Property(x => x.EmailDomain).HasMaxLength(255);
         e.Property(x => x.UsedCount).HasDefaultValue(0);
         e.Property(x => x.IsActive).HasDefaultValue(true);
+        e.Property(x => x.IsActive).HasDefaultValue(true);
+    });
+
+    // CourseSchedule
+    modelBuilder.Entity<CourseSchedule>(e =>
+    {
+        e.HasKey(x => x.Id);
+        e.Property(x => x.StartTime).IsRequired();
+        e.Property(x => x.EndTime).IsRequired();
+        e.Property(x => x.DayOfWeek).IsRequired();
+
+        e.HasOne(x => x.Course)
+         .WithMany(c => c.Schedules)
+         .HasForeignKey(x => x.CourseId)
+         .OnDelete(DeleteBehavior.Cascade);
     });
     }
 }

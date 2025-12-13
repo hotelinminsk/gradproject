@@ -6,6 +6,7 @@ import {
   type TeacherCourseDetail,
   type CreateSessionPayload,
   type CreateSessionResponse,
+  type CreateCoursePayload
 } from "@/types/course";
 import { type SessionDetail, type SessionQrPoll, type SessionSummary, type ActiveSessionInfo } from "@/types/attendance";
 import { toast } from "sonner";
@@ -28,10 +29,10 @@ export function useTeacherDashboardSummary() {
 export function useCreateCourse() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { courseName: string; courseCode: string; description?: string }) =>
+    mutationFn: (payload: CreateCoursePayload) =>
       apiFetch<{ courseId: string }>("/api/Course", {
         method: "POST",
-        body: payload,
+        body: payload as unknown as Record<string, unknown>,
         audience: "teacher",
       }),
     onSuccess: () => {
@@ -78,6 +79,26 @@ export const useTeacherCourses = () =>
     queryFn: () =>
       apiFetch<TeacherCourseSummary[]>("/api/course/mine/courses/teacher", { audience: "teacher" }),
     staleTime: Infinity,
+  });
+
+export interface TeacherStudent {
+  id: string; // GtuStudentId
+  fullName: string;
+  gtuStudentId: string;
+  email: string;
+  courses: {
+    courseCode: string;
+    courseName: string;
+    status: "rostered" | "enrolled" | "dropped";
+  }[];
+}
+
+export const useTeacherStudents = () =>
+  useQuery({
+    queryKey: ["teacher-students"],
+    queryFn: () =>
+      apiFetch<TeacherStudent[]>("/api/course/mine/students", { audience: "teacher" }),
+    staleTime: 1000 * 60, // 1 minute
   });
 
 

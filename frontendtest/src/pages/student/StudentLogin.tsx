@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint, GraduationCap, ArrowRight } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { AuthResponse } from "@/types/auth";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ export default function StudentLogin() {
   const [deviceName, setDeviceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper functions for WebAuthn logic (kept same as before)
   const fromBase64Url = (value: string) => {
     const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
     const pad = base64.length % 4 === 0 ? "" : "=".repeat(4 - (base64.length % 4));
@@ -31,7 +32,7 @@ export default function StudentLogin() {
     const bytes = new Uint8Array(buffer);
     let binary = "";
     bytes.forEach((b) => (binary += String.fromCharCode(b)));
-    return btoa(binary); // standard base64 to match backend DTO byte[]
+    return btoa(binary);
   };
 
   const prepareAssertionOptions = (options: any) => {
@@ -53,7 +54,6 @@ export default function StudentLogin() {
     }
     setIsLoading(true);
     try {
-      // 1) Begin (now with email/password)
       const begin = await apiFetch<any>("/api/auth/login-webauthn/begin", {
         method: "POST",
         body: { email, password, deviceName },
@@ -62,11 +62,9 @@ export default function StudentLogin() {
       const userId = begin.userId;
       const publicKey = prepareAssertionOptions(begin.options ?? begin);
 
-      // 2) navigator.credentials.get
       const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential;
       const res = assertion.response as AuthenticatorAssertionResponse;
 
-      // 3) Complete
       const auth = await apiFetch<AuthResponse>("/api/auth/login-webauthn/complete", {
         method: "POST",
         body: {
@@ -82,6 +80,9 @@ export default function StudentLogin() {
         },
       });
 
+      // Store credential ID for check-in
+      localStorage.setItem('student_credential_id', assertion.id);
+
       localStorage.setItem("student_device_name", deviceName || "Bu cihaz (passkey)");
 
       login(auth);
@@ -96,56 +97,98 @@ export default function StudentLogin() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center px-6 pb-safe-nav">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto grid place-items-center">
-            <Fingerprint className="w-8 h-8 text-primary" />
+    <div className="min-h-screen grid place-items-center bg-slate-50/50 sm:px-4 pb-safe-nav font-sans">
+      <div className="w-full max-w-[420px]">
+
+        {/* Brand Header */}
+        <div className="mb-8 text-center space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl mx-auto flex items-center justify-center shadow-sm">
+            <GraduationCap className="w-8 h-8 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground">Enter your student email to sign in or register.</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Tekrar Hoşgeldiniz</h1>
+          <p className="text-slate-500">Hesabınıza giriş yapın</p>
         </div>
 
-        <Card className="p-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Student Email</Label>
-            <Input id="email" type="email" placeholder="name@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="deviceName">Device Name (optional)</Label>
-            <Input id="deviceName" placeholder="My Device" value={deviceName} onChange={(e) => setDeviceName(e.target.value)} />
-          </div>
-          <p className="text-xs text-muted-foreground">Use your fingerprint, face, or security key to continue.</p>
+        <Card className="border-0 sm:border sm:border-slate-100 sm:shadow-xl sm:shadow-slate-200/40 bg-white p-6 sm:p-10 rounded-none sm:rounded-3xl">
+          <div className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-slate-700 font-medium">Email Adresi</Label>
+              <Input
+                id="email"
+                type="email"
+                className="h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all rounded-xl"
+                placeholder="ogrenci@gtu.edu.tr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-          <Button size="lg" className="w-full h-11" onClick={beginWebAuthnLogin} disabled={isLoading}>
-            <Fingerprint className="w-4 h-4 mr-2" />
-            {isLoading ? "Devam ediliyor…" : "Passkey ile devam et"}
-          </Button>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-slate-700 font-medium">Şifre</Label>
+                <span className="text-xs font-semibold text-blue-600 cursor-pointer hover:underline">Şifremi unuttum?</span>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                className="h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all rounded-xl"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            {/* Separator for Device Name / Passkey */}
+            <div className="py-2 flex items-center gap-3">
+              <div className="h-px bg-slate-100 flex-1" />
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passkey Girişi</span>
+              <div className="h-px bg-slate-100 flex-1" />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="deviceName" className="text-slate-700 font-medium">Cihaz İsmi (Varsa)</Label>
+              <Input
+                id="deviceName"
+                className="h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all rounded-xl"
+                placeholder="Örn: Telefonum"
+                value={deviceName}
+                onChange={(e) => setDeviceName(e.target.value)}
+              />
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all"
+              onClick={beginWebAuthnLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Doğrulanıyor...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Fingerprint className="w-5 h-5" />
+                  Biometrik ile Giriş Yap
+                </span>
+              )}
+            </Button>
+          </div>
+
+          <div className="mt-8 text-center pt-4 border-t border-slate-50">
+            <p className="text-sm text-slate-500">
+              Hesabınız yok mu?
+              <button
+                type="button"
+                onClick={() => navigate("/student/register")}
+                className="ml-1 font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+              >
+                Şimdi Kaydol
+              </button>
+            </p>
+          </div>
         </Card>
-
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => navigate("/student/register")}
-            className="text-primary hover:underline font-medium"
-          >
-            Don’t have an account? Register
-          </button>
-        </div>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Your information is protected with end-to-end encryption. We will never share your data.
-        </p>
       </div>
     </div>
   );

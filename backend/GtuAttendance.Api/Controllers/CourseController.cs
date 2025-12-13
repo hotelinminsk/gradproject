@@ -117,9 +117,24 @@ public class CourseController : ControllerBase
                 TeacherId = teacher.Value,
                 CourseName = NormalizeName(request.CourseName),
                 CourseCode = NormalizeName(request.CourseCode),
+                Description = request.Description,
                 InvitationToken = NewInviteToken(),
                 IsActive = true,
+                FirstSessionAt = request.FirstSessionAt
             };
+
+            if (request.Schedules != null && request.Schedules.Any())
+            {
+                foreach (var s in request.Schedules)
+                {
+                    course.Schedules.Add(new CourseSchedule
+                    {
+                        DayOfWeek = s.DayOfWeek,
+                        StartTime = s.StartTime,
+                        EndTime = s.EndTime
+                    });
+                }
+            }
 
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
@@ -381,9 +396,13 @@ public class CourseController : ControllerBase
             {
                 c.CourseId,
                 c.CourseName,
+                c.CourseCode,
+                c.Description,
                 c.CreatedAt,
+                c.FirstSessionAt,
                 c.IsActive,
                 EnrollmentCount = c.Enrollments.Count(e => !e.IsDropped),
+                SessionCount = c.Sessions.Count(),
                 LastSession = c.Sessions.OrderByDescending(s => s.CreatedAt)
                 .Select(s => new
                 {
@@ -430,7 +449,14 @@ public class CourseController : ControllerBase
                 courseId = e.Course.CourseId,
                 courseName = e.Course.CourseName,
                 courseCode = e.Course.CourseCode,
+                description = e.Course.Description,
+                firstSessionAt = e.Course.FirstSessionAt,
                 teacherName = e.Course.Teacher.FullName,
+                schedules = e.Course.Schedules.Select(s => new {
+                    dayOfWeek = s.DayOfWeek,
+                    startTime = s.StartTime,
+                    endTime = s.EndTime
+                }),
                 latestSession = e.Course.Sessions
                     .OrderByDescending(s => s.CreatedAt)
                     .Select(s => new
@@ -535,8 +561,10 @@ public class CourseController : ControllerBase
                 c.CourseId,
                 c.CourseName,
                 c.CourseCode,
+                c.Description,
                 c.InvitationToken,
                 c.CreatedAt,
+                c.FirstSessionAt,
                 c.IsActive,
                 Roster = c.Roster.ToList(),
                 Enrollments = c.Enrollments.Where(e => !e.IsDropped).ToList(),
@@ -554,7 +582,8 @@ public class CourseController : ControllerBase
                     e.Student.GtuStudentId,
                     true
                 ))
-                .ToList()
+                .ToList(),
+                Schedules = c.Schedules.Select(s => new ScheduleDto(s.DayOfWeek, s.StartTime, s.EndTime)).ToList()
             })
             .FirstOrDefaultAsync();
 
@@ -575,14 +604,17 @@ public class CourseController : ControllerBase
                 course.CourseId,
                 course.CourseName,
                 course.CourseCode,
+                course.Description,
                 InviteToken: course.InvitationToken,
                 course.CreatedAt,
+                course.FirstSessionAt,
                 course.IsActive,
                 course.Roster,
                 course.Enrollments,
                 sessionsComputed,
                 activeSessionDto,
-                course.CourseStudents
+                course.CourseStudents,
+                course.Schedules
             );
 
             
@@ -598,5 +630,141 @@ public class CourseController : ControllerBase
         } 
     }
 
+
+    [Authorize(Roles = "Teacher")]
+    [HttpGet("mine/students")]
+    public async Task<IActionResult> GetMyStudents()
+    {
+        try
+        {
+            var teacherId = User.GetUserId();
+            if (teacherId is null) return Unauthorized("Teacher id is null.");
+
+            // 1. Fetch all courses with Roster and Enrollments
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .Where(c => c.TeacherId == teacherId && c.IsActive)
+                .Include(c => c.Roster)
+                .Include(c => c.Enrollments)
+                    .ThenInclude(e => e.Student)
+                .ToListAsync();
+
+            // 2. Fetch Student Profiles to map GtuStudentId -> Email/Name for Roster entries
+            // We only need profiles for students who might be in the roster.
+            // For efficiency, we could filter, but fetching all student profiles might be okay if not huge.
+            // Better: Get all users who are Students.
+            var studentProfiles = await _context.StudentProfiles
+                .Include(sp => sp.User)
+                .AsNoTracking()
+                .ToDictionaryAsync(sp => sp.GtuStudentId, sp => new { sp.User.Email, sp.User.FullName });
+
+            // Flattened list before grouping
+            var flatList = new List<(string GtuStudentId, string FullName, string Email, string CourseCode, string CourseName, string Status)>();
+
+            foreach (var course in courses)
+            {
+                // Enrolled
+                foreach (var e in course.Enrollments.Where(e => !e.IsDropped && e.IsValidated))
+                {
+                    flatList.Add((
+                        e.Student.GtuStudentId ?? "",
+                        e.Student.FullName,
+                        e.Student.Email ?? "",
+                        course.CourseCode,
+                        course.CourseName,
+                        "enrolled"
+                    ));
+                }
+
+                // Dropped
+                foreach (var e in course.Enrollments.Where(e => e.IsDropped))
+                {
+                    flatList.Add((
+                        e.Student.GtuStudentId ?? "",
+                        e.Student.FullName,
+                        e.Student.Email ?? "",
+                        course.CourseCode,
+                        course.CourseName,
+                        "dropped"
+                    ));
+                }
+
+                // Roster
+                foreach (var r in course.Roster)
+                {
+                    // Check if we have profile info for this roster student
+                    var email = "";
+                    var fullName = r.FullName;
+                    
+                    if (studentProfiles.TryGetValue(r.GtuStudentId, out var profile))
+                    {
+                        email = profile.Email;
+                        // usage of profile.FullName is optional, roster name is usually accurate enough, 
+                        // but profile name is what they registered with. Let's prefer roster name for now as it's what teacher uploaded.
+                    }
+
+                    flatList.Add((
+                        r.GtuStudentId,
+                        fullName,
+                        email,
+                        course.CourseCode,
+                        course.CourseName,
+                        "rostered"
+                    ));
+                }
+            }
+
+            // Group by GtuStudentId
+            var grouped = flatList
+                .Where(x => !string.IsNullOrWhiteSpace(x.GtuStudentId))
+                .GroupBy(x => x.GtuStudentId)
+                .Select(g => 
+                {
+                    // Pick the best display name (prefer one from Enrollment/Profile if available, else first)
+                    var bestName = g.FirstOrDefault(x => x.Status == "enrolled").FullName;
+                    if (string.IsNullOrEmpty(bestName)) bestName = g.First().FullName;
+
+                    // Pick the best email (any non-empty)
+                    var bestEmail = g.FirstOrDefault(x => !string.IsNullOrEmpty(x.Email)).Email ?? "";
+
+                    // Unique courses
+                    // Priority: Enrolled > Dropped > Rostered
+                    // If a student is Enrolled in CSE101 and Rostered in CSE101, show Enrolled.
+                    var courses = g
+                        .GroupBy(x => x.CourseCode)
+                        .Select(cg => 
+                        {
+                            var status = "rostered";
+                            if (cg.Any(x => x.Status == "enrolled")) status = "enrolled";
+                            else if (cg.Any(x => x.Status == "dropped")) status = "dropped";
+                            
+                            return new StudentCourseStatus(
+                                cg.Key,
+                                cg.First().CourseName,
+                                status
+                            );
+                        })
+                        .OrderBy(c => c.CourseCode)
+                        .ToList();
+
+                    return new TeacherStudentGroupDto(
+                        g.Key,
+                        bestName,
+                        g.Key,
+                        bestEmail,
+                        courses
+                    );
+                })
+                .OrderBy(s => s.FullName)
+                .ToList();
+
+            return Ok(grouped);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.StackTrace);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
 }

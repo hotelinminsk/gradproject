@@ -1,16 +1,4 @@
-export interface Course {
-  courseId: string;
-  courseName: string;
-  courseCode: string;
-  invitationToken?: string;
-  isActive?: boolean;
-  lastSession?: {
-    sessionId: string;
-    createdAt: string;
-    expiresAtUtc: string;
-    isActive: boolean;
-  }
-}
+
 
 export interface RosterStudentRow {
   fullName: string;
@@ -24,6 +12,9 @@ export interface TeacherCourseSummary {
   courseCode: string;
   createdAt: string;
   isActive: boolean;
+  description?: string;
+  firstSessionAt?: string;
+  sessionCount?: number;
   enrollmentCount: number;
   lastSession?: {
     sessionId: string;
@@ -40,7 +31,14 @@ export interface StudentCourseSummary {
   courseId: string;
   courseName: string;
   courseCode: string;
+  description?: string;
+  firstSessionAt?: string;
   teacherName?: string;
+  schedules?: {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+  }[];
   latestSession?: {
     sessionId: string;
     sessionCreatedAt: string;
@@ -77,30 +75,19 @@ export interface AttendanceSessionSummary {
   createdAt: string;
   expiresAt: string;
   isActive: boolean;
+  attendeeCount?: number;
 }
 
 export interface CourseStudentEntry {
   courseStudentId: string;
   email: string;
-  fullname: string;
-  gtustudentid: string;
+  fullName: string;
+  gtuStudentId: string;
   isVerifiedEnrollment: boolean;
 }
 
 
-export interface TeacherCourseDetail {
-  courseId: string;
-  courseName: string;
-  courseCode: string;
-  inviteToken?: string;
-  createdAt: string;
-  isActive: boolean;
-  roster: CourseRosterEntry[];
-  enrollments: CourseEnrollmentEntry[];
-  sessions: AttendanceSessionSummary[];
-  activeSession?: AttendanceSessionSummary | null;
-  courseStudents: CourseStudentEntry[];
-}
+
 
 export interface CreateSessionPayload {
   courseId: string;
@@ -117,7 +104,7 @@ export interface CreateSessionResponse {
 }
 
 
-export interface CourseSessionV2{
+export interface CourseSessionV2 {
   sessionId: string;
   createdAtUtc: string;
   expiresAtUtc: string;
@@ -125,16 +112,69 @@ export interface CourseSessionV2{
   attendeeCount: number
 }
 
-export interface TeacherCourseDetailV2{
+export interface TeacherCourseDetailV2 {
   courseId: string;
   courseName: string;
   courseCode: string;
+  description?: string;
   inviteToken: string;
   createdAtUtc: string;
+  firstSessionAt?: string;
   isActive: boolean;
   roster: CourseRosterEntry[];
   enrollments: CourseEnrollmentEntry[];
   sessions: CourseSessionV2[];
   activeSession?: CourseSessionV2 | null;
   courseStudents: CourseStudentEntry[];
+}
+
+export interface CourseSchedule {
+  dayOfWeek: number;
+  startTime: string; // "HH:mm:ss"
+  endTime: string;   // "HH:mm:ss"
+}
+
+export interface Course {
+  courseId: string;
+  courseName: string;
+  courseCode: string;
+  invitationToken?: string;
+  isActive?: boolean;
+  firstSessionAt?: string;
+  lastSession?: {
+    sessionId: string;
+    createdAt: string;
+    expiresAtUtc: string;
+    isActive: boolean;
+  };
+  schedules?: CourseSchedule[];
+}
+
+// ... existing interfaces ...
+
+export interface TeacherCourseDetail {
+  courseId: string;
+  courseName: string;
+  courseCode: string;
+  description?: string;
+  inviteToken?: string;
+  createdAt: string;
+  firstSessionAt?: string;
+  isActive: boolean;
+  roster: CourseRosterEntry[];
+  enrollments: CourseEnrollmentEntry[];
+  sessions: AttendanceSessionSummary[];
+  activeSession?: AttendanceSessionSummary | null;
+  courseStudents: CourseStudentEntry[];
+  schedules?: CourseSchedule[];
+}
+
+// ...
+
+export interface CreateCoursePayload {
+  courseName: string;
+  courseCode: string;
+  description?: string;
+  firstSessionAt?: string;
+  schedules?: CourseSchedule[];
 }

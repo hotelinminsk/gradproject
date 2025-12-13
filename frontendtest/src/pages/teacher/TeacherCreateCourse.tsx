@@ -45,6 +45,8 @@ const TeacherCreateCourse = () => {
     firstSessionAt: "",
   });
 
+  const [schedules, setSchedules] = useState<any[]>([]);
+
   const handleCourseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createCourse.mutate(
@@ -52,6 +54,8 @@ const TeacherCreateCourse = () => {
         courseName: courseForm.courseName,
         courseCode: courseForm.courseCode,
         description: courseForm.description,
+        schedules: schedules,
+        firstSessionAt: courseForm.firstSessionAt ? new Date(courseForm.firstSessionAt).toISOString() : undefined,
       },
       {
         onSuccess: (data) => {
@@ -216,7 +220,7 @@ const TeacherCreateCourse = () => {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" >
       <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-none shadow-none p-6">
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr] items-center">
           <div className="space-y-3">
@@ -302,8 +306,83 @@ const TeacherCreateCourse = () => {
               onChange={(e) => setCourseForm({ ...courseForm, firstSessionAt: e.target.value })}
             />
             <p className="text-xs text-muted-foreground">
-              Optional: helps students see what’s coming inside their dashboards.
+              Opsiyonel: öğrenciler dersin ne zaman başlayacağını görür.
             </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Haftalık Program</Label>
+            <div className="rounded-lg border p-4 space-y-4">
+              <div className="flex flex-wrap gap-2 items-end">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Gün</Label>
+                  <select
+                    className="flex h-9 w-32 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    id="schedule-day"
+                  >
+                    <option value="1">Pazartesi</option>
+                    <option value="2">Salı</option>
+                    <option value="3">Çarşamba</option>
+                    <option value="4">Perşembe</option>
+                    <option value="5">Cuma</option>
+                    <option value="6">Cumartesi</option>
+                    <option value="0">Pazar</option>
+                  </select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Başlangıç</Label>
+                  <Input type="time" id="schedule-start" className="h-9" defaultValue="09:00" />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Bitiş</Label>
+                  <Input type="time" id="schedule-end" className="h-9" defaultValue="10:00" />
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="h-9"
+                  onClick={() => {
+                    const dayEl = document.getElementById("schedule-day") as HTMLSelectElement;
+                    const startEl = document.getElementById("schedule-start") as HTMLInputElement;
+                    const endEl = document.getElementById("schedule-end") as HTMLInputElement;
+
+                    if (!dayEl || !startEl || !endEl) return;
+
+                    const newSchedule = {
+                      dayOfWeek: parseInt(dayEl.value),
+                      startTime: startEl.value + ":00",
+                      endTime: endEl.value + ":00"
+                    };
+                    setSchedules(prev => [...prev, newSchedule]);
+                  }}
+                >
+                  Ekle
+                </Button>
+              </div>
+
+              {schedules.length > 0 ? (
+                <div className="grid gap-2">
+                  {schedules.map((s, idx) => (
+                    <div key={idx} className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-sm">
+                      <span>
+                        {["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"][s.dayOfWeek]} • {s.startTime.slice(0, 5)} - {s.endTime.slice(0, 5)}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => setSchedules(prev => prev.filter((_, i) => i !== idx))}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Henüz program eklenmedi.</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -324,9 +403,8 @@ const TeacherCreateCourse = () => {
             <Button
               type="submit"
               disabled={createCourse.isPending || justSubmitted}
-              className={`bg-primary text-white hover:bg-primary/90 ${
-                justSubmitted ? "bg-emerald-600 hover:bg-emerald-600" : ""
-              }`}
+              className={`bg-primary text-white hover:bg-primary/90 ${justSubmitted ? "bg-emerald-600 hover:bg-emerald-600" : ""
+                }`}
             >
               {createCourse.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {justSubmitted ? (
@@ -547,7 +625,7 @@ const TeacherCreateCourse = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 };
 
