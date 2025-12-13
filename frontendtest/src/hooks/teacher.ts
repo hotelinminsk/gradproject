@@ -12,41 +12,41 @@ import { toast } from "sonner";
 import type { TeacherDashboardSummary } from "@/types/dashboard";
 
 
-  
 
-export function useTeacherDashboardSummary(){
-    return useQuery({
-        queryKey: ["teacher-dashboard-summary"],
-        queryFn: () => 
-            apiFetch<TeacherDashboardSummary>("/api/TeacherDashboard/summary", {
-                audience: "teacher"
-            }),
-            staleTime: 1000 * 60
-    });
+
+export function useTeacherDashboardSummary() {
+  return useQuery({
+    queryKey: ["teacher-dashboard-summary"],
+    queryFn: () =>
+      apiFetch<TeacherDashboardSummary>("/api/TeacherDashboard/summary", {
+        audience: "teacher"
+      }),
+    staleTime: 1000 * 60
+  });
 }
 
-export function useCreateCourse(){
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: {courseName: string; courseCode: string; description?: string}) =>
-            apiFetch<{courseId: string}>("/api/Course", {
-                method: "POST",
-                body: payload,
-                audience: "teacher",
-            }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["teacher-dashboard-summary"]});
-            queryClient.invalidateQueries({queryKey: ["teacher-courses"]});
-        },
-    });
+export function useCreateCourse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { courseName: string; courseCode: string; description?: string }) =>
+      apiFetch<{ courseId: string }>("/api/Course", {
+        method: "POST",
+        body: payload,
+        audience: "teacher",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teacher-dashboard-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["teacher-courses"] });
+    },
+  });
 }
 
 type UploadRosterPayload =
   | RosterStudentRow[]
   | {
-      students: RosterStudentRow[];
-      replaceExisting?: boolean;
-    };
+    students: RosterStudentRow[];
+    replaceExisting?: boolean;
+  };
 
 export function useUploadRosterBulk(courseId?: string) {
   const queryClient = useQueryClient();
@@ -72,13 +72,13 @@ export function useUploadRosterBulk(courseId?: string) {
   });
 }
 // course/mine/courses/teacher
-export const useTeacherCourses = () => 
-    useQuery({
-        queryKey: ["teacher-courses"],
-        queryFn: () => 
-            apiFetch<TeacherCourseSummary[]>("/api/course/mine/courses/teacher", {audience: "teacher"}),
-        staleTime: Infinity,
-    });
+export const useTeacherCourses = () =>
+  useQuery({
+    queryKey: ["teacher-courses"],
+    queryFn: () =>
+      apiFetch<TeacherCourseSummary[]>("/api/course/mine/courses/teacher", { audience: "teacher" }),
+    staleTime: Infinity,
+  });
 
 
 export const useTeacherCourse = (courseId?: string) =>
@@ -173,41 +173,23 @@ export const useTeacherSessionsByCourse = (courseId?: string) =>
     staleTime: 10 * 1000,
   });
 
-export const useActiveSession = (courseId?: string) =>
-  useQuery<ActiveSessionInfo | null>({
-    queryKey: ["active-session", courseId],
-    enabled: !!courseId,
-    retry: false,
-    refetchInterval: 8000,
-    queryFn: async () => {
-      try {
-        return await apiFetch<ActiveSessionInfo>(`/api/Attendance/courses/${courseId}/active-session`, {
-          audience: "teacher",
-        });
-      } catch (err: any) {
-        // Treat 404/not found as "no active session"
-        const msg = err?.message?.toLowerCase?.() ?? "";
-        if (msg.includes("not found") || msg.includes("404")) return null;
-        throw err;
-      }
+
+
+export const useBulkDeleteCourses = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: string[]) =>
+      apiFetch<{ removed: number; skipped: number }>("/api/Course", {
+        method: "DELETE",
+        body: { courseIds: ids },
+        audience: "teacher",
+      }),
+    onSuccess: (_, ids) => {
+      qc.invalidateQueries({ queryKey: ["teacher-courses"] });
+      qc.invalidateQueries({ queryKey: ["teacher-dashboard-summary"] });
+      toast.success(`Removed ${ids.length} course(s).`);
+
     },
+    onError: (err) => toast.error(err.message ?? "Delete failed."),
   });
-
-    export const useBulkDeleteCourses = () => {
-        const qc = useQueryClient();
-        return useMutation({
-            mutationFn: (ids: string[]) =>
-                apiFetch<{removed: number; skipped: number}>("/api/Course", {
-                    method: "DELETE",
-                    body: {courseIds: ids},
-                    audience: "teacher",
-                }),
-                onSuccess: (_, ids) => {
-                    qc.invalidateQueries({queryKey: ["teacher-courses"]});
-                    qc.invalidateQueries({queryKey: ["teacher-dashboard-summary"]});
-                    toast.success(`Removed ${ids.length} course(s).`);
-
-                },
-                onError: (err) => toast.error(err.message ?? "Delete failed."),
-        });
-    };
+};

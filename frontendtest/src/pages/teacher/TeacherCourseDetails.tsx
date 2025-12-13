@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useTeacherCourse, useUploadRosterBulk, useActiveSession, useTeacherSession } from "@/hooks/teacher";
+import { useTeacherCourse, useUploadRosterBulk } from "@/hooks/teacher";
+import { useTeacherSession } from "@/providers/index";
+
 import type { RosterStudentRow } from "@/types/course";
 
 const formatDate = (value?: string) => {
@@ -61,7 +63,7 @@ export default function TeacherCourseDetails() {
   const { data: course, isLoading, isError } = useTeacherCourse(courseId);
   const uploadRosterBulk = useUploadRosterBulk(courseId);
   const manualAddMutation = useUploadRosterBulk(courseId);
-  const { data: activeSession } = useActiveSession(courseId);
+  const activeSession = course?.activeSession;
 
   const verifiedStudents = course?.courseStudents ?? [];
   const rosterEntries = course?.roster ?? [];
