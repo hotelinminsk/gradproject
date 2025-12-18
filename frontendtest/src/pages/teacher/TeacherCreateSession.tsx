@@ -6,12 +6,38 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTeacherCourse, useCreateSession } from "@/hooks/teacher";
-import { CalendarClock, MapPin, Radar, ShieldCheck, ArrowLeft } from "lucide-react";
+import { CalendarClock, ShieldCheck, ArrowLeft, QrCode } from "lucide-react";
 import { toast } from "sonner";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+// Leaflet marker fix
+import L from "leaflet";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const defaultDistance = 50;
 const defaultDurationMinutes = 15;
+const GTU_CENTER = [40.806, 29.355] as [number, number]; // Gebze Technical University
+
+function LocationMarker({ position, setPosition }: { position: [number, number] | null, setPosition: (pos: [number, number]) => void }) {
+  const map = useMapEvents({
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  return position ? <Marker position={position} /> : null;
+}
 
 export default function TeacherCreateSession() {
   const { courseId } = useParams();
@@ -20,15 +46,17 @@ export default function TeacherCreateSession() {
   const createSession = useCreateSession();
 
   const [form, setForm] = useState({
-    latitude: "",
-    longitude: "",
-    maxDistance: defaultDistance.toString(),
+    latitude: 0,
+    longitude: 0,
     expiresAt: "",
+    qrValidity: "5" // Default 5 seconds
   });
 
+  const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
+
   const isReady = useMemo(() => {
-    return Boolean(form.latitude && form.longitude && form.maxDistance && form.expiresAt);
-  }, [form]);
+    return Boolean(mapPosition && form.expiresAt);
+  }, [mapPosition, form.expiresAt]);
 
   useEffect(() => {
     if (!form.expiresAt) {
@@ -40,39 +68,27 @@ export default function TeacherCreateSession() {
     }
   }, [form.expiresAt]);
 
-  const handleGeolocate = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported in this browser.");
-      return;
+  useEffect(() => {
+    if (mapPosition) {
+      setForm(prev => ({ ...prev, latitude: mapPosition[0], longitude: mapPosition[1] }));
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setForm((prev) => ({
-          ...prev,
-          latitude: pos.coords.latitude.toFixed(6),
-          longitude: pos.coords.longitude.toFixed(6),
-        }));
-        toast.success("Location captured.");
-      },
-      () => toast.error("Unable to retrieve location."),
-      { enableHighAccuracy: true, timeout: 8000 },
-    );
-  };
+  }, [mapPosition]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseId) return;
     if (!isReady) {
-      toast.error("Fill all required fields.");
+      toast.error("Please select a location on the map.");
       return;
     }
     const expiresAtUtc = new Date(form.expiresAt);
     const payload = {
       courseId,
-      teacherLatitude: Number(form.latitude),
-      teacherLongitude: Number(form.longitude),
-      maxDistanceMeters: Number(form.maxDistance),
+      teacherLatitude: form.latitude,
+      teacherLongitude: form.longitude,
+      maxDistanceMeters: defaultDistance, // Fixed
       expiresAtUtc: expiresAtUtc.toISOString(),
+      qrCodeValiditySeconds: Number(form.qrValidity)
     };
     createSession.mutate(payload, {
       onSuccess: (res) => {
@@ -83,7 +99,7 @@ export default function TeacherCreateSession() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 pb-12">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Attendance</p>
@@ -99,7 +115,7 @@ export default function TeacherCreateSession() {
         </Button>
       </div>
 
-      <Card className="p-6 space-y-4">
+      <Card className="p-6 space-y-4 shadow-sm border-slate-200">
         {isLoading ? (
           <div className="space-y-3">
             <Skeleton className="h-6 w-40" />
@@ -114,102 +130,96 @@ export default function TeacherCreateSession() {
               <p className="text-xl font-semibold">{course.courseName}</p>
               <p className="text-sm text-muted-foreground">{course.courseCode}</p>
             </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary">
-                  <CalendarClock className="h-3 w-3" />
-                  Last session: {course.sessions?.[0]?.createdAt ? new Date(course.sessions[0].createdAt).toLocaleString() : "—"}
-                </Badge>
-                <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary">
-                  <ShieldCheck className="h-3 w-3" />
-                  Geofence {form.maxDistance || defaultDistance}m
-                </Badge>
-              </div>
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary">
+                <CalendarClock className="h-3 w-3" />
+                Last session: {course.sessions?.[0]?.createdAt ? new Date(course.sessions[0].createdAt).toLocaleString() : "—"}
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-1 bg-emerald-50 text-emerald-700">
+                <ShieldCheck className="h-3 w-3" />
+                Geofence Active ({defaultDistance}m)
+              </Badge>
             </div>
+          </div>
         )}
       </Card>
 
-      <Card className="p-6 space-y-5">
-        <form className="grid gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <Label htmlFor="latitude">Teacher latitude</Label>
-            <div className="flex gap-2">
-              <Input
-                id="latitude"
-                value={form.latitude}
-                onChange={(e) => setForm((prev) => ({ ...prev, latitude: e.target.value }))}
-                placeholder="e.g., 40.741"
-                required
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Map Section */}
+        <Card className="lg:col-span-2 overflow-hidden shadow-sm border-slate-200 h-[500px] relative z-0">
+          <div className="absolute top-4 left-4 z-[999] bg-white/90 backdrop-blur px-3 py-1.5 rounded-md shadow-md text-xs font-semibold text-slate-700 pointer-events-none">
+            📍 Click on the map to set session location
+          </div>
+          <MapContainer center={GTU_CENTER} zoom={15} scrollWheelZoom={true} className="h-full w-full">
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <LocationMarker position={mapPosition} setPosition={setMapPosition} />
+          </MapContainer>
+        </Card>
+
+        {/* Configuration Section */}
+        <Card className="p-6 h-fit shadow-sm border-slate-200">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiresAt">Session Duration</Label>
+                <Input
+                  id="expiresAt"
+                  type="datetime-local"
+                  value={form.expiresAt}
+                  onChange={(e) => setForm((prev) => ({ ...prev, expiresAt: e.target.value }))}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Session will automatically close at this time.</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <QrCode className="w-4 h-4 text-indigo-600" />
+                  QR Refresh Interval
+                </Label>
+                <Select
+                  value={form.qrValidity}
+                  onValueChange={(val) => setForm((prev) => ({ ...prev, qrValidity: val }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select interval" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 Seconds (High Security)</SelectItem>
+                    <SelectItem value="5">5 Seconds (Balanced)</SelectItem>
+                    <SelectItem value="10">10 Seconds (Standard)</SelectItem>
+                    <SelectItem value="15">15 Seconds (Relaxed)</SelectItem>
+                    <SelectItem value="30">30 Seconds (Slow)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Prevents QR sharing screenshots.</p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-500/20"
+                disabled={createSession.isPending || !isReady}
+              >
+                {createSession.isPending ? "Creating..." : "Start Session"}
+              </Button>
               <Button
                 type="button"
-                variant="outline"
-                className="border-border text-foreground hover:bg-primary/10 hover:text-primary"
-                onClick={handleGeolocate}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="w-full"
               >
-                <MapPin className="h-4 w-4 mr-1" />
-                Use GPS
+                Cancel
               </Button>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="longitude">Teacher longitude</Label>
-            <Input
-              id="longitude"
-              value={form.longitude}
-              onChange={(e) => setForm((prev) => ({ ...prev, longitude: e.target.value }))}
-              placeholder="e.g., 29.004"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="maxDistance">Max distance (meters)</Label>
-            <Input
-              id="maxDistance"
-              type="number"
-              min={1}
-              value={form.maxDistance}
-              onChange={(e) => setForm((prev) => ({ ...prev, maxDistance: e.target.value }))}
-              placeholder="50"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="expiresAt">Expires at</Label>
-            <Input
-              id="expiresAt"
-              type="datetime-local"
-              value={form.expiresAt}
-              onChange={(e) => setForm((prev) => ({ ...prev, expiresAt: e.target.value }))}
-              required
-            />
-            <p className="text-xs text-muted-foreground">Default is {defaultDurationMinutes} minutes from now.</p>
-          </div>
-          <div className="md:col-span-2 flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-              disabled={createSession.isPending || !isReady}
-            >
-              {createSession.isPending ? (
-                <>
-                  <Radar className="mr-2 h-4 w-4 animate-spin" />
-                  Creating…
-                </>
-              ) : (
-                "Create session"
-              )}
-            </Button>
-          </div>
-        </form>
-      </Card>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }

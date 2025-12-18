@@ -221,7 +221,7 @@ public class AuthController : ControllerBase
                 email: request.Email,
                 passwordhash: _passwordService.HashPassword(request.Password),
                 fullname: request.FullName,
-                gtuid: null,
+                gtuid: request.GtuStudentId,
                 role: "Student"
                 );
 

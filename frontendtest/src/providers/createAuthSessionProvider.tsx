@@ -28,16 +28,18 @@ export function createAuthSessionProvider<TProfile>(
     })
     {
         const queryClient = useQueryClient();
-        const token = authStore.getToken(audience);
+        const [token, setToken] = useState<string | null>(() => authStore.getToken(audience));
         const [hub, setHub] = useState<HubConnection | null>(null);
 
         const logout = () => {
             authStore.clear(audience);
+            setToken(null);
             queryClient.removeQueries({queryKey: [audience]});
         };
 
         const login = (auth: AuthResponse) => {
             authStore.setToken(audience, auth.token);
+            setToken(auth.token);
             queryClient.invalidateQueries({queryKey: [audience, "profile"]});
         };
 
@@ -48,6 +50,18 @@ export function createAuthSessionProvider<TProfile>(
             staleTime: 1000 * 60,
             retry: false,
         });
+
+        // keep token in sync across tabs
+        useEffect(() => {
+            const onStorage = (e: StorageEvent) => {
+                if (!e.key) return;
+                if (e.key.includes(audience)) {
+                    setToken(authStore.getToken(audience));
+                }
+            };
+            window.addEventListener("storage", onStorage);
+            return () => window.removeEventListener("storage", onStorage);
+        }, [audience]);
 
         useEffect(() => {
             if (query.isError) {

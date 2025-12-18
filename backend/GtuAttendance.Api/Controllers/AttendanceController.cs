@@ -324,6 +324,7 @@ public class AttendanceController : ControllerBase
             if(teacherId is null) throw new Unauthorized($"sessions/sessionId:{sessionId} : Teacher id is null.");
 
             var session = await _context.AttendanceSessions
+            .Include(s => s.Course)
             .Include(s => s.AttendanceRecords)
             .ThenInclude(r => r.Student)
             .AsNoTracking()
@@ -344,9 +345,13 @@ public class AttendanceController : ControllerBase
             var response = new SessionDetailResponse(
                 session.SessionId,
                 session.CourseId,
+                session.Course.CourseName,
+                session.Course.CourseCode,
                 session.CreatedAt,
                 session.ExpiresAt,
                 session.IsActive && session.ExpiresAt > DateTime.UtcNow,
+                session.TeacherLatitude,
+                session.TeacherLongitude,
                 attendess
             );
 
@@ -378,6 +383,8 @@ public class AttendanceController : ControllerBase
                 return Ok(new { msg = $"Session with session id : {sessionId} is already closed", sessionId });
             }
             session.IsActive = false;
+            // Manual close: bitişi şimdiye çek ki istemci relative sürede "Süre doldu" göstersin.
+            session.ExpiresAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
@@ -476,4 +483,36 @@ public class AttendanceController : ControllerBase
         }
     }
 
+[Authorize(Roles = "Student")]
+[HttpGet("student/history")]
+public async Task<IActionResult> GetStudentHistory()
+{
+    try
+    {
+        var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
+        if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("student history");
+
+        var history = await _context.AttendanceRecords
+            .AsNoTracking()
+            .Where(r => r.StudentId == studentId)
+            .OrderByDescending(r => r.Session.CreatedAt)
+            .Select(r => new
+            {
+                r.Session.SessionId,
+                r.Session.CourseId,
+                r.Session.Course.CourseName,
+                r.Session.Course.CourseCode,
+                SessionDate = r.Session.CreatedAt,
+                AttendedAt = r.CheckInTime
+            })
+            .ToListAsync();
+
+        return Ok(history);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, ex.StackTrace);
+        return BadRequest(new { error = ex.Message });
+    }
+}
 }

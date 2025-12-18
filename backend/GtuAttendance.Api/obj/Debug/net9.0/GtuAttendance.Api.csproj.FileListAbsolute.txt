@@ -394,7 +394,6 @@ C:/Users/root/Documents/ProjectGrad/backend/GtuAttendance.Api/obj/Debug/net9.0/c
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/bin/Debug/net9.0/GtuAttendance.Core.pdb
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/bin/Debug/net9.0/GtuAttendance.Infrastructure.pdb
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.csproj.AssemblyReference.cache
-/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/rpswa.dswa.cache.json
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.GeneratedMSBuildEditorConfig.editorconfig
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.AssemblyInfoInputs.cache
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.AssemblyInfo.cs
@@ -402,14 +401,10 @@ C:/Users/root/Documents/ProjectGrad/backend/GtuAttendance.Api/obj/Debug/net9.0/c
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.MvcApplicationPartsAssemblyInfo.cs
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.MvcApplicationPartsAssemblyInfo.cache
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.sourcelink.json
-/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/rjimswa.dswa.cache.json
-/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/rjsmrazor.dswa.cache.json
-/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/scopedcss/bundle/GtuAttendance.Api.styles.css
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/compressed/ghzhkt9bve-60pw5raklp.gz
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/compressed/8ratistjrz-7l7iba54v0.gz
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.build.json
-/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.build.json.cache
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.development.json
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.build.endpoints.json
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAtten.E0302B12.Up2Date
@@ -418,3 +413,9 @@ C:/Users/root/Documents/ProjectGrad/backend/GtuAttendance.Api/obj/Debug/net9.0/c
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.pdb
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/GtuAttendance.Api.genruntimeconfig.cache
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/ref/GtuAttendance.Api.dll
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.GtuAttendance.Api.Microsoft.AspNetCore.StaticWebAssets.props
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.GtuAttendance.Api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.build.GtuAttendance.Api.props
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.GtuAttendance.Api.props
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.GtuAttendance.Api.props
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.pack.json

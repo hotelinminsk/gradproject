@@ -52,9 +52,13 @@ public record SessionAttendeeDto(
 public record SessionDetailResponse(
     Guid SessionId,
     Guid CourseId,
+    string CourseName,
+    string CourseCode,
     DateTime CreatedAt,
     DateTime ExpiresAt,
     bool IsActive,
+    decimal Latitude,
+    decimal Longitude,
     IEnumerable<SessionAttendeeDto> Attendees
 );
 

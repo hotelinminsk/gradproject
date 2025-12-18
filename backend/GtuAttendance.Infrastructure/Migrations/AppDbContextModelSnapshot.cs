@@ -182,6 +182,13 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FirstSessionAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("InvitationToken")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -238,6 +245,31 @@ namespace GtuAttendance.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CourseEnrollments");
+                });
+
+            modelBuilder.Entity("GtuAttendance.Core.Entities.CourseSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseSchedules");
                 });
 
             modelBuilder.Entity("GtuAttendance.Core.Entities.StudentProfile", b =>
@@ -503,6 +535,17 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("GtuAttendance.Core.Entities.CourseSchedule", b =>
+                {
+                    b.HasOne("GtuAttendance.Core.Entities.Course", "Course")
+                        .WithMany("Schedules")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("GtuAttendance.Core.Entities.StudentProfile", b =>
                 {
                     b.HasOne("GtuAttendance.Core.Entities.User", "User")
@@ -546,6 +589,8 @@ namespace GtuAttendance.Infrastructure.Migrations
                     b.Navigation("Enrollments");
 
                     b.Navigation("Roster");
+
+                    b.Navigation("Schedules");
 
                     b.Navigation("Sessions");
                 });

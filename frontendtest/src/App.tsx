@@ -13,11 +13,13 @@ import TeacherLayout from "@/components/layouts/TeacherLayout";
 // Student pages
 import StudentHome from "./pages/student/StudentHome";
 import StudentRegister from "./pages/student/StudentRegister";
-  import StudentCourses from "./pages/student/StudentCourses";
-  import StudentCheckIn from "./pages/student/StudentCheckIn";
-  import StudentSettings from "./pages/student/StudentSettings";
-  import StudentLogin from "./pages/student/StudentLogin";
-  import StudentCourseDetails from "./pages/student/StudentCourseDetails";
+import StudentCourses from "./pages/student/StudentCourses";
+import StudentCheckIn from "./pages/student/StudentCheckIn";
+import StudentSettings from "./pages/student/StudentSettings";
+import StudentLogin from "./pages/student/StudentLogin";
+import StudentCourseDetails from "./pages/student/StudentCourseDetails";
+import StudentWeeklyPlan from "./pages/student/StudentWeeklyPlan";
+import StudentHistory from "./pages/student/StudentHistory";
 
 // Teacher pages
 import TeacherLogin from "./pages/teacher/TeacherLogin";
@@ -29,7 +31,7 @@ import TeacherReports from "./pages/teacher/TeacherReports";
 import TeacherCourseDetails from "./pages/teacher/TeacherCourseDetails";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherSessionClosed from "./pages/teacher/TeacherSessionClosed";
-import { TeacherSessionProvider } from "./providers";
+import { TeacherSessionProvider, StudentSessionProvider } from "./providers";
 import TeacherCreateCourse from "./pages/teacher/TeacherCreateCourse";
 import TeacherCreateSession from "./pages/teacher/TeacherCreateSession";
 import TeacherSessions from "./pages/teacher/TeacherSessions";
@@ -41,82 +43,100 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TeacherSessionProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
+          <StudentSessionProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<Index />} />
 
-            {/* Student auth screens (no layout) */}
-            <Route path="/student" element={<StudentLogin />} />
-            <Route path="/student/login" element={<StudentLogin />} />
-            <Route path="/student/register" element={<StudentRegister />} />
+                {/* Student auth screens (no layout) */}
+                <Route path="/student" element={<StudentLogin />} />
+                <Route path="/student/login" element={<StudentLogin />} />
+                <Route path="/student/register" element={<StudentRegister />} />
 
-            {/* Student protected routes under layout */}
-            <Route element={<StudentLayout />}>
-              <Route
-                path="/student/home"
-                element={
-                  <RequireStudentAuth>
-                    <StudentHome />
-                  </RequireStudentAuth>
-                }
-              />
-              <Route
-                path="/student/courses"
-                element={
-                  <RequireStudentAuth>
-                    <StudentCourses />
-                  </RequireStudentAuth>
-                }
-              />
-              <Route
-                path="/student/courses/:courseId"
-                element={
-                  <RequireStudentAuth>
-                    <StudentCourseDetails />
-                  </RequireStudentAuth>
-                }
-              />
-              <Route
-                path="/student/check-in/:courseId"
-                element={
-                  <RequireStudentAuth>
-                    <StudentCheckIn />
-                  </RequireStudentAuth>
-                }
-              />
-              <Route
-                path="/student/settings"
-                element={
-                  <RequireStudentAuth>
-                    <StudentSettings />
-                  </RequireStudentAuth>
-                }
-              />
-            </Route>
-            {/* Teacher routes (protected) */}
-            <Route element={<TeacherLayout />}>
-              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-              <Route path="/teacher/courses" element={<TeacherCourses />} />
-              <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetails />} />
-              <Route path="/teacher/courses/:courseId/sessions/new" element={<TeacherCreateSession />} />
-              <Route path="/teacher/sessions" element={<TeacherSessions />} />
-              <Route path="/teacher/students" element={<TeacherStudents />} />
-              <Route path="/teacher/session" element={<TeacherSession />} />
-              <Route path="/teacher/session/:sessionId" element={<TeacherSession />} />
-              <Route path="/teacher/session/:sessionId/closed" element={<TeacherSessionClosed />} />
-              <Route path="/teacher/reports" element={<TeacherReports />} />
-              <Route path="/teacher/create-course" element={<TeacherCreateCourse />} />
-            </Route>
+                {/* Student protected routes under layout */}
+                <Route element={<StudentLayout />}>
+                  <Route
+                    path="/student/home"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentHome />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/weekly-plan"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentWeeklyPlan />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/history"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentHistory />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/courses"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentCourses />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/courses/:courseId"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentCourseDetails />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/check-in/:courseId"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentCheckIn />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/settings"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentSettings />
+                      </RequireStudentAuth>
+                    }
+                  />
+                </Route>
+                {/* Teacher routes (protected) */}
+                <Route element={<TeacherLayout />}>
+                  <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+                  <Route path="/teacher/courses" element={<TeacherCourses />} />
+                  <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetails />} />
+                  <Route path="/teacher/courses/:courseId/sessions/new" element={<TeacherCreateSession />} />
+                  <Route path="/teacher/sessions" element={<TeacherSessions />} />
+                  <Route path="/teacher/students" element={<TeacherStudents />} />
+                  <Route path="/teacher/session" element={<TeacherSession />} />
+                  <Route path="/teacher/session/:sessionId" element={<TeacherSession />} />
+                  <Route path="/teacher/session/:sessionId/closed" element={<TeacherSessionClosed />} />
+                  <Route path="/teacher/reports" element={<TeacherReports />} />
+                  <Route path="/teacher/create-course" element={<TeacherCreateCourse />} />
+                </Route>
 
-            {/* Teacher auth routes (no provider) */}
-            <Route path="/teacher/login" element={<TeacherLogin />} />
-            <Route path="/teacher/register" element={<TeacherRegister />} />
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
+                {/* Teacher auth routes (no provider) */}
+                <Route path="/teacher/login" element={<TeacherLogin />} />
+                <Route path="/teacher/register" element={<TeacherRegister />} />
+                {/* Catch-all */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </StudentSessionProvider>
         </TeacherSessionProvider>
       </BrowserRouter>
     </QueryClientProvider>

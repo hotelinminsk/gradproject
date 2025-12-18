@@ -1,0 +1,28 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/GtuAttendance.Api/admin-test.60pw5raklp.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\admin-test.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"60pw5raklp"},{"Name":"integrity","Value":"sha256-llfz\u002B0RtNxVReLZlSTjKV3UKerZB01Evwh/BuMIWMXc="},{"Name":"label","Value":"_content/GtuAttendance.Api/admin-test.html"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"4984"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u0022llfz\u002B0RtNxVReLZlSTjKV3UKerZB01Evwh/BuMIWMXc=\u0022"},{"Name":"Last-Modified","Value":"Sat, 13 Dec 2025 10:49:10 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/GtuAttendance.Api/admin-test.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\admin-test.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-llfz\u002B0RtNxVReLZlSTjKV3UKerZB01Evwh/BuMIWMXc="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"4984"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u0022llfz\u002B0RtNxVReLZlSTjKV3UKerZB01Evwh/BuMIWMXc=\u0022"},{"Name":"Last-Modified","Value":"Sat, 13 Dec 2025 10:49:10 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/GtuAttendance.Api/webauthn-test.7l7iba54v0.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\webauthn-test.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"7l7iba54v0"},{"Name":"integrity","Value":"sha256-65lUSdzKGl0N2V8ZLJHqbcNKyHcinlyp2oJ8c1GJlKg="},{"Name":"label","Value":"_content/GtuAttendance.Api/webauthn-test.html"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"7613"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u002265lUSdzKGl0N2V8ZLJHqbcNKyHcinlyp2oJ8c1GJlKg=\u0022"},{"Name":"Last-Modified","Value":"Sat, 13 Dec 2025 10:49:10 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/GtuAttendance.Api/webauthn-test.html">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\webauthn-test.html'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-65lUSdzKGl0N2V8ZLJHqbcNKyHcinlyp2oJ8c1GJlKg="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"7613"},{"Name":"Content-Type","Value":"text/html"},{"Name":"ETag","Value":"\u002265lUSdzKGl0N2V8ZLJHqbcNKyHcinlyp2oJ8c1GJlKg=\u0022"},{"Name":"Last-Modified","Value":"Sat, 13 Dec 2025 10:49:10 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

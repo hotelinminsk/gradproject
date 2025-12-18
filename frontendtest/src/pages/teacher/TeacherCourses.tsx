@@ -161,238 +161,237 @@ const TeacherCourses = () => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Teacher Panel</p>
-          <h1 className="text-3xl font-bold">Courses</h1>
-          <p className="text-sm text-muted-foreground">Manage rosters, sessions, and enrollment at a glance.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            disabled={!selectionCount || bulkDelete.isPending || isLoading}
-            className="border-destructive/40 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-            onClick={() => setConfirmOpen(true)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-            {selectionCount ? <span className="ml-1 rounded-full bg-destructive/10 px-2 text-xs">{selectionCount}</span> : null}
-          </Button>
-          <Button onClick={() => navigate("/teacher/create-course")}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Course
-          </Button>
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-20 font-sans">
+      {/* Sticky Header - Aligning with Sidebar Header (approx 88px) */}
+      <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-200 h-[88px] flex items-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-normal tracking-tight text-slate-900">Derslerim</h1>
+            <p className="text-xs text-muted-foreground hidden sm:block">Derslerinizi ve oturumlarınızı yönetin</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {selectionCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={bulkDelete.isPending || isLoading}
+                className="border-red-100 text-red-600 hover:bg-red-50 hover:text-red-700 bg-white"
+                onClick={() => setConfirmOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Sil ({selectionCount})
+              </Button>
+            )}
+            <Button onClick={() => navigate("/teacher/create-course")} size="sm" className="bg-[#1a73e8] hover:bg-[#1557b0] text-white shadow-md border-0">
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Ders
+            </Button>
+          </div>
         </div>
       </div>
 
-      <Card className="p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex flex-1 items-center rounded-full border bg-card px-4 py-2">
-            <Search className="mr-2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by course name or code"
-              className="border-0 bg-transparent px-0 focus-visible:ring-0"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
-              checked={filteredCourses.length > 0 && selectionCount === filteredCourses.length}
-              onCheckedChange={toggleAll}
-              id="select-all"
-              disabled={isLoading || filteredCourses.length === 0}
-            />
-            <label htmlFor="select-all" className="cursor-pointer">
-              Select all
-            </label>
-          </div>
-        </div>
-      </Card>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {!isLoading &&
-          filteredCourses.map((course) => {
-            const isSelected = selected.has(course.courseId);
-            const lastSessionCreated = parseUtc(course.lastSession?.createdAt);
-            const lastSessionExpires = parseUtc(course.lastSession?.expiresAtUtc || (course as any).lastSession?.expiresAt);
-            const lastSessionLabel = course.lastSession
-              ? `${course.lastSession.isActive ? "Aktif" : "Kapandı"} - Son yoklama ${formatFriendlyDateTr(
-                  lastSessionExpires || lastSessionCreated,
-                )}`
-              : "No sessions yet";
-            const createdLabel = formatDateTime(course.createdAt);
-            const statusLabel = course.isActive ? "Active" : "Paused";
-            // We now share raw token instead of URL.
-            const derivedInviteLink = course.inviteToken ?? course.inviteToken ?? course.inviteToken;
-            const activeSessionId = activeSessionByCourse.get(course.courseId);
-            return (
-              <Card
-                key={course.courseId}
-                className={`group relative overflow-hidden border transition hover:border-primary/60 hover:shadow-xl hover:scale-[1.01] ${
-                  isSelected ? "border-primary/70 shadow-lg" : ""
-                }`}
-              >
-                <div className="absolute left-4 top-4 z-10 rounded-full bg-background/95 p-2 shadow-sm">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => toggleCourse(course.courseId)}
-                    aria-label="Select course"
-                  />
-                </div>
-                <div className="flex flex-col gap-4 p-6 pl-12">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <BookOpen className="h-4 w-4 text-primary" />
-                      <span>{course.courseCode}</span>
+        {/* Search & Filter Bar */}
+        <Card className="p-1 px-2 shadow-sm rounded-full border border-slate-200 bg-white max-w-2xl mx-auto flex items-center">
+          <div className="pl-3 text-slate-400">
+            <Search className="h-4 w-4" />
+          </div>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Ders adı veya kodu ile ara..."
+            className="border-0 bg-transparent shadow-none focus-visible:ring-0 flex-1 h-10"
+          />
+          {filteredCourses.length > 0 && (
+            <div className="pr-2 flex items-center gap-2 border-l border-slate-100 pl-2">
+              <Checkbox
+                checked={filteredCourses.length > 0 && selectionCount === filteredCourses.length}
+                onCheckedChange={toggleAll}
+                id="select-all"
+              />
+              <label htmlFor="select-all" className="text-xs text-slate-500 cursor-pointer whitespace-nowrap">
+                Tümünü Seç
+              </label>
+            </div>
+          )}
+        </Card>
+
+        {/* Course Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {!isLoading &&
+            filteredCourses.map((course) => {
+              const isSelected = selected.has(course.courseId);
+              const lastSessionCreated = parseUtc(course.lastSession?.createdAt);
+              const activeSessionId = activeSessionByCourse.get(course.courseId);
+              // Derived invite token
+              const derivedInviteLink = course.inviteToken;
+
+              return (
+                <Card
+                  key={course.courseId}
+                  className={`group relative overflow-hidden border transition-all duration-200 hover:shadow-lg rounded-xl bg-white flex flex-col ${isSelected ? "border-[#1a73e8] ring-1 ring-[#1a73e8]/20" : "border-slate-200 hover:border-blue-200"
+                    }`}
+                >
+                  {/* Card Header / Banner Placeholder */}
+                  <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-100 p-4 relative">
+                    <div className="absolute top-3 left-3">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleCourse(course.courseId)}
+                        className="bg-white/80 border-slate-300 data-[state=checked]:bg-[#1a73e8] data-[state=checked]:border-[#1a73e8]"
+                      />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-semibold text-foreground">{course.courseName}</h3>
-                      {activeSessionId && (
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Aktif yoklama</Badge>
+                    <div className="flex justify-end">
+                      {activeSessionId ? (
+                        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border-0 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Canlı
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-white/60 text-slate-500 hover:bg-white/80 backdrop-blur-sm">
+                          {course.isActive ? "Aktif" : "Pasif"}
+                        </Badge>
                       )}
                     </div>
                   </div>
-                </div>
 
-                  <div className="rounded-2xl border bg-muted/40 p-4 text-sm text-muted-foreground">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-foreground">Last activity</span>
-                      <CalendarClock className="h-4 w-4 text-primary" />
+                  {/* Card Content */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="mb-4">
+                      <div className="text-xs font-semibold text-[#1a73e8] mb-0.5 flex items-center gap-2">
+                        {course.courseCode}
+                        {course.firstSessionAt && <span className="text-slate-400 font-normal">• {new Date(course.firstSessionAt).toLocaleDateString('tr-TR')}</span>}
+                      </div>
+                      <h3
+                        className="text-lg font-medium text-slate-900 line-clamp-1 cursor-pointer hover:text-[#1a73e8] transition-colors"
+                        onClick={() => navigate(`/teacher/courses/${course.courseId}`)}
+                      >
+                        {course.courseName}
+                      </h3>
+                      {course.description && (
+                        <p className="text-xs text-slate-500 line-clamp-2 mt-1 min-h-[2.5em]">
+                          {course.description}
+                        </p>
+                      )}
+                      {!course.description && <div className="min-h-[2.5em]" />}
                     </div>
-                    <p className="mt-1 text-foreground">{lastSessionLabel}</p>
-                    <Separator className="my-3" />
-                    <div className="grid grid-cols-3 gap-4 text-center">
+
+                    <div className="grid grid-cols-2 gap-2 text-center py-3 border-t border-b border-slate-50 mb-4 bg-slate-50/30 rounded-lg">
                       <div>
-                        <p className="text-xs uppercase tracking-wide">Enrollment</p>
-                        <p className="text-lg font-semibold text-foreground">{course.enrollmentCount ?? 0}</p>
+                        <span className="block text-lg font-light text-slate-900">{course.enrollmentCount ?? 0}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Öğrenci</span>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-wide">Created</p>
-                        <p className="text-sm text-foreground">{createdLabel}</p>
+                        <span className="block text-lg font-light text-slate-900">{course.sessionCount ?? 0}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Oturum</span>
                       </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-wide">Status</p>
-                        <p className="text-sm text-foreground">{statusLabel}</p>
-                      </div>
+                    </div>
+
+                    <div className="mt-auto flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs border-slate-200 text-slate-600 hover:text-[#1a73e8] hover:border-blue-200 hover:bg-blue-50"
+                        onClick={() => navigate(`/teacher/courses/${course.courseId}`)}
+                      >
+                        Yönet
+                      </Button>
+                      <Button
+                        size="sm"
+                        className={`flex-[1.5] text-xs shadow-sm border-0 text-white ${activeSessionId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#1a73e8] hover:bg-[#1557b0]'}`}
+                        onClick={() => handleStartSession(course.courseId)}
+                      >
+                        {activeSessionId ? "Oturuma Git" : "Yoklama Başlat"}
+                      </Button>
                     </div>
                   </div>
+                </Card>
+              );
+            })}
+        </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-dashed hover:bg-primary/5 hover:border-primary/40"
-                      onClick={() => navigate(`/teacher/courses/${course.courseId}`)}
-                    >
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Manage Course
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 justify-center border-border/60 text-foreground hover:bg-primary/10 hover:text-primary"
-                      onClick={() => handleShowInvite(derivedInviteLink, course.courseCode)}
-                    >
-                      <Link2 className="mr-2 h-4 w-4" />
-                      Copy Invite Token
-                    </Button>
-                    <Button
-                      className={`flex-1 basis-full justify-center text-primary-foreground ${
-                        activeSessionId
-                          ? "bg-emerald-500 hover:bg-emerald-600"
-                          : "bg-primary/80 hover:bg-primary/70"
-                      }`}
-                      onClick={() => handleStartSession(course.courseId)}
-                    >
-                      <CalendarClock className="mr-2 h-4 w-4" />
-                      {activeSessionId ? "View Active Session" : "Create Attendance Session"}
-                    </Button>
-                  </div>
+        {isLoading && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <Card key={idx} className="h-[300px] p-4 flex flex-col gap-4">
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <div className="mt-auto flex gap-2">
+                  <Skeleton className="h-8 flex-1" />
+                  <Skeleton className="h-8 flex-1" />
                 </div>
               </Card>
-            );
-          })}
-        {isLoading &&
-          Array.from({ length: 4 }).map((_, idx) => (
-            <Card key={`skeleton-${idx}`} className="p-6">
-              <div className="flex flex-col gap-4">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-24 w-full" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                </div>
-              </div>
-            </Card>
-          ))}
+            ))}
+          </div>
+        )}
+
         {!isLoading && filteredCourses.length === 0 && (
-          <Card className="col-span-full flex flex-col items-center justify-center gap-3 p-12 text-center">
-            <p className="text-lg font-semibold text-foreground">No courses found</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your search or create a new course.</p>
-            <Button onClick={() => navigate("/teacher/create-course")} variant="outline">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <BookOpen className="w-8 h-8 text-slate-300" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-900">Ders bulunamadı</h3>
+            <p className="text-sm text-slate-500 max-w-sm mt-1 mb-6">Aktif yoklama takibine başlamak için ilk dersinizi oluşturun.</p>
+            <Button onClick={() => navigate("/teacher/create-course")} className="bg-[#1a73e8] hover:bg-[#1557b0] text-white">
               <Plus className="mr-2 h-4 w-4" />
-              Create course
+              Ders Oluştur
             </Button>
-          </Card>
+          </div>
         )}
       </div>
 
-          <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-            <DialogContent className="sm:max-w-[480px]">
-              <DialogHeader>
-                <DialogTitle>Share invite token</DialogTitle>
-                <DialogDescription>Send this token to students so they can join {inviteCourseLabel}.</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3">
-                <Input value={inviteLinkValue} readOnly />
+      {/* Dialogs unchanged essentially, just wrapped */}
+      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+        {/* ... */}
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Davet kodunu paylaş</DialogTitle>
+            <DialogDescription>Öğrencilerin {inviteCourseLabel} dersine katılması için bu kodu paylaşın.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+              <code className="text-2xl font-bold tracking-widest text-slate-800 break-all select-all">
+                {inviteLinkValue}
+              </code>
+            </div>
             <DialogFooter className="gap-2 sm:justify-end">
               <Button variant="ghost" onClick={() => setInviteDialogOpen(false)}>
-                Close
+                Kapat
               </Button>
-              <Button onClick={copyInviteLink}>Copy link</Button>
+              <Button onClick={copyInviteLink} className="bg-[#1a73e8] text-white hover:bg-[#1557b0]">
+                <Link2 className="w-4 h-4 mr-2" />
+                Kopyala
+              </Button>
             </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Alert Dialog (Delete) */}
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="space-y-5">
-          <AlertDialogHeader className="space-y-2">
-            <AlertDialogTitle className="text-2xl">Delete selected courses?</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground">
-              Attendance sessions, rosters, and student records related to these courses will be removed for good.
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{selectionCount} dersi silmek istiyor musunuz?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bu işlem seçilen dersleri, öğrenci listelerini ve yoklama kayıtlarını kalıcı olarak silecektir.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Card className="border bg-muted/30 p-4 text-sm">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span>Courses selected</span>
-              <span className="text-foreground font-semibold">{selectionCount}</span>
-            </div>
-            <Separator className="my-3" />
-            {selectedCourses.slice(0, 2).map((course) => (
-              <div key={course.courseId} className="flex items-center justify-between text-foreground">
-                <span className="font-medium">{course.courseName}</span>
-                <span className="text-xs text-muted-foreground">{course.courseCode}</span>
+
+          <div className="max-h-[200px] overflow-auto border rounded-md p-2 text-sm bg-slate-50">
+            {selectedCourses.map(c => (
+              <div key={c.courseId} className="flex justify-between py-1 px-2 border-b last:border-0 border-slate-100">
+                <span className="font-medium text-slate-700">{c.courseName}</span>
+                <span className="text-slate-400 text-xs">{c.courseCode}</span>
               </div>
             ))}
-            {selectionCount > 2 && (
-              <p className="mt-2 text-xs text-muted-foreground">+{selectionCount - 2} more courses selected</p>
-            )}
-          </Card>
-          <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-xs text-destructive">
-            This action can’t be undone. You’ll need to recreate courses and sessions if you remove them now.
           </div>
-          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDelete}
-              disabled={!selectionCount || bulkDelete.isPending}
-              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:w-auto disabled:opacity-70"
-            >
-              {bulkDelete.isPending ? "Deleting..." : `Delete ${selectionCount ? `(${selectionCount})` : ""}`}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Sil
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
