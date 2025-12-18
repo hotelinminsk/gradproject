@@ -419,3 +419,5 @@ C:/Users/root/Documents/ProjectGrad/backend/GtuAttendance.Api/obj/Debug/net9.0/c
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.GtuAttendance.Api.props
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.GtuAttendance.Api.props
 /home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/obj/Debug/net9.0/staticwebassets.pack.json
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/bin/Debug/net9.0/Npgsql.dll
+/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/bin/Debug/net9.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll

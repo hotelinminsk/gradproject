@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "yHZIVc7SWyA=",
+  "dgSpecHash": "yxOAGM0u4UE=",
   "success": true,
   "projectFilePath": "/home/kleinerprinze/Projects/gradproject/backend/GtuAttendance.Api/GtuAttendance.Api.csproj",
   "expectedPackageFiles": [
@@ -71,6 +71,8 @@
     "/home/kleinerprinze/.nuget/packages/microsoft.sqlserver.server/1.0.0/microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "/home/kleinerprinze/.nuget/packages/microsoft.win32.systemevents/6.0.0/microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "/home/kleinerprinze/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
+    "/home/kleinerprinze/.nuget/packages/npgsql/9.0.2/npgsql.9.0.2.nupkg.sha512",
+    "/home/kleinerprinze/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.2/npgsql.entityframeworkcore.postgresql.9.0.2.nupkg.sha512",
     "/home/kleinerprinze/.nuget/packages/nsec.cryptography/25.4.0/nsec.cryptography.25.4.0.nupkg.sha512",
     "/home/kleinerprinze/.nuget/packages/swashbuckle.aspnetcore/9.0.6/swashbuckle.aspnetcore.9.0.6.nupkg.sha512",
     "/home/kleinerprinze/.nuget/packages/swashbuckle.aspnetcore.swagger/9.0.6/swashbuckle.aspnetcore.swagger.9.0.6.nupkg.sha512",

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GtuAttendance.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialClean : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,14 +15,14 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "TeacherInvites",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MaxUses = table.Column<int>(type: "int", nullable: true),
-                    UsedCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    EmailDomain = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MaxUses = table.Column<int>(type: "integer", nullable: true),
+                    UsedCount = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    EmailDomain = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -33,14 +33,14 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    GtuStudentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    FullName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    GtuStudentId = table.Column<string>(type: "text", nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,13 +51,15 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "Courses",
                 columns: table => new
                 {
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TeacherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    CourseCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    InvitationToken = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    CourseCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    InvitationToken = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    FirstSessionAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,8 +76,8 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "StudentProfiles",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GtuStudentId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GtuStudentId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,7 +94,7 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "TeacherProfiles",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -109,18 +111,18 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "WebAuthnCredentials",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CredentialId = table.Column<byte[]>(type: "varbinary(900)", nullable: false),
-                    PublicKey = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CredentialId = table.Column<byte[]>(type: "bytea", nullable: false),
+                    PublicKey = table.Column<byte[]>(type: "bytea", nullable: false),
                     SignatureCounter = table.Column<long>(type: "bigint", nullable: false),
-                    UserHandle = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    DeviceName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    CredentialType = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Transports = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    UserHandle = table.Column<byte[]>(type: "bytea", nullable: false),
+                    DeviceName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    CredentialType = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Transports = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,18 +139,18 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "AttendanceSessions",
                 columns: table => new
                 {
-                    SessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TeacherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QRCodeToken = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    TeacherLatitude = table.Column<decimal>(type: "decimal(10,8)", precision: 10, scale: 8, nullable: false),
-                    TeacherLongitude = table.Column<decimal>(type: "decimal(11,8)", precision: 11, scale: 8, nullable: false),
-                    MaxDistanceMeters = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Secret = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    CodeStepSeconds = table.Column<int>(type: "int", nullable: false, defaultValue: 30)
+                    SessionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QRCodeToken = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    TeacherLatitude = table.Column<decimal>(type: "numeric(10,8)", precision: 10, scale: 8, nullable: false),
+                    TeacherLongitude = table.Column<decimal>(type: "numeric(11,8)", precision: 11, scale: 8, nullable: false),
+                    MaxDistanceMeters = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Secret = table.Column<byte[]>(type: "bytea", nullable: false),
+                    CodeStepSeconds = table.Column<int>(type: "integer", nullable: false, defaultValue: 30)
                 },
                 constraints: table =>
                 {
@@ -171,11 +173,14 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "CourseEnrollments",
                 columns: table => new
                 {
-                    EnrollmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsValidated = table.Column<bool>(type: "bit", nullable: false)
+                    EnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EnrolledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsValidated = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDropped = table.Column<bool>(type: "boolean", nullable: false),
+                    DroppedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DroppedByTeacherId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -198,11 +203,11 @@ namespace GtuAttendance.Infrastructure.Migrations
                 name: "CourseRosters",
                 columns: table => new
                 {
-                    RosterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GtuStudentId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    ImportedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    RosterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GtuStudentId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    FullName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    ImportedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -216,20 +221,41 @@ namespace GtuAttendance.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CourseSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DayOfWeek = table.Column<int>(type: "integer", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    EndTime = table.Column<TimeSpan>(type: "interval", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseSchedules_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AttendanceRecords",
                 columns: table => new
                 {
-                    AttendanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StudentLatitude = table.Column<decimal>(type: "decimal(10,8)", precision: 10, scale: 8, nullable: false),
-                    StudentLongitude = table.Column<decimal>(type: "decimal(11,8)", precision: 11, scale: 8, nullable: false),
-                    DistanceFromTeacherMeters = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    IsWithinRange = table.Column<bool>(type: "bit", nullable: false),
-                    DeviceCredentialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SyncedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    AttendanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CheckInTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    StudentLatitude = table.Column<decimal>(type: "numeric(10,8)", precision: 10, scale: 8, nullable: false),
+                    StudentLongitude = table.Column<decimal>(type: "numeric(11,8)", precision: 11, scale: 8, nullable: false),
+                    DistanceFromTeacherMeters = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
+                    IsWithinRange = table.Column<bool>(type: "boolean", nullable: false),
+                    DeviceCredentialId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SyncedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -326,6 +352,11 @@ namespace GtuAttendance.Infrastructure.Migrations
                 column: "TeacherId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseSchedules_CourseId",
+                table: "CourseSchedules",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentProfiles_GtuStudentId",
                 table: "StudentProfiles",
                 column: "GtuStudentId",
@@ -366,6 +397,9 @@ namespace GtuAttendance.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "CourseRosters");
+
+            migrationBuilder.DropTable(
+                name: "CourseSchedules");
 
             migrationBuilder.DropTable(
                 name: "StudentProfiles");

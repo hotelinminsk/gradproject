@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using GtuAttendance.Core.Entities;
-using Microsoft.Data.SqlClient;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,8 +47,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Database // ADDED RETRIES FOR DATABASE CONNECTION BUILDER
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sql => sql.EnableRetryOnFailure(5,TimeSpan.FromSeconds(2), null)));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        pgsql => pgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(2), null)));
 
 // Services
 builder.Services.AddScoped<JWTService>();
@@ -161,7 +163,7 @@ using (var scope = app.Services.CreateScope())
             await db.Database.MigrateAsync();
             break;
         }
-        catch (SqlException ex) when (ex.Number is 1801 or 4060 or 18456) // already exists / cannot open DB / login
+        catch (Exception ex) // Generic catch for now, or use NpgsqlException if strictly needed
         {
             await Task.Delay(2000);
             if (attempt == 10) throw;
