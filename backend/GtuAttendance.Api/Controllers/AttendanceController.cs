@@ -350,6 +350,8 @@ public class AttendanceController : ControllerBase
                 session.CreatedAt,
                 session.ExpiresAt,
                 session.IsActive && session.ExpiresAt > DateTime.UtcNow,
+                session.TeacherLatitude,
+                session.TeacherLongitude,
                 attendess
             );
 
@@ -481,4 +483,36 @@ public class AttendanceController : ControllerBase
         }
     }
 
+[Authorize(Roles = "Student")]
+[HttpGet("student/history")]
+public async Task<IActionResult> GetStudentHistory()
+{
+    try
+    {
+        var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User?.FindFirst("sub")?.Value;
+        if (!Guid.TryParse(sub, out var studentId)) throw new Unauthorized("student history");
+
+        var history = await _context.AttendanceRecords
+            .AsNoTracking()
+            .Where(r => r.StudentId == studentId)
+            .OrderByDescending(r => r.Session.CreatedAt)
+            .Select(r => new
+            {
+                r.Session.SessionId,
+                r.Session.CourseId,
+                r.Session.Course.CourseName,
+                r.Session.Course.CourseCode,
+                SessionDate = r.Session.CreatedAt,
+                AttendedAt = r.CheckInTime
+            })
+            .ToListAsync();
+
+        return Ok(history);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, ex.StackTrace);
+        return BadRequest(new { error = ex.Message });
+    }
+}
 }

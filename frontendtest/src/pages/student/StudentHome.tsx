@@ -12,11 +12,17 @@ const StudentHome = () => {
 
   // Find the first active session across all courses
   const activeCourse = courses.find(
-    (c) =>
-      c.latestSession &&
-      c.latestSession.sessionIsActive &&
-      new Date(c.latestSession.sessionExpiredAt) > new Date()
+    (c) => c.latestSession && c.latestSession.sessionIsActive
   );
+  // Determine today's classes
+  const today = new Date().getDay(); // 0=Sunday, 1=Monday...
+  const todaysClasses = courses
+    .filter(c => c.schedules?.some(s => s.dayOfWeek === today))
+    .map(c => {
+      const schedule = c.schedules!.find(s => s.dayOfWeek === today)!;
+      return { ...c, schedule };
+    })
+    .sort((a, b) => a.schedule.startTime.localeCompare(b.schedule.startTime));
 
   return (
     <div className="min-h-screen bg-slate-50 pb-safe-nav font-sans text-slate-900 relative overflow-hidden">
@@ -92,13 +98,57 @@ const StudentHome = () => {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">Aktif dersin yok</h3>
+                  <h3 className="font-semibold text-slate-900">Aktif yoklaman yok</h3>
                   <p className="text-sm text-slate-500">İyi dinlenmeler!</p>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Today's Classes */}
+        <div className="animate-in fade-in slide-in-from-bottom-5 duration-700">
+          <h2 className="text-sm font-bold text-slate-900 mb-4 px-1 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-indigo-600" />
+            Bugünkü Dersler
+          </h2>
+
+          {todaysClasses.length > 0 ? (
+            <div className="flex overflow-x-auto gap-4 pb-2 -mx-5 px-5 snap-x scrollbar-hide">
+              {todaysClasses.map((course) => (
+                <div
+                  key={course.courseId}
+                  onClick={() => navigate(`/student/courses/${course.courseId}`)}
+                  className="snap-start shrink-0 min-w-[240px] p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all active:scale-[0.98] group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -mr-4 -mt-4 transition-colors group-hover:bg-indigo-100" />
+
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">
+                        {course.schedule.startTime.slice(0, 5)}
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                        {course.courseCode}
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-slate-900 leading-tight mb-1">{course.courseName}</h3>
+                    <p className="text-xs text-slate-500 truncate">{course.teacherName || "Öğretim Üyesi"}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 rounded-2xl bg-slate-50/50 border border-slate-100 border-dashed text-center">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-400 mb-3">
+                <Compass className="w-5 h-5" />
+              </span>
+              <p className="text-sm font-semibold text-slate-900">Bugün dersin yok!</p>
+              <p className="text-xs text-slate-500 mt-1">Günün tadını çıkar, iyi dinlenmeler. 🎉</p>
+            </div>
+          )}
+        </div>
 
         {/* Quick Actions */}
         <div>
@@ -116,7 +166,7 @@ const StudentHome = () => {
               {
                 title: "Geçmiş",
                 icon: History,
-                to: "/student/courses",
+                to: "/student/history",
                 color: "text-violet-600",
                 bg: "bg-violet-50",
                 border: "border-violet-100"
@@ -132,7 +182,8 @@ const StudentHome = () => {
               {
                 title: "Yardım",
                 icon: Compass,
-                to: "/student/settings",
+                to: "#",
+                onClick: () => window.open("/guide.pdf", "_blank"),
                 color: "text-slate-600",
                 bg: "bg-slate-50",
                 border: "border-slate-100"
@@ -142,7 +193,7 @@ const StudentHome = () => {
               return (
                 <button
                   key={idx}
-                  onClick={() => navigate(action.to)}
+                  onClick={() => action.onClick ? action.onClick() : navigate(action.to)}
                   className="group relative p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all active:scale-[0.98] text-left overflow-hidden"
                 >
                   <div className={`absolute top-0 right-0 w-16 h-16 opacity-5 rounded-bl-full ${action.bg.replace("50", "500")}`} />

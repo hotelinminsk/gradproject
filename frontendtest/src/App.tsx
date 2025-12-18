@@ -19,6 +19,7 @@ import StudentSettings from "./pages/student/StudentSettings";
 import StudentLogin from "./pages/student/StudentLogin";
 import StudentCourseDetails from "./pages/student/StudentCourseDetails";
 import StudentWeeklyPlan from "./pages/student/StudentWeeklyPlan";
+import StudentHistory from "./pages/student/StudentHistory";
 
 // Teacher pages
 import TeacherLogin from "./pages/teacher/TeacherLogin";
@@ -69,6 +70,14 @@ const App = () => {
                     element={
                       <RequireStudentAuth>
                         <StudentWeeklyPlan />
+                      </RequireStudentAuth>
+                    }
+                  />
+                  <Route
+                    path="/student/history"
+                    element={
+                      <RequireStudentAuth>
+                        <StudentHistory />
                       </RequireStudentAuth>
                     }
                   />

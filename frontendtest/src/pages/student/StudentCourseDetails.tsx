@@ -109,82 +109,93 @@ export default function StudentCourseDetails() {
       <div className="absolute top-[10%] left-[-10%] w-[300px] h-[300px] bg-purple-100/40 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="relative px-6 pt-8 pb-4 z-10">
-        <button
-          className="flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-white/60 transition-colors mb-4"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
-          <span className="text-sm font-medium text-slate-600">Geri</span>
-        </button>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">{course?.courseName ?? "Ders Detayı"}</h1>
-        <p className="text-sm text-slate-500 font-medium mt-1">{course?.courseCode}</p>
+      <div className="relative px-6 pt-8 pb-2 z-10">
+        <div className="flex items-center justify-between">
+          <button
+            className="flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-white/60 transition-colors"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
+            <span className="text-sm font-medium text-slate-600">Geri</span>
+          </button>
+
+          <div className="bg-white/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+            <span className="text-xs font-bold text-slate-600 tracking-wide uppercase">{course?.courseCode}</span>
+          </div>
+        </div>
       </div>
 
-      <main className="flex flex-col flex-1 gap-5 px-5 pt-6 max-w-lg mx-auto">
+      <main className="flex flex-col flex-1 gap-5 px-5 pt-2 max-w-lg mx-auto">
         {isLoading ? (
           <div className="space-y-4">
+            <Skeleton className="h-48 w-full rounded-3xl" />
             <Skeleton className="h-40 w-full rounded-2xl" />
-            <Skeleton className="h-64 w-full rounded-2xl" />
           </div>
         ) : !course ? (
           <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-              <GraduationCap className="w-8 h-8 text-slate-400" />
-            </div>
-            <p className="text-lg font-medium text-slate-900">Ders bulunamadı</p>
-            <p className="text-sm text-slate-500">Bu ders silinmiş veya erişiminiz yok olabilir.</p>
-            <Button variant="link" onClick={() => navigate("/student/courses")}>Derslere Dön</Button>
+            {/* ... existing empty state ... */}
           </div>
         ) : (
           <>
-            {/* Hero Section */}
-            <section className="rounded-xl bg-white border border-slate-200 shadow-sm p-5">
-              <div className="flex gap-4 items-start">
-                <div
-                  className="bg-center bg-cover rounded-xl min-h-20 w-20 shrink-0 shadow-inner border border-slate-100"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBR3TiQxyX3mFH-wMwYOoQfZXLZ_vg1nRRLIebzcWDSGSRtli09gm4aNvBPUeknMtV3RSvmDe1kN8sXQQWVBzdsx5xEzBJM5-BKu5QSN0_U9yXz34qi_IC3RghgTf5Yqogxrlls5MQDLrw_JrIeMHjJ9VWjtAX8_reXWKi5Ad2mSqxnsU5cMD5sDteBBy-L0YmvV5upUJtNklAaq_DCghlYqm2FHmRQeeRtfqAv3BVas7ummtlNj4X2zGFa2kAUoPtmzj-Zw3A2Wp1E')",
-                  }}
-                />
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <h1 className="text-xl font-bold leading-tight">{course.courseName}</h1>
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <GraduationCap className="w-4 h-4 text-primary" />
-                    <span>{course.teacherName || "Öğretim görevlisi"}</span>
+            {/* Hero Section - Redesigned */}
+            <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-indigo-500/20 group">
+              {/* Card Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full mix-blend-overlay blur-3xl -mr-16 -mt-32" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full mix-blend-overlay blur-3xl -ml-16 -mb-32" />
+
+              <div className="relative p-6 text-white">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold leading-tight mb-2 shadow-sm">{course.courseName}</h1>
+                    <div className="flex items-center gap-2 text-blue-100 text-sm font-medium mb-4">
+                      <GraduationCap className="w-4 h-4 text-blue-200" />
+                      <span>{course.teacherName || "Öğretim görevlisi"}</span>
+                    </div>
                   </div>
+                  {/* Course Icon Placeholder or generated initials */}
+                  <div className="shrink-0 w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center">
+                    <span className="text-lg font-bold">{course.courseCode.slice(0, 3)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   {course.schedules && course.schedules.length > 0 ? (
-                    <div className="flex flex-col gap-1 mt-1">
+                    <div className="flex flex-wrap gap-2">
                       {course.schedules.map((sch, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                          <CalendarClock className="w-4 h-4 text-slate-500" />
+                        <div key={i} className="flex items-center gap-1.5 text-xs font-semibold bg-black/20 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/10">
+                          <Clock3 className="w-3.5 h-3.5 text-blue-200" />
                           <span>
-                            {["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"][sch.dayOfWeek]} {sch.startTime.slice(0, 5)} - {sch.endTime.slice(0, 5)}
+                            {["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"][sch.dayOfWeek]} {sch.startTime.slice(0, 5)} - {sch.endTime.slice(0, 5)}
                           </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-sm text-slate-400 mt-1">
-                      <CalendarClock className="w-4 h-4" />
+                    <div className="inline-flex items-center gap-2 text-xs text-blue-200 bg-white/5 px-3 py-1.5 rounded-lg">
+                      <CalendarClock className="w-3.5 h-3.5" />
                       <span>Program girilmemiş</span>
                     </div>
                   )}
+
                   {course.firstSessionAt && (
-                    <p className="text-xs text-slate-500 mt-1">
+                    <div className="flex items-center gap-2 text-xs text-blue-100/80 mt-2 px-1">
+                      <span className="w-1 h-1 rounded-full bg-blue-300" />
                       İlk ders: {new Date(course.firstSessionAt).toLocaleDateString('tr-TR')}
-                    </p>
+                    </div>
                   )}
                 </div>
               </div>
+            </div>
 
-              {course.description && (
-                <div className="mt-4 pt-4 border-t border-slate-100 text-sm text-slate-600 leading-relaxed">
+            {course.description && (
+              <Card className="p-4 bg-white/60 backdrop-blur-sm border-slate-100/60 shadow-sm">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ders Hakkında</h3>
+                <p className="text-sm text-slate-700 leading-relaxed font-medium">
                   {course.description}
-                </div>
-              )}
-            </section>
+                </p>
+              </Card>
+            )}
 
             {/* Active Session Status */}
             <section className={`rounded-3xl p-6 relative overflow-hidden transition-all ${hasActive ? "bg-white shadow-xl shadow-emerald-500/10 border border-emerald-100" : "bg-white border border-slate-100 shadow-sm"}`}>
@@ -252,7 +263,7 @@ export default function StudentCourseDetails() {
                 </span>
               </div>
 
-              {latest ? (
+              {latest && !hasActive ? (
                 <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
                   <div className={`flex items-center justify-center rounded-xl shrink-0 h-12 w-12 ${historyIconColor} shadow-sm`}>
                     {attended ? <CheckCircle2 className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}

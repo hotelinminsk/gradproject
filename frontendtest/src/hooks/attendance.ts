@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 import type {
     BeginCheckInRequest,
@@ -9,12 +8,34 @@ import type {
     ActiveSessionInfo,
 } from "@/types/attendance";
 
+export const apiFetch = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+    const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+    };
+
+    const config = {
+        ...options,
+        headers,
+        body: options.body instanceof FormData ? options.body : JSON.stringify(options.body),
+    };
+
+    const response = await fetch(endpoint, config);
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Something went wrong");
+    }
+
+    return response.json();
+};
+
 export function useBeginCheckIn() {
     return useMutation({
         mutationFn: async (request: BeginCheckInRequest) => {
             return apiFetch<BeginCheckInResponse>("/api/attendance/check-in/begin", {
                 method: "POST",
-                body: request,
+                body: request as any,
             });
         },
         onError: (error: any) => {
@@ -28,7 +49,7 @@ export function useCompleteCheckIn() {
         mutationFn: async (request: CheckInRequest) => {
             return apiFetch<CheckInResponse>("/api/attendance/check-in/complete", {
                 method: "POST",
-                body: request,
+                body: request as any,
             });
         },
         onSuccess: (data) => {

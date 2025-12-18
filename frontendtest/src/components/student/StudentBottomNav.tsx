@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, BookOpen, Settings, CalendarClock } from "lucide-react";
+import { Home, BookOpen, Settings, CalendarClock, History as HistoryIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const StudentBottomNav = () => {
@@ -9,13 +9,14 @@ const StudentBottomNav = () => {
   const navItems = [
     { path: "/student/home", icon: Home, label: "Ana sayfa" },
     { path: "/student/courses", icon: BookOpen, label: "Dersler" },
+    { path: "/student/history", icon: HistoryIcon, label: "Geçmiş" },
     { path: "/student/weekly-plan", icon: CalendarClock, label: "Program" },
     { path: "/student/settings", icon: Settings, label: "Ayarlar" },
   ];
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg"
+      className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex justify-around items-center h-16 px-2">

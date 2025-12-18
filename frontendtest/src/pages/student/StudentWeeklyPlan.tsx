@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarClock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import StudentBottomNav from "@/components/student/StudentBottomNav";
+
 
 const DAYS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
@@ -132,7 +132,7 @@ export default function StudentWeeklyPlan() {
                 )}
             </main>
 
-            <StudentBottomNav />
+            {/* StudentBottomNav comes from Layout */}
         </div>
     );
 }

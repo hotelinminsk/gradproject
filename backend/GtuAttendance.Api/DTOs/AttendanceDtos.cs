@@ -57,6 +57,8 @@ public record SessionDetailResponse(
     DateTime CreatedAt,
     DateTime ExpiresAt,
     bool IsActive,
+    decimal Latitude,
+    decimal Longitude,
     IEnumerable<SessionAttendeeDto> Attendees
 );
 

@@ -13,6 +13,8 @@ export interface SessionDetail {
     createdAt: string;
     expiresAt: string;
     isActive: boolean;
+    latitude: number;
+    longitude: number;
     attendees: SessionAttendee[];
 }
 

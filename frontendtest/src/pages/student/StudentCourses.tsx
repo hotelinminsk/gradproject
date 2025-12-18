@@ -115,8 +115,9 @@ const StudentCourses = () => {
           </div>
           <Drawer open={isJoinOpen} onOpenChange={setIsJoinOpen}>
             <DrawerTrigger asChild>
-              <Button className="rounded-full h-12 w-12 p-0 shadow-lg shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 text-white">
-                <Plus className="w-6 h-6" />
+              <Button variant="outline" className="h-9 gap-2 text-xs font-semibold rounded-lg border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700">
+                <Plus className="w-3.5 h-3.5" />
+                Derse Katıl
               </Button>
             </DrawerTrigger>
             <DrawerContent>

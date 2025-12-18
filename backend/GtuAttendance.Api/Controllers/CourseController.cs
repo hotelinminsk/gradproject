@@ -343,42 +343,45 @@ public class CourseController : ControllerBase
 
             if (!inRoster) throw new StudentNotInRosterException(studentRow.FullName, studentProfile?.GtuStudentId ?? "");
 
-            var exists = await _context.CourseEnrollments.AnyAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId && !e.IsDropped);
+            var existingEnrollment = await _context.CourseEnrollments
+            .FirstOrDefaultAsync(e => e.CourseId == course.CourseId && e.StudentId == studentId);
 
-            if (!exists)
-            {
-                _context.CourseEnrollments.Add(new CourseEnrollment
-                {
-                    CourseId = course.CourseId,
-                    StudentId = studentId,
-                });
-
-
-                await _context.SaveChangesAsync();
-
-                await _attendanceHub.Clients.Group($"course-{course.CourseId}")
-                    .SendAsync("EnrollmentUpdated", new
-                    {
-                        courseId = course.CourseId,
-                        studentId,
-                        fullName = studentRow.FullName,
-                        gtuStudentId = studentProfile?.GtuStudentId
-                    });
-
-                return Ok(new { succes = true, course.CourseId, course.CourseName, course.CourseCode });
-            }
-            else
-            {
-                return BadRequest(new { message = "Student:" + studentRow.FullName + " already enrolled to this class " });
-            }
-
-
-        }
-        catch (Exception ex)
+        if (existingEnrollment == null)
         {
-            _logger.LogError(ex, ex.StackTrace);
-            return BadRequest(new { error = ex.Message });
+            _context.CourseEnrollments.Add(new CourseEnrollment
+            {
+                CourseId = course.CourseId,
+                StudentId = studentId,
+                IsDropped = false
+            });
         }
+        else if (existingEnrollment.IsDropped)
+        {
+            existingEnrollment.IsDropped = false;
+        }
+        else
+        {
+             return BadRequest(new { message = "Student:" + studentRow.FullName + " already enrolled to this class " });
+        }
+
+        await _context.SaveChangesAsync();
+
+        await _attendanceHub.Clients.Group($"course-{course.CourseId}")
+            .SendAsync("EnrollmentUpdated", new
+            {
+                courseId = course.CourseId,
+                studentId,
+                fullName = studentRow.FullName,
+                gtuStudentId = studentProfile?.GtuStudentId
+            });
+
+        return Ok(new { succes = true, course.CourseId, course.CourseName, course.CourseCode });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, ex.StackTrace);
+        return BadRequest(new { error = ex.Message });
+    }
     }
 
     [Authorize(Roles = "Teacher")]

@@ -95,6 +95,7 @@ export interface CreateSessionPayload {
   teacherLongitude: number;
   maxDistanceMeters: number;
   expiresAtUtc: string;
+  qrCodeValiditySeconds?: number;
 }
 
 export interface CreateSessionResponse {

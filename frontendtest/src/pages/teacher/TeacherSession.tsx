@@ -300,7 +300,9 @@ export default function TeacherSession() {
                   <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Konum</span>
                 </div>
                 <p className="text-sm font-medium text-slate-900 pl-1">
-                  {detail?.attendees?.length ? "Aktif" : "Bilinmiyor"}
+                  {detail?.latitude && detail?.longitude
+                    ? `${detail.latitude.toFixed(6)}, ${detail.longitude.toFixed(6)}`
+                    : "Bilinmiyor"}
                 </p>
               </Card>
             </div>

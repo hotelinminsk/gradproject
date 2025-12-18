@@ -39,7 +39,7 @@ export const useEnrollByInvite = () => {
     },
     onSuccess: () => {
       toast.success("Kursa kayıt başarılı.");
-      queryClient.invalidateQueries({ queryKey: ["student-courses"] });
+      queryClient.invalidateQueries({ queryKey: ["student-courses"], refetchType: "all" });
     },
     // ... existing code ...
     onError: (err: any) => toast.error(err?.message ?? "Kursa kayıt başarısız"),
